@@ -1,6 +1,6 @@
 <div align="center">
 
-# 💸 AGYKE SYSTEM
+# AGYKE
 
 **Sistema Inteligente de Control de Gastos Compartidos**  
 *Bot de Telegram impulsado por Gemini 1.5 Flash + Dashboard Web en Next.js 15*
@@ -16,7 +16,7 @@
 
 ---
 
-## 📌 Visión General
+## Visión General
 
 **Agyke** es una plataforma integral diseñada para simplificar la gestión de gastos compartidos entre dos usuarios (ej. compañeros de departamento o parejas). Combina la inmediatez de un **Bot de Telegram** potenciado con Inteligencia Artificial Multimodal (**Gemini 1.5 Flash**) y la claridad visual de un **Dashboard Web en Next.js 15** con estética oscura y *glassmorphism*.
 
@@ -25,23 +25,23 @@
 
 ---
 
-## 🔥 Características Principales
+## Características Principales
 
-### ⚡ 1. Flujo Directo de Registro
+### 1. Flujo Directo de Registro
 Para gastos rápidos sin pasar por la cola de revisión:
 - **Comando:** `/gasto <monto> <concepto> <clasificacion>`
 - **Ejemplo:** `/gasto 15000 Coto 50`
 - Impacta instantáneamente en la base de datos y recalcula el saldo consolidado (`net_balance`).
 
-### 🧠 2. Muro Agyke (Pipeline Asistido con IA)
+### 2. Muro Agyke (Pipeline Asistido con IA)
 Para entradas multimodales o ambiguas:
 - **Entradas Soportadas:**
-  - 🎙️ **Notas de Voz** (`.ogg`, `.mp3`, `.m4a`): Transcripción y extracción contable.
-  - 📄 **Comprobantes / Tickets** (`.pdf`, `.jpg`, `.png`): Lectura OCR inteligente.
-  - 💬 **Texto Libre** (ej. `12500 Verdulería`): Parsing automático de concepto y monto.
+  - **Notas de Voz** (`.ogg`, `.mp3`, `.m4a`): Transcripción y extracción contable.
+  - **Comprobantes / Tickets** (`.pdf`, `.jpg`, `.png`): Lectura OCR inteligente.
+  - **Texto Libre** (ej. `12500 Verdulería`): Parsing automático de concepto y monto.
 - **Interacción en Telegram:** Genera un mensaje interactivo con un *Inline Keyboard* de 4 botones para clasificar la deuda con un solo toque.
 
-### ⚖️ 3. Lógica Financiera Sin Adivinaciones
+### 3. Lógica Financiera Sin Adivinaciones
 Cálculo estricto y consolidado en la tabla `balances`:
 - **`net_balance > 0`**: El Usuario B le debe dinero al Usuario A.
 - **`net_balance < 0`**: El Usuario A le debe dinero al Usuario B.
@@ -58,7 +58,7 @@ Cálculo estricto y consolidado en la tabla `balances`:
 
 ---
 
-### 📊 4. Dashboard Web Moderno (Next.js 15)
+### 4. Dashboard Web Moderno (Next.js 15)
 - **Interfaz Glassmorphic Ultra-Premium:** Estética oscura, degradados sutiles y micro-animaciones.
 - **Métricas en Tiempo Real:** Tarjetas con el estado de deuda neta, total gastado y desglose por usuario.
 - **Visualización de Datos:** Gráficos interactivos construidos con Recharts.
@@ -66,33 +66,33 @@ Cálculo estricto y consolidado en la tabla `balances`:
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## Arquitectura del Sistema
 
 ```mermaid
 flowchart TD
-    subgraph Telegram ["💬 Telegram Client"]
+    subgraph Telegram ["Telegram Client"]
         U1[Usuario A / Usuario B]
     end
 
-    subgraph BotEngine ["⚙️ Bot Engine (grammY + TS)"]
+    subgraph BotEngine ["Bot Engine (grammY + TS)"]
         AUTH[Auth Middleware]
         DIRECT[Direct Handler /gasto]
         ASSISTED[Assisted Handler - Muro Agyke]
         CALLBACK[Callback Handler - Keyboard]
     end
 
-    subgraph AI ["🧠 AI Engine"]
+    subgraph AI ["AI Engine"]
         GEMINI[Google Gemini 1.5 Flash]
     end
 
-    subgraph Database ["🗄️ Supabase PostgreSQL"]
+    subgraph Database ["Supabase PostgreSQL"]
         USERS[(users)]
         QUEUE[(agyke_queue)]
         TX[(transactions)]
         BALANCES[(balances)]
     end
 
-    subgraph Frontend ["💻 Web Dashboard"]
+    subgraph Frontend ["Web Dashboard"]
         NEXT[Next.js 15 App Router + Recharts]
     end
 
@@ -115,7 +115,7 @@ flowchart TD
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 agyke/
@@ -145,7 +145,7 @@ agyke/
 
 ---
 
-## 🚀 Guía de Instalación y Configuración
+## Guía de Instalación y Configuración
 
 ### 1. Requisitos Previos
 - **Node.js**: `v20.0.0` o superior.
@@ -190,7 +190,7 @@ SUPABASE_SERVICE_ROLE_KEY="ey..."
 Ejecuta el script SQL ubicado en [`supabase/schema.sql`](file:///home/n1krov/projects/agyke/supabase/schema.sql) (o en [`docs/ARCHITECTURE.md`](file:///home/n1krov/projects/agyke/docs/ARCHITECTURE.md)) dentro del **SQL Editor** de tu panel de Supabase.
 
 <details>
-<summary><b>📄 Ver Script SQL DDL</b></summary>
+<summary><b>Ver Script SQL DDL</b></summary>
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -242,15 +242,15 @@ CREATE TABLE balances (
 
 ---
 
-## 💻 Ejecución del Proyecto
+## Ejecución del Proyecto
 
 ### Modo Desarrollo
 
 ```bash
-# 🤖 Iniciar el Bot de Telegram
+# Iniciar el Bot de Telegram
 npm run dev:bot
 
-# 📊 Iniciar el Dashboard Web (Next.js en http://localhost:3000)
+# Iniciar el Dashboard Web (Next.js en http://localhost:3000)
 npm run dev:web
 ```
 
@@ -266,7 +266,7 @@ npm run start
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 - **Core & Backend:** Node.js (v20+), TypeScript Strict Mode.
 - **Bot Engine:** [grammY Framework](https://grammy.dev/) (Telegram Bot API).
@@ -276,6 +276,6 @@ npm run start
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto fue desarrollado bajo la especificación del sistema Agyke. MIT License.

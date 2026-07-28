@@ -1,3 +1,5 @@
 {
-  "buildCommand": "if [ -d \"web\" ]; then cd web && npm run build; else npm run build; fi"
+  "installCommand": "npm install && npm install --prefix web",
+  "buildCommand": "npm run build --prefix web",
+  "outputDirectory": "web/.next"
 }

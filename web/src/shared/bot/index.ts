@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { AgykeContext } from '../types/context';
 import { authMiddleware } from './middlewares/auth';
 import { gastoCommandHandler } from './commands/gasto';
+import { helpCommandHandler } from './commands/help';
 import { assistedFlowHandler } from './handlers/assisted';
 import { callbackQueryHandler } from './handlers/callback';
 import { clearSession } from '../services/session';
@@ -19,6 +20,9 @@ bot.use(authMiddleware);
 
 // Comando /gasto
 bot.command('gasto', gastoCommandHandler);
+
+// Comando /help y /ayuda
+bot.command(['help', 'ayuda'], helpCommandHandler);
 
 // Comando /cancelar y /cancel
 bot.command(['cancelar', 'cancel'], async (ctx) => {
@@ -61,12 +65,15 @@ bot.command('start', async (ctx) => {
     await ctx.reply(
       `👋 ¡Hola ${name}! Bienvenido a *Agyke* - Sistema de Control de Gastos Compartidos.\n\n` +
       `Puedes registrar gastos de las siguientes formas:\n` +
-      `• *Paso a paso conversacional:* Escribe \`/gasto\` y yo te iré pidiendo el monto y concepto.\n` +
-      `• *Carga directa en una línea:* \`/gasto 15000 Coto 50\`\n` +
-      `• *Carga asistida por IA:* Envía un audio, foto de comprobante o texto libre y Gemini lo procesará.\n\n` +
+      `• *Escribiendo gasto:* \`gasto\` o \`/gasto\`\n` +
+      `• *Con monto:* \`gasto 1000 pollo\` o \`3344 carne\`\n` +
+      `• *Carga directa en una línea:* \`gasto 15000 Coto 50\` o \`3344 carne 50\`\n` +
+      `• *Carga asistida por IA:* Envía un audio o foto de comprobante y Gemini lo procesará.\n\n` +
       `Comandos útiles:\n` +
       `• \`/saldo\`: Ver el balance neto consolidado.\n` +
-      `• \`/cancelar\`: Cancelar cualquier registro en curso.`,
+      `• \`/help\`: Ver la guía completa de lo que podés hacer.\n` +
+      `• \`/cancelar\`: Cancelar cualquier registro en curso.\n\n` +
+      `🌐 *Dashboard:* Podés ver el resumen de gastos en agyke.vercel.app`,
       { parse_mode: 'Markdown' }
     );
   } catch (error) {
@@ -89,4 +96,3 @@ export async function startBot() {
   });
   await bot.start();
 }
-

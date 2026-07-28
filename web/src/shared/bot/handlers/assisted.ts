@@ -1,10 +1,22 @@
 import { InlineKeyboard } from 'grammy';
 import { AgykeContext } from '../../types/context';
 import { supabase } from '../../lib/supabase';
-import { processMediaWithGemini, processTextWithGemini } from '../../services/gemini';
-import { SourceType } from '../../types/database';
+import { processMediaWithGemini } from '../../services/gemini';
+import { SourceType, ClassificationType } from '../../types/database';
 import { getSession, setSession, clearSession } from '../../services/session';
-import { getClassificationKeyboard } from '../commands/gasto';
+import { gastoCommandHandler, getClassificationKeyboard, VALID_CLASSIFICATIONS } from '../commands/gasto';
+import { calculateDebtImpact, updateBalance } from '../../services/balance';
+
+export function tryParseNumberPrefix(text: string): number | null {
+  const firstToken = text.split(/\s+/)[0];
+  if (!firstToken) return null;
+  const rawAmount = firstToken.replace('$', '').replace(/\./g, '').replace(',', '.');
+  const amount = parseFloat(rawAmount);
+  if (!isNaN(amount) && amount > 0 && /^\$?[\d.,]+$/.test(firstToken)) {
+    return amount;
+  }
+  return null;
+}
 
 async function downloadTelegramFile(fileId: string): Promise<{ buffer: Buffer; filePath: string }> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -50,7 +62,8 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     // 1. Manejar respuestas a pasos activos del Wizard
     if (activeSession && textMsg) {
       if (activeSession.step === 'AWAITING_AMOUNT') {
-        const rawAmount = textMsg.replace('$', '').replace(/\./g, '').replace(',', '.');
+        const tokens = textMsg.split(/\s+/);
+        const rawAmount = tokens[0].replace('$', '').replace(/\./g, '').replace(',', '.');
         const amount = parseFloat(rawAmount);
 
         if (isNaN(amount) || amount <= 0) {
@@ -59,6 +72,47 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         }
 
         activeSession.amount = amount;
+
+        // Si se enviaron tokens adicionales (ej: "15000 Coto" o "15000 Coto 50")
+        if (tokens.length > 1) {
+          const lastToken = tokens[tokens.length - 1];
+          const isDirectClassification = VALID_CLASSIFICATIONS.includes(lastToken as ClassificationType);
+
+          if (isDirectClassification) {
+            const concept = tokens.slice(1, -1).join(' ') || 'Gasto general';
+            const classification = lastToken as ClassificationType;
+            const debtImpact = calculateDebtImpact(amount, classification);
+
+            const { error: txError } = await supabase
+              .from('transactions')
+              .insert({
+                user_id: user.id,
+                amount: amount,
+                concept: concept,
+                classification: classification,
+                debt_impact: debtImpact
+              });
+
+            if (txError) {
+              console.error('[AssistedFlow] Error al insertar transacción en wizard:', txError);
+              await ctx.reply('⚠️ Ocurrió un error al registrar el gasto.');
+              return;
+            }
+
+            clearSession(telegramId);
+            await updateBalance();
+
+            const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            await ctx.reply(
+              `✅ Gasto registrado: *$${formattedAmount}* (${concept}). Balance actualizado.\n\n` +
+              `📊 Podés ver el resumen de gastos en agyke.vercel.app`,
+              { parse_mode: 'Markdown' }
+            );
+            return;
+          } else {
+            activeSession.concept = tokens.slice(1).join(' ');
+          }
+        }
 
         if (!activeSession.concept || activeSession.concept === 'Gasto general') {
           activeSession.step = 'AWAITING_CONCEPT';
@@ -93,6 +147,44 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       }
 
       if (activeSession.step === 'AWAITING_CONCEPT') {
+        const tokens = textMsg.split(/\s+/);
+        const lastToken = tokens[tokens.length - 1];
+        const isDirectClassification = VALID_CLASSIFICATIONS.includes(lastToken as ClassificationType);
+
+        if (isDirectClassification && tokens.length > 1) {
+          const concept = tokens.slice(0, -1).join(' ');
+          const classification = lastToken as ClassificationType;
+          const amount = activeSession.amount || 0;
+          const debtImpact = calculateDebtImpact(amount, classification);
+
+          const { error: txError } = await supabase
+            .from('transactions')
+            .insert({
+              user_id: user.id,
+              amount: amount,
+              concept: concept,
+              classification: classification,
+              debt_impact: debtImpact
+            });
+
+          if (txError) {
+            console.error('[AssistedFlow] Error al insertar transacción en concept wizard:', txError);
+            await ctx.reply('⚠️ Ocurrió un error al registrar el gasto.');
+            return;
+          }
+
+          clearSession(telegramId);
+          await updateBalance();
+
+          const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+          await ctx.reply(
+            `✅ Gasto registrado: *$${formattedAmount}* (${concept}). Balance actualizado.\n\n` +
+            `📊 Podés ver el resumen de gastos en agyke.vercel.app`,
+            { parse_mode: 'Markdown' }
+          );
+          return;
+        }
+
         activeSession.concept = textMsg;
         activeSession.step = 'AWAITING_CLASSIFICATION';
         setSession(telegramId, activeSession);
@@ -118,13 +210,38 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     let fileBuffer: Buffer | null = null;
     let mimeType: string = 'text/plain';
     let rawFilePath: string | null = null;
-    let textPrompt: string | null = null;
 
     // 2. Identificar tipo de entrada recibida
     const isAudio = Boolean(ctx.message?.voice || ctx.message?.audio);
     const isPhoto = Boolean(ctx.message?.photo);
     const isDocument = Boolean(ctx.message?.document);
     const isText = Boolean(ctx.message?.text);
+
+    if (isText && textMsg) {
+      // Si el texto empieza con / de otro comando (ej: /saldo, /help, /cancelar, /start), dejar que grammy lo maneje
+      if (textMsg.startsWith('/') && !textMsg.toLowerCase().startsWith('/gasto')) {
+        return;
+      }
+
+      // Caso A: El texto coincide con "gasto" o "/gasto" (ej: "gasto", "gasto 1000", "gasto 1000 pollo 50")
+      const gastoMatch = textMsg.match(/^(\/)?gasto(?:\s+(.*))?$/i);
+      if (gastoMatch) {
+        const args = gastoMatch[2] || '';
+        await gastoCommandHandler(ctx, args);
+        return;
+      }
+
+      // Caso B: El texto empieza con un número / monto (ej: "3344 carne", "1000 pollo 50", "$15000 Coto")
+      const leadingAmount = tryParseNumberPrefix(textMsg);
+      if (leadingAmount !== null) {
+        await gastoCommandHandler(ctx, textMsg);
+        return;
+      }
+
+      // Caso C: Cualquier otro texto plano sin "gasto" ni número inicial (ej: "hola", "que haces")
+      // Se ignora silenciosamente para no iniciar un gasto erróneo.
+      return;
+    }
 
     if (isAudio) {
       sourceType = 'audio';
@@ -135,21 +252,15 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     } else if (isDocument) {
       sourceType = 'image';
       console.log(`[AssistedFlow] 📄 Documento recibido de ${user.name} (${telegramId})`);
-    } else if (isText) {
-      sourceType = 'text';
-      textPrompt = ctx.message!.text!.trim();
-      if (textPrompt && textPrompt.startsWith('/')) {
-        return;
-      }
     } else {
       return;
     }
 
-    // Responder inmediatamente en Telegram para confirmar recepción
+    // Responder inmediatamente en Telegram para confirmar recepción del archivo multimedia
     const statusMsg = await ctx.reply(
       isAudio ? '🎙️ Procesando audio...' :
       isPhoto ? '📷 Procesando imagen...' :
-      '🔍 Procesando contenido...'
+      '📄 Procesando documento...'
     );
 
     // Descargar archivos si es multimedia
@@ -183,20 +294,18 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
-    // Extraer contenido con Gemini o Regex
+    // Extraer contenido multimedia con Gemini
     let extraction;
     try {
       if (fileBuffer) {
         extraction = await processMediaWithGemini(fileBuffer, mimeType);
-      } else if (textPrompt) {
-        extraction = await processTextWithGemini(textPrompt);
       } else {
         await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
         await ctx.reply('⚠️ No se pudo obtener contenido para procesar.');
         return;
       }
     } catch (geminiErr) {
-      console.error('[AssistedFlow] Error procesando contenido:', geminiErr);
+      console.error('[AssistedFlow] Error procesando contenido multimedia:', geminiErr);
       await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
       await ctx.reply('⚠️ Ocurrió un error al analizar la información.');
       return;
@@ -214,7 +323,7 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         concept: detectedConcept
       });
 
-      const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' : isDocument ? '📄 *Documento recibido*' : '📝 *Gasto detectado*';
+      const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' : '📄 *Documento recibido*';
 
       await ctx.reply(
         `${mediaTitle}\n` +

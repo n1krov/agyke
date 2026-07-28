@@ -7,6 +7,17 @@ import { getSession, setSession, clearSession } from '../../services/session';
 import { gastoCommandHandler, getClassificationKeyboard, VALID_CLASSIFICATIONS } from '../commands/gasto';
 import { calculateDebtImpact, updateBalance } from '../../services/balance';
 
+export function tryParseNumberPrefix(text: string): number | null {
+  const firstToken = text.split(/\s+/)[0];
+  if (!firstToken) return null;
+  const rawAmount = firstToken.replace('$', '').replace(/\./g, '').replace(',', '.');
+  const amount = parseFloat(rawAmount);
+  if (!isNaN(amount) && amount > 0 && /^\$?[\d.,]+$/.test(firstToken)) {
+    return amount;
+  }
+  return null;
+}
+
 async function downloadTelegramFile(fileId: string): Promise<{ buffer: Buffer; filePath: string }> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error('TELEGRAM_BOT_TOKEN no está configurado.');
@@ -207,12 +218,12 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     const isText = Boolean(ctx.message?.text);
 
     if (isText && textMsg) {
-      // Si el texto empieza con / (y no es /gasto), dejar que grammy lo maneje
+      // Si el texto empieza con / de otro comando (ej: /saldo, /help, /cancelar, /start), dejar que grammy lo maneje
       if (textMsg.startsWith('/') && !textMsg.toLowerCase().startsWith('/gasto')) {
         return;
       }
 
-      // Verificar si el texto coincide con "gasto" o "/gasto" (con o sin parámetros)
+      // Caso A: El texto coincide con "gasto" o "/gasto" (ej: "gasto", "gasto 1000", "gasto 1000 pollo 50")
       const gastoMatch = textMsg.match(/^(\/)?gasto(?:\s+(.*))?$/i);
       if (gastoMatch) {
         const args = gastoMatch[2] || '';
@@ -220,19 +231,15 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
 
-      // Si es un texto plano sin el comando "gasto", informar al usuario la sintaxis correcta
-      await ctx.reply(
-        `ℹ️ Para registrar un gasto por texto, escribe *gasto* seguido de los datos.\n\n` +
-        `*Estructura del comando:*\n` +
-        `\`gasto <monto> <concepto> <tipo>\`\n\n` +
-        `*Ejemplos:*\n` +
-        `• \`gasto\` (asistente paso a paso)\n` +
-        `• \`gasto 1000\`\n` +
-        `• \`gasto 1000 Coto\`\n` +
-        `• \`gasto 1000 Coto 50\`\n\n` +
-        `Escribe \`/help\` para ver todas las opciones disponibles.`,
-        { parse_mode: 'Markdown' }
-      );
+      // Caso B: El texto empieza con un número / monto (ej: "3344 carne", "1000 pollo 50", "$15000 Coto")
+      const leadingAmount = tryParseNumberPrefix(textMsg);
+      if (leadingAmount !== null) {
+        await gastoCommandHandler(ctx, textMsg);
+        return;
+      }
+
+      // Caso C: Cualquier otro texto plano sin "gasto" ni número inicial (ej: "hola", "que haces")
+      // Se ignora silenciosamente para no iniciar un gasto erróneo.
       return;
     }
 

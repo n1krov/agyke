@@ -28,7 +28,7 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
       ? overrideText.trim()
       : (typeof ctx.match === 'string' ? ctx.match.trim() : '');
 
-    // Caso 1: /gasto sin parámetros -> Iniciar Wizard pidiendo Monto
+    // Caso 1: /gasto o gasto sin parámetros -> Iniciar Wizard pidiendo Monto
     if (!rawText) {
       setSession(ctx.from.id, {
         userId: user.id,
@@ -53,13 +53,13 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
     if (isNaN(amount) || amount <= 0) {
       await ctx.reply(
         '⚠️ El monto no es válido.\n' +
-        'Por favor ingresa un número positivo (ej: `15000`).',
+        'Por favor ingresa un número positivo (ej: `gasto 15000 Coto 50` o `15000 Coto 50`).',
         { parse_mode: 'Markdown' }
       );
       return;
     }
 
-    // Caso 2: Solo se pasó el monto (ej: /gasto 15000)
+    // Caso 2: Solo se pasó el monto (ej: gasto 15000 o 15000)
     if (tokens.length === 1) {
       setSession(ctx.from.id, {
         userId: user.id,
@@ -76,7 +76,7 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
       return;
     }
 
-    // Caso 3: Verificar si el último token es una clasificación válida (ej: /gasto 15000 Coto 50)
+    // Caso 3: Verificar si el último token es una clasificación válida (ej: gasto 15000 Coto 50 o 15000 Coto 50)
     const lastToken = tokens[tokens.length - 1];
     const isDirectClassification = VALID_CLASSIFICATIONS.includes(lastToken as ClassificationType);
 
@@ -114,7 +114,7 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
       return;
     }
 
-    // Caso 4: Se pasó monto y concepto pero no clasificación (ej: /gasto 15000 Coto)
+    // Caso 4: Se pasó monto y concepto pero no clasificación (ej: gasto 15000 Coto o 15000 Coto)
     const concept = tokens.slice(1).join(' ');
     setSession(ctx.from.id, {
       userId: user.id,
@@ -138,7 +138,7 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
     );
 
   } catch (err) {
-    console.error('[GastoCommand] Excepción al procesar /gasto:', err);
+    console.error('[GastoCommand] Excepción al procesar gasto:', err);
     await ctx.reply('⚠️ Ocurrió un error inesperado al procesar el gasto.');
   }
 }

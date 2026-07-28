@@ -72,7 +72,8 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
       await ctx.editMessageText(
         `✅ Clasificado como *${label}*.\n` +
         `*Monto:* $${formattedAmount} (${concept})\n` +
-        `Balance actualizado.`,
+        `Balance actualizado.\n\n` +
+        `📊 Podés ver el resumen de gastos en agyke.vercel.app`,
         { parse_mode: 'Markdown' }
       );
       return;
@@ -140,7 +141,8 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
       await ctx.editMessageText(
         `✅ Clasificado como *${label}*.\n` +
         `*Monto:* $${formattedAmount} (${queueItem.concept || 'Gasto general'}).\n` +
-        `Balance actualizado.`,
+        `Balance actualizado.\n\n` +
+        `📊 Podés ver el resumen de gastos en agyke.vercel.app`,
         { parse_mode: 'Markdown' }
       );
     }

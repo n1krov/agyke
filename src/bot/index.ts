@@ -65,9 +65,10 @@ bot.command('start', async (ctx) => {
     await ctx.reply(
       `👋 ¡Hola ${name}! Bienvenido a *Agyke* - Sistema de Control de Gastos Compartidos.\n\n` +
       `Puedes registrar gastos de las siguientes formas:\n` +
-      `• *Paso a paso conversacional:* Escribe \`/gasto\` y yo te iré pidiendo el monto y concepto.\n` +
-      `• *Carga directa en una línea:* \`/gasto 15000 Coto 50\`\n` +
-      `• *Carga asistida por IA:* Envía un audio, foto de comprobante o texto libre y Gemini lo procesará.\n\n` +
+      `• *Escribiendo gasto:* \`gasto\` o \`/gasto\`\n` +
+      `• *Con monto:* \`gasto 1000 pollo\` o \`3344 carne\`\n` +
+      `• *Carga directa en una línea:* \`gasto 15000 Coto 50\` o \`3344 carne 50\`\n` +
+      `• *Carga asistida por IA:* Envía un audio o foto de comprobante y Gemini lo procesará.\n\n` +
       `Comandos útiles:\n` +
       `• \`/saldo\`: Ver el balance neto consolidado.\n` +
       `• \`/help\`: Ver la guía completa de lo que podés hacer.\n` +

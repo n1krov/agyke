@@ -104,7 +104,11 @@ export async function gastoCommandHandler(ctx: AgykeContext): Promise<void> {
       await updateBalance();
 
       const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-      await ctx.reply(`✅ Gasto registrado: *$${formattedAmount}* (${concept}). Balance actualizado.`, { parse_mode: 'Markdown' });
+      await ctx.reply(
+        `✅ Gasto registrado: *$${formattedAmount}* (${concept}). Balance actualizado.\n\n` +
+        `📊 Podés ver el resumen de gastos en agyke.vercel.app`,
+        { parse_mode: 'Markdown' }
+      );
       return;
     }
 

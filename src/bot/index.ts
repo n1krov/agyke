@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { AgykeContext } from '../types/context';
 import { authMiddleware } from './middlewares/auth';
 import { gastoCommandHandler } from './commands/gasto';
+import { helpCommandHandler } from './commands/help';
 import { assistedFlowHandler } from './handlers/assisted';
 import { callbackQueryHandler } from './handlers/callback';
 import { clearSession } from '../services/session';
@@ -19,6 +20,9 @@ bot.use(authMiddleware);
 
 // Comando /gasto
 bot.command('gasto', gastoCommandHandler);
+
+// Comando /help y /ayuda
+bot.command(['help', 'ayuda'], helpCommandHandler);
 
 // Comando /cancelar y /cancel
 bot.command(['cancelar', 'cancel'], async (ctx) => {
@@ -66,7 +70,9 @@ bot.command('start', async (ctx) => {
       `• *Carga asistida por IA:* Envía un audio, foto de comprobante o texto libre y Gemini lo procesará.\n\n` +
       `Comandos útiles:\n` +
       `• \`/saldo\`: Ver el balance neto consolidado.\n` +
-      `• \`/cancelar\`: Cancelar cualquier registro en curso.`,
+      `• \`/help\`: Ver la guía completa de lo que podés hacer.\n` +
+      `• \`/cancelar\`: Cancelar cualquier registro en curso.\n\n` +
+      `🌐 *Dashboard:* Podés ver el resumen de gastos en agyke.vercel.app`,
       { parse_mode: 'Markdown' }
     );
   } catch (error) {

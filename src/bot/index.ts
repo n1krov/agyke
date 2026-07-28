@@ -5,13 +5,12 @@ import { authMiddleware } from './middlewares/auth';
 import { gastoCommandHandler } from './commands/gasto';
 import { assistedFlowHandler } from './handlers/assisted';
 import { callbackQueryHandler } from './handlers/callback';
+import { clearSession } from '../services/session';
+import { supabase } from '../lib/supabase';
 
 dotenv.config();
 
-const token = process.env.TELEGRAM_BOT_TOKEN;
-if (!token) {
-  throw new Error('Falta la variable de entorno TELEGRAM_BOT_TOKEN.');
-}
+const token = process.env.TELEGRAM_BOT_TOKEN || '8652404759:AAHfU_zeslhMkc-gwDvvwa_2LG3ZvNR_QKE';
 
 export const bot = new Bot<AgykeContext>(token);
 
@@ -21,16 +20,53 @@ bot.use(authMiddleware);
 // Comando /gasto
 bot.command('gasto', gastoCommandHandler);
 
+// Comando /cancelar y /cancel
+bot.command(['cancelar', 'cancel'], async (ctx) => {
+  if (ctx.from) {
+    clearSession(ctx.from.id);
+  }
+  await ctx.reply('❌ Operación cancelada.');
+});
+
+// Comando /saldo o /balance
+bot.command(['saldo', 'balance'], async (ctx) => {
+  try {
+    const { data: users } = await supabase.from('users').select('*').order('created_at', { ascending: true });
+    const { data: balance } = await supabase.from('balances').select('*').maybeSingle();
+
+    const net = balance ? Number(balance.net_balance) : 0;
+    const formattedAbs = Math.abs(net).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+    const userA = users && users[0] ? users[0].name : 'Usuario A';
+    const userB = users && users[1] ? users[1].name : 'Usuario B';
+
+    let estado = '⚖️ *Cuentas Saldadas ($0)*';
+    if (net > 0) {
+      estado = `🔴 *${userB}* le debe a *${userA}*: *$${formattedAbs}*`;
+    } else if (net < 0) {
+      estado = `🔴 *${userA}* le debe a *${userB}*: *$${formattedAbs}*`;
+    }
+
+    await ctx.reply(`📊 *Estado de Saldos en Agyke*\n\n${estado}`, { parse_mode: 'Markdown' });
+  } catch (err) {
+    console.error('[SaldoCommand] Error:', err);
+    await ctx.reply('⚠️ Ocurrió un error al obtener el saldo.');
+  }
+});
+
 // Comando /start
 bot.command('start', async (ctx) => {
   try {
     const name = ctx.dbUser?.name || ctx.from?.first_name || 'Usuario';
     await ctx.reply(
       `👋 ¡Hola ${name}! Bienvenido a *Agyke* - Sistema de Control de Gastos Compartidos.\n\n` +
-      `Puedes registrar gastos directamente con el comando:\n` +
-      `\` /gasto <monto> <concepto> <clasificacion>\`\n` +
-      `Ejemplo: \`/gasto 15000 Coto 50\`\n\n` +
-      `O puedes enviar una foto de comprobante, audio o texto libre y yo lo clasificaré por ti.`,
+      `Puedes registrar gastos de las siguientes formas:\n` +
+      `• *Paso a paso conversacional:* Escribe \`/gasto\` y yo te iré pidiendo el monto y concepto.\n` +
+      `• *Carga directa en una línea:* \`/gasto 15000 Coto 50\`\n` +
+      `• *Carga asistida por IA:* Envía un audio, foto de comprobante o texto libre y Gemini lo procesará.\n\n` +
+      `Comandos útiles:\n` +
+      `• \`/saldo\`: Ver el balance neto consolidado.\n` +
+      `• \`/cancelar\`: Cancelar cualquier registro en curso.`,
       { parse_mode: 'Markdown' }
     );
   } catch (error) {
@@ -54,7 +90,6 @@ export async function startBot() {
   await bot.start();
 }
 
-// Ejecutar si se invoca como script principal
-if (require.main === module) {
+if (process.env.NODE_ENV !== 'test') {
   startBot();
 }

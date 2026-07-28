@@ -43,42 +43,15 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Users
-      const { data: usersData } = await supabase.from('users').select('*').order('created_at', { ascending: true });
-      if (usersData) setUsers(usersData);
-
-      // 2. Fetch Transactions
-      const { data: txData } = await supabase
-        .from('transactions')
-        .select('*, users(*)')
-        .order('created_at', { ascending: false });
-      if (txData) setTransactions(txData);
-
-      // 3. Fetch Queue Items
-      const { data: qData } = await supabase
-        .from('agyke_queue')
-        .select('*, users(*)')
-        .order('created_at', { ascending: false });
-      if (qData) setQueueItems(qData);
-
-      // 4. Fetch Balance
-      const { data: balanceData } = await supabase.from('balances').select('*').maybeSingle();
-      if (balanceData) {
-        setNetBalance(Number(balanceData.net_balance));
-      } else if (txData && usersData && usersData.length >= 2) {
-        // Calcular localmente si no existe la fila aún
-        const userA = usersData[0];
-        const userB = usersData[1];
-        let calc = 0;
-        txData.forEach((tx) => {
-          const impact = Number(tx.debt_impact);
-          if (tx.user_id === userA.id) calc += impact;
-          else if (tx.user_id === userB.id) calc -= impact;
-        });
-        setNetBalance(calc);
-      }
+      const res = await fetch('/api/dashboard');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.users) setUsers(data.users);
+      if (data.transactions) setTransactions(data.transactions);
+      if (data.queueItems) setQueueItems(data.queueItems);
+      if (typeof data.netBalance === 'number') setNetBalance(data.netBalance);
     } catch (err) {
-      console.error('Error cargando datos de Supabase:', err);
+      console.error('Error cargando datos del Dashboard:', err);
     } finally {
       setLoading(false);
     }
@@ -88,18 +61,12 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  // Demo Fallback Data if DB is empty
+  // Referencia de usuarios
   const userA = users[0] || { id: '1', name: 'Usuario A' };
   const userB = users[1] || { id: '2', name: 'Usuario B' };
 
-  const displayTransactions = transactions.length > 0 ? transactions : [
-    { id: '1', user_id: userA.id, amount: 15000, concept: 'Supermercado Coto', classification: '50' as const, debt_impact: 7500, created_at: new Date(Date.now() - 3600000 * 2).toISOString(), users: userA },
-    { id: '2', user_id: userB.id, amount: 4500, concept: 'Verdulería', classification: '50' as const, debt_impact: 2250, created_at: new Date(Date.now() - 3600000 * 12).toISOString(), users: userB },
-    { id: '3', user_id: userA.id, amount: 8000, concept: 'Farmacia (Favor)', classification: '100' as const, debt_impact: 8000, created_at: new Date(Date.now() - 3600000 * 24).toISOString(), users: userA },
-    { id: '4', user_id: userB.id, amount: 3200, concept: 'Café Personal', classification: '0' as const, debt_impact: 0, created_at: new Date(Date.now() - 3600000 * 36).toISOString(), users: userB },
-  ];
-
-  const currentBalance = transactions.length > 0 ? netBalance : 13250;
+  const displayTransactions = transactions;
+  const currentBalance = netBalance;
 
   // Totales
   const totalGasto = displayTransactions.reduce((acc, tx) => acc + Number(tx.amount), 0);

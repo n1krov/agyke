@@ -1,58 +1,35 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GeminiExtractionResult } from '../types/database';
 
-const SYSTEM_PROMPT = `
-Eres un asistente contable. Tu única tarea es analizar el audio, imagen, archivo PDF/documento o texto provisto y extraer el monto de la compra y un concepto corto.
-Debes responder ÚNICAMENTE un objeto JSON válido con este formato:
-{
-  "amount": number,
-  "concept": string
-}
-No agregues texto explicativo, solo el JSON. Si no encuentras un concepto claro, pon "Gasto general". Si no encuentras monto, pon 0.
-`;
+/**
+ * Módulo de procesamiento local instantáneo (Integración con IA externa pausada).
+ * Todos los gastos se procesan en local sin realizar llamadas externas ni consumir cuotas de API.
+ */
 
-function getGenAI() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('Falta la variable de entorno GEMINI_API_KEY.');
+export function fallbackParseText(text: string): GeminiExtractionResult {
+  const amountMatch = text.match(/\$?\s*(\d+(?:[\.,]\d+)?)/);
+  let amount = 0;
+  if (amountMatch) {
+    const rawNum = amountMatch[1].replace(/\./g, '').replace(',', '.');
+    amount = parseFloat(rawNum) || 0;
   }
-  return new GoogleGenerativeAI(apiKey);
+
+  let concept = text.replace(/\$?\s*(\d+(?:[\.,]\d+)?)/, '').trim();
+  if (!concept) concept = 'Gasto general';
+
+  return { amount, concept };
 }
 
 export async function processMediaWithGemini(
-  fileBuffer: Buffer,
-  mimeType: string
+  _fileBuffer: Buffer,
+  _mimeType: string
 ): Promise<GeminiExtractionResult> {
-  const genAI = getGenAI();
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-1.5-flash',
-    generationConfig: { responseMimeType: 'application/json' }
-  });
-
-  const parts = [
-    {
-      inlineData: {
-        data: fileBuffer.toString('base64'),
-        mimeType
-      },
-    },
-  ];
-
-  const result = await model.generateContent([SYSTEM_PROMPT, ...parts]);
-  const responseText = result.response.text();
-  return JSON.parse(responseText) as GeminiExtractionResult;
+  // Retorna extracción por defecto local sin llamadas de red a IA
+  return { amount: 0, concept: 'Gasto general' };
 }
 
 export async function processTextWithGemini(
   text: string
 ): Promise<GeminiExtractionResult> {
-  const genAI = getGenAI();
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-1.5-flash',
-    generationConfig: { responseMimeType: 'application/json' }
-  });
-
-  const result = await model.generateContent([SYSTEM_PROMPT, `Texto del gasto: "${text}"`]);
-  const responseText = result.response.text();
-  return JSON.parse(responseText) as GeminiExtractionResult;
+  // Parseo local instantáneo con Regex sin llamadas de red a IA
+  return fallbackParseText(text);
 }

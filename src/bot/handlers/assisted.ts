@@ -3,12 +3,13 @@ import { AgykeContext } from '../../types/context';
 import { supabase } from '../../lib/supabase';
 import { processMediaWithGemini, processTextWithGemini } from '../../services/gemini';
 import { SourceType } from '../../types/database';
+import { getSession, setSession, clearSession } from '../../services/session';
+import { getClassificationKeyboard } from '../commands/gasto';
 
 async function downloadTelegramFile(fileId: string): Promise<{ buffer: Buffer; filePath: string }> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error('TELEGRAM_BOT_TOKEN no está configurado.');
 
-  // Usar getFile de Telegram API
   const resFile = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
   const jsonFile = (await resFile.json()) as { ok: boolean; result?: { file_path?: string } };
 
@@ -30,9 +31,87 @@ async function downloadTelegramFile(fileId: string): Promise<{ buffer: Buffer; f
 export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
   try {
     const user = ctx.dbUser;
-    if (!user) {
+    if (!user || !ctx.from) {
       await ctx.reply('⚠️ Usuario no autenticado.');
       return;
+    }
+
+    const telegramId = ctx.from.id;
+    const activeSession = getSession(telegramId);
+    const textMsg = ctx.message?.text?.trim();
+
+    // 0. Manejo de cancelación si hay sesión activa
+    if (activeSession && textMsg && (textMsg === '/cancelar' || textMsg === '/cancel')) {
+      clearSession(telegramId);
+      await ctx.reply('❌ Registro de gasto cancelado.');
+      return;
+    }
+
+    // 1. Manejar respuestas a pasos activos del Wizard
+    if (activeSession && textMsg) {
+      if (activeSession.step === 'AWAITING_AMOUNT') {
+        const rawAmount = textMsg.replace('$', '').replace(/\./g, '').replace(',', '.');
+        const amount = parseFloat(rawAmount);
+
+        if (isNaN(amount) || amount <= 0) {
+          await ctx.reply('⚠️ El monto debe ser un número válido positivo (ejemplo: `15000`). Intenta de nuevo:');
+          return;
+        }
+
+        activeSession.amount = amount;
+
+        if (!activeSession.concept || activeSession.concept === 'Gasto general') {
+          activeSession.step = 'AWAITING_CONCEPT';
+          setSession(telegramId, activeSession);
+
+          const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+          await ctx.reply(
+            `💵 Monto registrado: *$${formattedAmount}*\n\n` +
+            `📝 Ahora ingresa el *concepto* del gasto (ej: \`Coto\`, \`Verdulería\`):`,
+            { parse_mode: 'Markdown' }
+          );
+          return;
+        } else {
+          activeSession.step = 'AWAITING_CLASSIFICATION';
+          setSession(telegramId, activeSession);
+
+          const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+          const keyboard = getClassificationKeyboard(`session:${telegramId}`);
+
+          await ctx.reply(
+            `📝 *Confirmar Clasificación*\n` +
+            `*Monto:* $${formattedAmount}\n` +
+            `*Concepto:* ${activeSession.concept}\n\n` +
+            `Selecciona la clasificación:`,
+            {
+              parse_mode: 'Markdown',
+              reply_markup: keyboard
+            }
+          );
+          return;
+        }
+      }
+
+      if (activeSession.step === 'AWAITING_CONCEPT') {
+        activeSession.concept = textMsg;
+        activeSession.step = 'AWAITING_CLASSIFICATION';
+        setSession(telegramId, activeSession);
+
+        const formattedAmount = (activeSession.amount || 0).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        const keyboard = getClassificationKeyboard(`session:${telegramId}`);
+
+        await ctx.reply(
+          `📝 *Confirmar Clasificación*\n` +
+          `*Monto:* $${formattedAmount}\n` +
+          `*Concepto:* ${textMsg}\n\n` +
+          `Selecciona la clasificación:`,
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboard
+          }
+        );
+        return;
+      }
     }
 
     let sourceType: SourceType = 'text';
@@ -41,37 +120,24 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     let rawFilePath: string | null = null;
     let textPrompt: string | null = null;
 
-    // 1. Identificar tipo de entrada
-    if (ctx.message?.voice || ctx.message?.audio) {
-      sourceType = 'audio';
-      const fileId = ctx.message.voice?.file_id || ctx.message.audio?.file_id;
-      mimeType = ctx.message.voice?.mime_type || ctx.message.audio?.mime_type || 'audio/ogg';
-      if (fileId) {
-        const downloaded = await downloadTelegramFile(fileId);
-        fileBuffer = downloaded.buffer;
-        rawFilePath = downloaded.filePath;
-      }
-    } else if (ctx.message?.photo) {
-      sourceType = 'image';
-      // Las fotos vienen en varias resoluciones, tomar la última (mayor resolución)
-      const photos = ctx.message.photo;
-      const fileId = photos[photos.length - 1].file_id;
-      mimeType = 'image/jpeg';
-      const downloaded = await downloadTelegramFile(fileId);
-      fileBuffer = downloaded.buffer;
-      rawFilePath = downloaded.filePath;
-    } else if (ctx.message?.document) {
-      sourceType = 'image';
-      const doc = ctx.message.document;
-      mimeType = doc.mime_type || 'application/pdf';
-      const downloaded = await downloadTelegramFile(doc.file_id);
-      fileBuffer = downloaded.buffer;
-      rawFilePath = downloaded.filePath;
-    } else if (ctx.message?.text) {
-      sourceType = 'text';
-      textPrompt = ctx.message.text.trim();
+    // 2. Identificar tipo de entrada recibida
+    const isAudio = Boolean(ctx.message?.voice || ctx.message?.audio);
+    const isPhoto = Boolean(ctx.message?.photo);
+    const isDocument = Boolean(ctx.message?.document);
+    const isText = Boolean(ctx.message?.text);
 
-      // Si empieza con '/', es un comando y no debe procesarse por el flujo asistido
+    if (isAudio) {
+      sourceType = 'audio';
+      console.log(`[AssistedFlow] 🎙️ Audio recibido de ${user.name} (${telegramId})`);
+    } else if (isPhoto) {
+      sourceType = 'image';
+      console.log(`[AssistedFlow] 📷 Foto recibida de ${user.name} (${telegramId})`);
+    } else if (isDocument) {
+      sourceType = 'image';
+      console.log(`[AssistedFlow] 📄 Documento recibido de ${user.name} (${telegramId})`);
+    } else if (isText) {
+      sourceType = 'text';
+      textPrompt = ctx.message!.text!.trim();
       if (textPrompt.startsWith('/')) {
         return;
       }
@@ -79,10 +145,45 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
-    // Informar procesamiento
-    const statusMsg = await ctx.reply('🔍 Procesando contenido con Gemini...');
+    // Responder inmediatamente en Telegram para confirmar recepción
+    const statusMsg = await ctx.reply(
+      isAudio ? '🎙️ Procesando audio...' :
+      isPhoto ? '📷 Procesando imagen...' :
+      '🔍 Procesando contenido...'
+    );
 
-    // 2. Extraer datos con Gemini
+    // Descargar archivos si es multimedia
+    try {
+      if (isAudio) {
+        const fileId = ctx.message!.voice?.file_id || ctx.message!.audio?.file_id;
+        mimeType = ctx.message!.voice?.mime_type || ctx.message!.audio?.mime_type || 'audio/ogg';
+        if (fileId) {
+          const downloaded = await downloadTelegramFile(fileId);
+          fileBuffer = downloaded.buffer;
+          rawFilePath = downloaded.filePath;
+        }
+      } else if (isPhoto) {
+        const photos = ctx.message!.photo!;
+        const fileId = photos[photos.length - 1].file_id;
+        mimeType = 'image/jpeg';
+        const downloaded = await downloadTelegramFile(fileId);
+        fileBuffer = downloaded.buffer;
+        rawFilePath = downloaded.filePath;
+      } else if (isDocument) {
+        const doc = ctx.message!.document!;
+        mimeType = doc.mime_type || 'application/pdf';
+        const downloaded = await downloadTelegramFile(doc.file_id);
+        fileBuffer = downloaded.buffer;
+        rawFilePath = downloaded.filePath;
+      }
+    } catch (downloadErr) {
+      console.error('[AssistedFlow] Error descargando archivo de Telegram:', downloadErr);
+      await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
+      await ctx.reply('⚠️ No se pudo descargar el archivo desde Telegram. Intenta de nuevo.');
+      return;
+    }
+
+    // Extraer contenido con Gemini o Regex
     let extraction;
     try {
       if (fileBuffer) {
@@ -95,21 +196,36 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
     } catch (geminiErr) {
-      console.error('[AssistedFlow] Error al llamar a Gemini:', geminiErr);
+      console.error('[AssistedFlow] Error procesando contenido:', geminiErr);
       await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
-      await ctx.reply('⚠️ Lo siento, ocurrió un error al analizar la información con Gemini.');
+      await ctx.reply('⚠️ Ocurrió un error al analizar la información.');
       return;
     }
 
-    // Borrar mensaje temporal de procesamiento
     await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
 
-    if (!extraction || typeof extraction.amount !== 'number') {
-      await ctx.reply('⚠️ No se pudo extraer un monto válido del contenido enviado.');
+    // Si no se extrajo un monto (> 0), pasar al flujo conversacional solicitándolo
+    if (!extraction || typeof extraction.amount !== 'number' || extraction.amount <= 0) {
+      const detectedConcept = extraction?.concept && extraction.concept !== 'Gasto general' ? extraction.concept : undefined;
+
+      setSession(telegramId, {
+        userId: user.id,
+        step: 'AWAITING_AMOUNT',
+        concept: detectedConcept
+      });
+
+      const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' : isDocument ? '📄 *Documento recibido*' : '📝 *Gasto detectado*';
+
+      await ctx.reply(
+        `${mediaTitle}\n` +
+        (detectedConcept ? `*Concepto:* ${detectedConcept}\n\n` : '') +
+        `💰 Por favor ingresa el *monto* del gasto (ej: \`1000\` o \`1000 fideos\`):`,
+        { parse_mode: 'Markdown' }
+      );
       return;
     }
 
-    // 3. Insertar en agyke_queue
+    // Guardar en agyke_queue si se extrajo monto e iniciar clasificación
     const { data: queueItem, error: queueError } = await supabase
       .from('agyke_queue')
       .insert({
@@ -129,7 +245,6 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
-    // 4. Crear Inline Keyboard con los 4 botones
     const keyboard = new InlineKeyboard()
       .text('50 (Mitad y Mitad)', `agyke:${queueItem.id}:50`)
       .text('100 (Favor 100%)', `agyke:${queueItem.id}:100`)
@@ -150,7 +265,6 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       }
     );
 
-    // Actualizar telegram_message_id
     await supabase
       .from('agyke_queue')
       .update({ telegram_message_id: sentMessage.message_id })

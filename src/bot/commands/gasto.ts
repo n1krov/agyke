@@ -5,7 +5,7 @@ import { calculateDebtImpact, updateBalance } from '../../services/balance';
 import { ClassificationType } from '../../types/database';
 import { setSession } from '../../services/session';
 
-const VALID_CLASSIFICATIONS: ClassificationType[] = ['50', '100', '-100', '0'];
+export const VALID_CLASSIFICATIONS: ClassificationType[] = ['50', '100', '-100', '0'];
 
 export function getClassificationKeyboard(prefix: string) {
   return new InlineKeyboard()
@@ -16,7 +16,7 @@ export function getClassificationKeyboard(prefix: string) {
     .text('0 (Personal)', `${prefix}:0`);
 }
 
-export async function gastoCommandHandler(ctx: AgykeContext): Promise<void> {
+export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: string): Promise<void> {
   try {
     const user = ctx.dbUser;
     if (!user || !ctx.from) {
@@ -24,7 +24,9 @@ export async function gastoCommandHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
-    const rawText = typeof ctx.match === 'string' ? ctx.match.trim() : '';
+    const rawText = overrideText !== undefined
+      ? overrideText.trim()
+      : (typeof ctx.match === 'string' ? ctx.match.trim() : '');
 
     // Caso 1: /gasto sin parámetros -> Iniciar Wizard pidiendo Monto
     if (!rawText) {

@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase';
 
 dotenv.config();
 
-const token = process.env.TELEGRAM_BOT_TOKEN || '8652404759:AAHfU_zeslhMkc-gwDvvwa_2LG3ZvNR_QKE';
+const token = process.env.TELEGRAM_BOT_TOKEN || 'dummy_token_for_build';
 
 export const bot = new Bot<AgykeContext>(token);
 

@@ -11,6 +11,7 @@ export async function authMiddleware(ctx: AgykeContext, next: NextFunction): Pro
     }
 
     const telegramId = ctx.from.id;
+    const currentName = [ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ') || ctx.from.username || 'Usuario';
 
     // Buscar si el usuario ya existe en Supabase
     const { data: existingUser, error } = await supabase
@@ -26,16 +27,22 @@ export async function authMiddleware(ctx: AgykeContext, next: NextFunction): Pro
     }
 
     if (existingUser) {
+      // Si cambió el nombre en Telegram, actualizarlo en la base de datos
+      if (existingUser.name !== currentName) {
+        await supabase
+          .from('users')
+          .update({ name: currentName })
+          .eq('id', existingUser.id);
+        existingUser.name = currentName;
+      }
       ctx.dbUser = existingUser as User;
     } else {
       // Registrar automáticamente al usuario si no existe
-      const name = [ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ') || ctx.from.username || 'Usuario';
-
       const { data: newUser, error: insertError } = await supabase
         .from('users')
         .insert({
           telegram_id: telegramId,
-          name: name
+          name: currentName
         })
         .select()
         .single();
@@ -47,7 +54,7 @@ export async function authMiddleware(ctx: AgykeContext, next: NextFunction): Pro
       }
 
       ctx.dbUser = newUser as User;
-      await ctx.reply(`👋 ¡Hola ${name}! Te hemos registrado exitosamente en Agyke.`);
+      await ctx.reply(`👋 ¡Hola ${currentName}! Te hemos registrado exitosamente en Agyke.`);
     }
 
     await next();

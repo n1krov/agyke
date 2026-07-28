@@ -1,5 +1,5 @@
 import { webhookCallback } from 'grammy';
-import { bot } from '@shared/bot';
+import { bot } from '@/shared/bot';
 
 export const dynamic = 'force-dynamic';
 

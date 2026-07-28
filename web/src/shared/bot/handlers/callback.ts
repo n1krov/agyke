@@ -3,6 +3,9 @@ import { supabase } from '../../lib/supabase';
 import { calculateDebtImpact, updateBalance } from '../../services/balance';
 import { ClassificationType } from '../../types/database';
 import { getSession, clearSession } from '../../services/session';
+import { gastoCommandHandler } from '../commands/gasto';
+import { saldoCommandHandler } from '../commands/saldo';
+import { helpCommandHandler } from '../commands/help';
 
 const CLASSIFICATION_LABELS: Record<ClassificationType, string> = {
   '50': '50/50 (Mitad y Mitad)',
@@ -16,7 +19,22 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
     const data = ctx.callbackQuery?.data;
     if (!data) return;
 
-    // Caso A: Botón proveniente de sesión interactiva (session:<telegramId>:<classification>)
+    // Caso A: Botón proveniente de menú rápido de comandos (action:gasto, action:saldo, action:help)
+    if (data.startsWith('action:')) {
+      const action = data.split(':')[1];
+      await ctx.answerCallbackQuery();
+
+      if (action === 'gasto') {
+        await gastoCommandHandler(ctx, '');
+      } else if (action === 'saldo') {
+        await saldoCommandHandler(ctx);
+      } else if (action === 'help') {
+        await helpCommandHandler(ctx);
+      }
+      return;
+    }
+
+    // Caso B: Botón proveniente de sesión interactiva (session:<telegramId>:<classification>)
     if (data.startsWith('session:')) {
       const parts = data.split(':');
       if (parts.length !== 3) {
@@ -79,7 +97,7 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
-    // Caso B: Botón proveniente de agyke_queue (agyke:<queueId>:<classification>)
+    // Caso C: Botón proveniente de agyke_queue (agyke:<queueId>:<classification>)
     if (data.startsWith('agyke:')) {
       const parts = data.split(':');
       if (parts.length !== 3) {

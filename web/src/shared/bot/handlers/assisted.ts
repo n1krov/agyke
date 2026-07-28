@@ -238,8 +238,21 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
 
-      // Caso C: Cualquier otro texto plano sin "gasto" ni número inicial (ej: "hola", "que haces")
-      // Se ignora silenciosamente para no iniciar un gasto erróneo.
+      // Caso C: Cualquier otro texto plano (ej: "hola", "buenas", "que tal")
+      // Responder con un menú interactivo de botones de acceso rápido
+      const quickMenuKeyboard = new InlineKeyboard()
+        .text('💰 Registrar Gasto', 'action:gasto')
+        .text('📊 Ver Saldo', 'action:saldo')
+        .row()
+        .text('💡 Ayuda / Comandos', 'action:help');
+
+      await ctx.reply(
+        `👋 ¿Qué te gustaría hacer en *Agyke*?\nSelecciona una opción rápida:`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: quickMenuKeyboard
+        }
+      );
       return;
     }
 

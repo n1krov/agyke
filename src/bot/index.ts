@@ -4,10 +4,10 @@ import { AgykeContext } from '../types/context';
 import { authMiddleware } from './middlewares/auth';
 import { gastoCommandHandler } from './commands/gasto';
 import { helpCommandHandler } from './commands/help';
+import { saldoCommandHandler } from './commands/saldo';
 import { assistedFlowHandler } from './handlers/assisted';
 import { callbackQueryHandler } from './handlers/callback';
 import { clearSession } from '../services/session';
-import { supabase } from '../lib/supabase';
 
 dotenv.config();
 
@@ -24,38 +24,15 @@ bot.command('gasto', gastoCommandHandler);
 // Comando /help y /ayuda
 bot.command(['help', 'ayuda'], helpCommandHandler);
 
+// Comando /saldo o /balance
+bot.command(['saldo', 'balance'], saldoCommandHandler);
+
 // Comando /cancelar y /cancel
 bot.command(['cancelar', 'cancel'], async (ctx) => {
   if (ctx.from) {
     clearSession(ctx.from.id);
   }
   await ctx.reply('❌ Operación cancelada.');
-});
-
-// Comando /saldo o /balance
-bot.command(['saldo', 'balance'], async (ctx) => {
-  try {
-    const { data: users } = await supabase.from('users').select('*').order('created_at', { ascending: true });
-    const { data: balance } = await supabase.from('balances').select('*').maybeSingle();
-
-    const net = balance ? Number(balance.net_balance) : 0;
-    const formattedAbs = Math.abs(net).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-
-    const userA = users && users[0] ? users[0].name : 'Usuario A';
-    const userB = users && users[1] ? users[1].name : 'Usuario B';
-
-    let estado = '⚖️ *Cuentas Saldadas ($0)*';
-    if (net > 0) {
-      estado = `🔴 *${userB}* le debe a *${userA}*: *$${formattedAbs}*`;
-    } else if (net < 0) {
-      estado = `🔴 *${userA}* le debe a *${userB}*: *$${formattedAbs}*`;
-    }
-
-    await ctx.reply(`📊 *Estado de Saldos en Agyke*\n\n${estado}`, { parse_mode: 'Markdown' });
-  } catch (err) {
-    console.error('[SaldoCommand] Error:', err);
-    await ctx.reply('⚠️ Ocurrió un error al obtener el saldo.');
-  }
 });
 
 // Comando /start

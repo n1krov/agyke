@@ -6,6 +6,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const [usersRes, txRes, queueRes, balanceRes] = await Promise.all([

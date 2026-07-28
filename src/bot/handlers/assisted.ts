@@ -138,7 +138,7 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     } else if (isText) {
       sourceType = 'text';
       textPrompt = ctx.message!.text!.trim();
-      if (textPrompt.startsWith('/')) {
+      if (textPrompt && textPrompt.startsWith('/')) {
         return;
       }
     } else {

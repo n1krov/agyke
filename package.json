@@ -10,8 +10,8 @@
     "dev:bot": "tsx src/bot/index.ts",
     "dev:web": "npm run dev --prefix web",
     "build:web": "npm run build --prefix web",
-    "build": "tsc",
-    "start": "node dist/bot/index.js",
+    "build": "npm run build --prefix web",
+    "start": "npm run start --prefix web",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { ClassificationType } from '../types/database';
+import type { ClassificationType } from '../types/database';
 
 /**
  * Calcula el impacto en deuda según la clasificación elegida:

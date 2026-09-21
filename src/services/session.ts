@@ -1,4 +1,5 @@
-import { ClassificationType } from '../types/database';
+import type { ClassificationType } from '../types/database';
+
 
 export interface GastoDraft {
   userId: string;

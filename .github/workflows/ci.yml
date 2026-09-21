@@ -1,0 +1,60 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, Typecheck, Test & Build
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy_anon_key
+      SUPABASE_URL: https://dummy.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: dummy_service_key
+      TELEGRAM_BOT_TOKEN: dummy_telegram_token
+      GEMINI_API_KEY: dummy_gemini_key
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📦 Install root dependencies
+        run: npm ci || npm install
+
+      - name: 📦 Install web dependencies
+        run: npm ci --prefix web || npm install --prefix web
+
+      - name: 🔍 Typecheck (Root & Bot)
+        run: npx tsc --noEmit
+
+      - name: 🔍 Typecheck (Next.js Web)
+        run: npx tsc --noEmit --project web/tsconfig.json
+
+      - name: 🧹 Lint (Next.js Web)
+        run: npm run lint --prefix web
+
+      - name: 🧪 Run Unit Tests
+        run: npm test
+
+      - name: 🏗️ Build Application (Next.js)
+        run: npm run build

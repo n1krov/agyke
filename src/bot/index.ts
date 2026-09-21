@@ -19,7 +19,7 @@ export const bot = new Bot<AgykeContext>(token);
 bot.use(authMiddleware);
 
 // Comando /gasto
-bot.command('gasto', gastoCommandHandler);
+bot.command('gasto', (ctx) => gastoCommandHandler(ctx));
 
 // Comando /help y /ayuda
 bot.command(['help', 'ayuda'], helpCommandHandler);

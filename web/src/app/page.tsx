@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { Transaction, User, AgykeItem } from '../types/database';
 import {
   DollarSign,
@@ -58,7 +57,27 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchData();
+    let ignore = false;
+    async function initDashboard() {
+      try {
+        const res = await fetch('/api/dashboard');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (ignore) return;
+        if (data.users) setUsers(data.users);
+        if (data.transactions) setTransactions(data.transactions);
+        if (data.queueItems) setQueueItems(data.queueItems);
+        if (typeof data.netBalance === 'number') setNetBalance(data.netBalance);
+      } catch (err) {
+        console.error('Error cargando datos del Dashboard:', err);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    initDashboard();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   // Referencia de usuarios
@@ -121,7 +140,7 @@ export default function Dashboard() {
               Sistema Activo
             </span>
             <button
-              onClick={fetchData}
+              onClick={() => fetchData()}
               disabled={loading}
               className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700/50"
               title="Actualizar datos"
@@ -247,7 +266,7 @@ export default function Dashboard() {
                   <YAxis stroke="#6b7280" fontSize={12} tickFormatter={(v) => `$${v}`} tickLine={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '0.75rem', color: '#fff' }}
-                    formatter={(value: any) => [formattedCurrency(Number(value)), 'Monto']}
+                    formatter={(value) => [formattedCurrency(Number(value)), 'Monto']}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {classificationData.map((entry, index) => (
@@ -289,7 +308,7 @@ export default function Dashboard() {
                   </Pie>
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '0.75rem', color: '#fff' }}
-                    formatter={(value: any) => [formattedCurrency(Number(value)), 'Monto']}
+                    formatter={(value) => [formattedCurrency(Number(value)), 'Monto']}
                   />
                 </PieChart>
               </ResponsiveContainer>

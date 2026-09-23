@@ -1,0 +1,65 @@
+# STATUS.md - Bitácora Viva del Proyecto Agyke
+
+> **Propósito:** Este documento es la memoria técnica y el estado de situación en tiempo real de Agyke. En cada interacción o cambio en el repositorio, este archivo se consulta y actualiza para garantizar alineación absoluta con la metodología **Spec-Driven Development (SDD)**.
+
+---
+
+## 1. Identificación y Estado de Git
+* **Fecha de corte:** 23 de Septiembre de 2026.
+* **Rama Activa:** `dev` (Sincronizada con `origin/dev`).
+* **Último Commit:** `f5c0b93` (*fix(types, lint): fix command middleware typing, eliminate explicit any, and resolve react-hooks/set-state-in-effect in dashboard*).
+* **Rama de Producción:** `master` (conectada a despliegues en Vercel).
+
+---
+
+## 2. Semáforo de Componentes
+
+| Componente | Estado | Cobertura / Tests | Notas |
+| :--- | :---: | :---: | :--- |
+| **Cálculo Financiero (`balance.ts`)** |  Listo | 10 tests unitarios | Invariante de `net_balance` y los 4 botones (`50`, `100`, `-100`, `0`). |
+| **Parser Gemini 1.5 Flash (`gemini.ts`)** |  Listo | 6 tests unitarios | Conexión real con `@google/generative-ai` + fallback regex local de alta precisión. |
+| **Gestor de Sesiones (`session.ts`)** |  Listo | 4 tests unitarios | Manejo de borradores conversacionales paso a paso por usuario. |
+| **Bot Handlers (`src/bot/`)** |  Listo | Validado en build | Comandos `/start`, `/gasto`, `/saldo`, `/help`, `/cancelar`, callbacks y flujo asistido. |
+| **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
+| **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
+| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 20/20 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
+
+---
+
+## 3. Decisiones de Arquitectura Registradas (ADRs)
+
+* **ADR-001 (Git Flow Estricto):** `master` es exclusivo para releases a producción (Vercel). Todo desarrollo, integración y testing previo ocurre en la rama `dev`.
+* **ADR-002 (Unificación de Código en `/src`):** Se eliminó la carpeta duplicada `web/src/shared`. Next.js consume directamente `src/` mediante el path alias `@/shared/*` configurado en `web/tsconfig.json`.
+* **ADR-003 (Desacoplamiento de Polling vs Webhook):** `src/bot/index.ts` solo exporta la instancia del bot sin iniciar listeners continuos. `src/bot/cli.ts` es el único punto de entrada para Long Polling (`npm run dev:bot`). El Webhook corre de forma stateless en `/api/telegram/webhook`.
+* **ADR-004 (Testing Local sin Bot en Vivo):** En desarrollo local no se requiere conectar a Telegram con el celular. Las pruebas de flujos de gasto, parsing y recálculos se simulan con tests de integración automatizados.
+
+---
+
+## 4. Estado de Tareas (Roadmap)
+
+### Completadas
+- [x] Tarea 1: Estructura del Proyecto y Supabase Setup (`docs/TASKS.md`).
+- [x] Tarea 2: Inicialización del Bot y Middleware de Autenticación (`docs/TASKS.md`).
+- [x] Tarea 3: Handler de Carga Directa `/gasto` (`docs/TASKS.md`).
+- [x] Tarea 4: Pipeline Asistido con Gemini 1.5 Flash (`docs/TASKS.md`).
+- [x] Tarea 5: Handler de Botones Agyke (Inline Keyboards) (`docs/TASKS.md`).
+- [x] Tarea 6: Dashboard Web en Next.js (`docs/TASKS.md`).
+- [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
+- [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
+
+### En Curso / Próximos Hitos (SDD)
+- [ ] **Tarea 7: Arnés de Simulación de Telegram Headless (`docs/LOCAL_TESTING_SPEC.md`)**:
+  - Implementar generador de updates sintéticos (`src/tests/telegram-mock.ts`).
+  - Suite de tests de integración (`src/tests/integration.test.ts`) para simular `/gasto`, mensajes y callbacks.
+  - Script `npm run test:integration` en `package.json`.
+- [ ] **Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral**:
+  - Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) y script `npm run simulate`.
+  - Ejecutar flujo completo de prueba local de punta a punta y verificar que ande todo.
+- [ ] **Tarea 9: Preparación y Validación del Entorno de Deploy a Producción**:
+  - Validar webhook serverless y scripts de configuración.
+  - Verificar variables de entorno y preparar merge a `master` para Vercel.
+
+---
+
+## 5. Próxima Acción Inmediata
+Ejecutar la **Tarea 7**: Desarrollar `src/tests/telegram-mock.ts` y la suite de integración `src/tests/integration.test.ts` con su respectivo commit atómico.

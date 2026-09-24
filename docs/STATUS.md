@@ -35,6 +35,7 @@
 * **ADR-004 (Testing Local sin Bot en Vivo):** En desarrollo local no se requiere conectar a Telegram con el celular. Las pruebas de flujos de gasto, parsing y recálculos se simulan con tests de integración automatizados.
 * **ADR-005 (Resolución de Dependencias para Vercel):** Se ajustaron las versiones de `devDependencies` en el `package.json` raíz (`typescript@^5.7.2`, `@types/node@^22.10.0`, `tsx@^4.19.2`) para evitar errores 404 durante el paso `installCommand` en Vercel.
 * **ADR-006 (Regla Mandatoria Pre-Commit SDD):** Ningún cambio de código se commitea sin haber actualizado previamente `docs/STATUS.md` y la documentación correspondiente en `docs/`.
+* **ADR-007 (Resolución de Módulos Compartidos en Next.js):** Se añadió `webpack.resolve.modules` en `web/next.config.ts` referenciando `web/node_modules`. Esto resuelve los errores `module-not-found` (`grammy`, `dotenv`) al compilar código de `../src/` dentro de Vercel.
 
 ---
 

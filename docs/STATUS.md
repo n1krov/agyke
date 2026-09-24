@@ -46,15 +46,11 @@
 - [x] Tarea 6: Dashboard Web en Next.js (`docs/TASKS.md`).
 - [x] Tarea 7: Arnés de Simulación de Telegram Headless (`docs/LOCAL_TESTING_SPEC.md`).
 - [x] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral (`scripts/simulate-flow.ts`).
+- [x] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción (`docs/TASKS_PROD.md`).
 - [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
 - [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
-
-### En Curso / Próximos Hitos (SDD)
-- [ ] **Tarea 9: Preparación y Validación del Entorno de Deploy a Producción**:
-  - Validar webhook serverless y scripts de configuración (`scripts/set-webhook.ts`).
-  - Verificar variables de entorno y preparar merge a `master` para Vercel.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Ejecutar la **Tarea 9**: Validar la configuración del entorno de producción y preparar el flujo de despliegue a Vercel con su respectivo commit atómico.
+Subir los commits locales a `dev` (`git push origin dev`) y realizar el merge de `dev` hacia `master` para disparar el despliegue automático en Vercel. Una vez publicado, ejecutar `scripts/set-webhook.ts` para conectar el bot en vivo con Telegram.

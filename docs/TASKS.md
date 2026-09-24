@@ -52,7 +52,7 @@
 - [x] Ejecutar el flujo completo de prueba local de punta a punta (alta de usuarios, comandos, callbacks, recálculo de balance) y verificar que ande todo.
 - [x] Asegurar que toda la suite de calidad (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`) esté en verde.
 
-### [ ] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción
-- [ ] Validar endpoint serverless y configuración de webhook (`/api/telegram/webhook`, `/api/telegram/setup-webhook`, `scripts/set-webhook.ts`).
-- [ ] Verificar la matriz de variables de entorno para Vercel y Supabase según `REQUIREMENTS_PROD.md`.
-- [ ] Documentar y verificar el checklist de paso a producción (`dev` -> `master`) con CI validado.
+### [x] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción
+- [x] Validar endpoint serverless y configuración de webhook (`/api/telegram/webhook`, `/api/telegram/setup-webhook`, `scripts/set-webhook.ts`).
+- [x] Verificar la matriz de variables de entorno para Vercel y Supabase según `REQUIREMENTS_PROD.md`.
+- [x] Documentar y verificar el checklist de paso a producción (`dev` -> `master`) con CI validado.

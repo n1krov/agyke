@@ -16,6 +16,7 @@
     "test:unit": "tsx --test \"src/services/**/*.test.ts\"",
     "test:integration": "tsx --test \"src/tests/**/*.test.ts\"",
     "simulate": "tsx scripts/simulate-flow.ts",
+    "simulate:live": "tsx scripts/simulate-flow.ts --live",
     "typecheck": "tsc --noEmit",
     "lint": "npm run lint --prefix web"
   },

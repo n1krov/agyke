@@ -1,16 +1,26 @@
 import { bot } from '../src/bot/index';
 import { setupBotInterceptor, createTextMessageUpdate, createCallbackQueryUpdate } from '../src/tests/telegram-mock';
 import { setupInMemorySupabase } from '../src/tests/supabase-mock';
+import { supabase } from '../src/lib/supabase';
 import { clearSession } from '../src/services/session';
 
 async function runSimulation() {
+  const isLive = process.argv.includes('--live');
+
   console.log('\n============================================================');
   console.log('   🚀 SIMULADOR DE FLUJO LOCAL HEADLESS - AGYKE SYSTEM');
+  console.log(`   Modo: ${isLive ? '🔴 BASE DE DATOS REAL (Supabase Cloud)' : '🟢 EN MEMORIA (Sandbox sin tocar Supabase)'}`);
   console.log('   (Pruebas de punta a punta sin bot en vivo de Telegram)');
   console.log('============================================================\n');
 
-  const memorySupabase = setupInMemorySupabase();
+  const memorySupabase = isLive ? null : setupInMemorySupabase();
   const interceptor = setupBotInterceptor(bot);
+
+  async function getBalanceDisplay(): Promise<number> {
+    if (memorySupabase) return memorySupabase.db.balances[0]?.net_balance ?? 0;
+    const { data } = await supabase.from('balances').select('net_balance').maybeSingle();
+    return data ? Number(data.net_balance) : 0;
+  }
 
   const USER_A = { id: 1001, name: 'Lautaro' };
   const USER_B = { id: 1002, name: 'Cholo' };
@@ -40,8 +50,7 @@ async function runSimulation() {
       text: '/start'
     }));
     console.log(`   ✅ ${USER_B.name} envió /start`);
-    console.log(`   📨 Respuesta: "${interceptor.getLastMessage()?.split('\n')[0]}"`);
-    console.log(`   👥 Total usuarios registrados: ${memorySupabase.db.users.length}\n`);
+    console.log(`   📨 Respuesta: "${interceptor.getLastMessage()?.split('\n')[0]}"\n`);
 
     // -------------------------------------------------------------
     // Paso 2: Carga directa compartida 50/50 por Usuario A
@@ -54,8 +63,8 @@ async function runSimulation() {
       text: '/gasto 20000 Coto 50'
     }));
     console.log(`   ✅ Mensaje procesado: "/gasto 20000 Coto 50"`);
-    console.log(`   📨 Bot: "${interceptor.getLastMessage()}"`);
-    console.log(`   📊 Saldo neto en BD: $${memorySupabase.db.balances[0]?.net_balance} (${USER_B.name} le debe a ${USER_A.name})\n`);
+    console.log(`   📨 Bot: "${interceptor.getLastMessage()?.split('\n')[0]}"`);
+    console.log(`   📊 Saldo neto: $${await getBalanceDisplay()} (${USER_B.name} le debe a ${USER_A.name})\n`);
 
     // -------------------------------------------------------------
     // Paso 3: Compensación: Usuario B paga $6.000 (50/50)
@@ -68,8 +77,8 @@ async function runSimulation() {
       text: '/gasto 6000 Verdulería 50'
     }));
     console.log(`   ✅ Mensaje procesado: "/gasto 6000 Verdulería 50"`);
-    console.log(`   📨 Bot: "${interceptor.getLastMessage()}"`);
-    console.log(`   📊 Nuevo saldo neto: $${memorySupabase.db.balances[0]?.net_balance} (Deuda reducida a $7.000)\n`);
+    console.log(`   📨 Bot: "${interceptor.getLastMessage()?.split('\n')[0]}"`);
+    console.log(`   📊 Saldo neto: $${await getBalanceDisplay()} (Deuda reducida)\n`);
 
     // -------------------------------------------------------------
     // Paso 4: Pago 100% a favor (Saldar deuda completa)
@@ -82,8 +91,8 @@ async function runSimulation() {
       text: '/gasto 7000 Transferencia 100'
     }));
     console.log(`   ✅ Mensaje procesado: "/gasto 7000 Transferencia 100"`);
-    console.log(`   📨 Bot: "${interceptor.getLastMessage()}"`);
-    console.log(`   ⚖️ Balance neto tras pago: $${memorySupabase.db.balances[0]?.net_balance} (¡Cuentas saldadas en $0!)\n`);
+    console.log(`   📨 Bot: "${interceptor.getLastMessage()?.split('\n')[0]}"`);
+    console.log(`   ⚖️ Balance neto tras pago: $${await getBalanceDisplay()}\n`);
 
     // -------------------------------------------------------------
     // Paso 5: Flujo conversacional paso a paso con botones interactivos
@@ -98,7 +107,7 @@ async function runSimulation() {
       text: '/gasto'
     }));
     console.log(`   1️⃣ Lautaro escribe "/gasto"`);
-    console.log(`      Bot solicita: "${interceptor.getLastMessage()?.replace(/\*/g, '')}"`);
+    console.log(`      Bot solicita: "${interceptor.getLastMessage()?.replace(/\*/g, '')?.split('\n')[0]}"`);
 
     // Enviar monto
     interceptor.clear();
@@ -108,7 +117,7 @@ async function runSimulation() {
       text: '3500'
     }));
     console.log(`   2️⃣ Lautaro responde monto: "3500"`);
-    console.log(`      Bot solicita: "${interceptor.getLastMessage()?.replace(/\*/g, '')}"`);
+    console.log(`      Bot solicita: "${interceptor.getLastMessage()?.replace(/\*/g, '')?.split('\n')[0]}"`);
 
     // Enviar concepto
     interceptor.clear();
@@ -118,7 +127,7 @@ async function runSimulation() {
       text: 'Peluquería'
     }));
     console.log(`   3️⃣ Lautaro responde concepto: "Peluquería"`);
-    console.log(`      Bot presenta botones: "${interceptor.getLastMessage()?.replace(/\*/g, '')}"`);
+    console.log(`      Bot presenta botones: "${interceptor.getLastMessage()?.replace(/\*/g, '')?.split('\n')[0]}"`);
 
     // Presionar botón 50
     interceptor.clear();
@@ -129,7 +138,7 @@ async function runSimulation() {
     }));
     console.log(`   4️⃣ Lautaro presiona botón [ 50 (Mitad y Mitad) ]`);
     console.log(`      Bot confirma: "${interceptor.getLastMessage()?.replace(/\*/g, '')?.split('\n')[0]}"`);
-    console.log(`   📊 Nuevo balance consolidado: $${memorySupabase.db.balances[0]?.net_balance}\n`);
+    console.log(`   📊 Nuevo balance consolidado: $${await getBalanceDisplay()}\n`);
 
     // -------------------------------------------------------------
     // Paso 6: Consulta formal del comando /saldo
@@ -151,14 +160,19 @@ async function runSimulation() {
     console.log('============================================================');
     console.log('   🎉 SIMULACIÓN EXITOSA - RESUMEN DE LA SESIÓN');
     console.log('============================================================');
-    console.log(`   • Total usuarios en BD:     ${memorySupabase.db.users.length}`);
-    console.log(`   • Total transacciones:      ${memorySupabase.db.transactions.length}`);
-    console.log(`   • Saldo neto final:         $${memorySupabase.db.balances[0]?.net_balance}`);
-    console.log(`   • Peticiones interceptadas: ${interceptor.captured.length} llamadas`);
+    if (memorySupabase) {
+      console.log(`   • Total usuarios en BD:     ${memorySupabase.db.users.length}`);
+      console.log(`   • Total transacciones:      ${memorySupabase.db.transactions.length}`);
+    } else {
+      console.log(`   • Modo:                     Impactado en Supabase Cloud`);
+    }
+    console.log(`   • Saldo neto final:         $${await getBalanceDisplay()}`);
     console.log('============================================================\n');
 
   } finally {
-    memorySupabase.restore();
+    if (memorySupabase) {
+      memorySupabase.restore();
+    }
   }
 }
 

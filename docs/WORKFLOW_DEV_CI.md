@@ -17,6 +17,16 @@ Este documento detalla el ciclo de vida de desarrollo, la estrategia de ramas, l
   * Ramas secundarias para tareas específicas creadas a partir de `dev`.
   * Se integran a `dev` mediante Pull Requests.
 
+### 1.1 Guía de Sincronización Diaria (Git)
+Para sincronizar y mantener el repositorio al día con GitHub sin pérdida de cambios:
+1. **Comprobar estado local:** `git status` (si hay cambios temporales, resguardar con `git stash`).
+2. **Descargar novedades de todas las ramas:** `git fetch --all --prune`.
+3. **Actualizar la rama de trabajo actual (`dev`):** `git pull`.
+4. **Sincronizar ambas ramas (`dev` y `master`) en un paso:**
+   ```bash
+   git checkout master && git pull && git checkout dev && git pull
+   ```
+
 ---
 
 ## 2. Unificación de Arquitectura

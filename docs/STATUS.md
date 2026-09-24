@@ -5,9 +5,9 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 23 de Septiembre de 2026.
-* **Rama Activa:** `dev` (Sincronizada con `origin/dev`).
-* **Último Commit:** `f5c0b93` (*fix(types, lint): fix command middleware typing, eliminate explicit any, and resolve react-hooks/set-state-in-effect in dashboard*).
+* **Fecha de corte:** 24 de Septiembre de 2026.
+* **Rama Activa:** `dev`.
+* **Último Commit:** `0b536cd` (*feat(simulate): add --live flag support to populate real supabase database on demand*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---
@@ -23,6 +23,7 @@
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
 | **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 26/26 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
+| **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 | Corrección de versiones de dependencias para `npm install` limpio en Vercel. |
 
 ---
 
@@ -32,6 +33,8 @@
 * **ADR-002 (Unificación de Código en `/src`):** Se eliminó la carpeta duplicada `web/src/shared`. Next.js consume directamente `src/` mediante el path alias `@/shared/*` configurado en `web/tsconfig.json`.
 * **ADR-003 (Desacoplamiento de Polling vs Webhook):** `src/bot/index.ts` solo exporta la instancia del bot sin iniciar listeners continuos. `src/bot/cli.ts` es el único punto de entrada para Long Polling (`npm run dev:bot`). El Webhook corre de forma stateless en `/api/telegram/webhook`.
 * **ADR-004 (Testing Local sin Bot en Vivo):** En desarrollo local no se requiere conectar a Telegram con el celular. Las pruebas de flujos de gasto, parsing y recálculos se simulan con tests de integración automatizados.
+* **ADR-005 (Resolución de Dependencias para Vercel):** Se ajustaron las versiones de `devDependencies` en el `package.json` raíz (`typescript@^5.7.2`, `@types/node@^22.10.0`, `tsx@^4.19.2`) para evitar errores 404 durante el paso `installCommand` en Vercel.
+* **ADR-006 (Regla Mandatoria Pre-Commit SDD):** Ningún cambio de código se commitea sin haber actualizado previamente `docs/STATUS.md` y la documentación correspondiente en `docs/`.
 
 ---
 
@@ -49,8 +52,9 @@
 - [x] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción (`docs/TASKS_PROD.md`).
 - [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
 - [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
+- [x] Corrección de dependencias y compatibilidad de build en Vercel.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Subir los commits locales a `dev` (`git push origin dev`) y realizar el merge de `dev` hacia `master` para disparar el despliegue automático en Vercel. Una vez publicado, ejecutar `scripts/set-webhook.ts` para conectar el bot en vivo con Telegram.
+Hacer push de los cambios de `dev` a GitHub (`git push origin dev`) para que el preview deployment de Vercel compile exitosamente, y posteriormente crear/aprobar el Pull Request de `dev` a `master` para publicar en producción. Una vez publicado en `master`, ejecutar `scripts/set-webhook.ts` o consultar `/api/telegram/setup-webhook` para validar la conexión en vivo con Telegram.

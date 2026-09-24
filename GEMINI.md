@@ -24,7 +24,7 @@ El ciclo de desarrollo debe seguir este orden estricto:
 3. **Pruebas Primero (Test-Driven / Simulation):** Diseñar las pruebas automatizadas que validen el comportamiento esperado.
 4. **Implementar:** Escribir el código estrictamente necesario para cumplir la especificación.
 5. **Verificar:** Correr tests unitarios, typecheck estricto y linter (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`).
-6. **Bitácora:** Registrar el progreso en [`docs/STATUS.md`](./docs/STATUS.md).
+6. **Bitácora y Docs Pre-Commit (Obligatorio):** Actualizar obligatoriamente [`docs/STATUS.md`](./docs/STATUS.md) y toda la carpeta [`docs/`](./docs) ANTES de realizar cualquier commit. No se permite ningún commit sin su correspondiente registro en la bitácora.
 
 ---
 

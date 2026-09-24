@@ -12,7 +12,9 @@
     "build:web": "npm run build --prefix web",
     "build": "npm run build --prefix web",
     "start": "npm run start --prefix web",
-    "test": "node --experimental-strip-types --loader ./scripts/ts-loader.js --test \"src/**/*.test.ts\"",
+    "test": "tsx --test \"src/**/*.test.ts\"",
+    "test:unit": "tsx --test \"src/services/**/*.test.ts\"",
+    "test:integration": "tsx --test \"src/tests/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "lint": "npm run lint --prefix web"
   },

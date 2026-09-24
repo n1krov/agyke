@@ -41,10 +41,10 @@
 - [x] Crear tabla con el historial de la tabla `transactions`.
 - [x] Crear gráficos de barras/torta (usando Recharts o Chart.js) para mostrar los gastos personales vs. compartidos.
 
-### [ ] Tarea 7: Arnés de Simulación de Telegram Headless (Spec: LOCAL_TESTING_SPEC.md)
-- [ ] Implementar helper de `Update` sintéticos (`src/tests/telegram-mock.ts`).
-- [ ] Crear suite de tests de integración (`src/tests/integration.test.ts`) simulando `/gasto`, mensajes ambiguos y callbacks de botones.
-- [ ] Añadir script `npm run test:integration` en `package.json`.
+### [x] Tarea 7: Arnés de Simulación de Telegram Headless (Spec: LOCAL_TESTING_SPEC.md)
+- [x] Implementar helper de `Update` sintéticos (`src/tests/telegram-mock.ts`).
+- [x] Crear suite de tests de integración (`src/tests/integration.test.ts`) simulando `/gasto`, mensajes ambiguos y callbacks de botones.
+- [x] Añadir script `npm run test:integration` en `package.json`.
 
 ### [ ] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral
 - [ ] Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) para ejecutar escenarios desde la terminal con salida formateada.

@@ -22,7 +22,7 @@
 | **Bot Handlers (`src/bot/`)** |  Listo | Validado en build | Comandos `/start`, `/gasto`, `/saldo`, `/help`, `/cancelar`, callbacks y flujo asistido. |
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
-| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 20/20 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
+| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 26/26 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
 
 ---
 
@@ -44,14 +44,11 @@
 - [x] Tarea 4: Pipeline Asistido con Gemini 1.5 Flash (`docs/TASKS.md`).
 - [x] Tarea 5: Handler de Botones Agyke (Inline Keyboards) (`docs/TASKS.md`).
 - [x] Tarea 6: Dashboard Web en Next.js (`docs/TASKS.md`).
+- [x] Tarea 7: Arnés de Simulación de Telegram Headless (`docs/LOCAL_TESTING_SPEC.md`).
 - [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
 - [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
 
 ### En Curso / Próximos Hitos (SDD)
-- [ ] **Tarea 7: Arnés de Simulación de Telegram Headless (`docs/LOCAL_TESTING_SPEC.md`)**:
-  - Implementar generador de updates sintéticos (`src/tests/telegram-mock.ts`).
-  - Suite de tests de integración (`src/tests/integration.test.ts`) para simular `/gasto`, mensajes y callbacks.
-  - Script `npm run test:integration` en `package.json`.
 - [ ] **Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral**:
   - Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) y script `npm run simulate`.
   - Ejecutar flujo completo de prueba local de punta a punta y verificar que ande todo.
@@ -62,4 +59,4 @@
 ---
 
 ## 5. Próxima Acción Inmediata
-Ejecutar la **Tarea 7**: Desarrollar `src/tests/telegram-mock.ts` y la suite de integración `src/tests/integration.test.ts` con su respectivo commit atómico.
+Ejecutar la **Tarea 8**: Desarrollar el script CLI `scripts/simulate-flow.ts`, agregar `npm run simulate` y validar la ejecución completa de pruebas de punta a punta con su respectivo commit atómico.

@@ -45,18 +45,16 @@
 - [x] Tarea 5: Handler de Botones Agyke (Inline Keyboards) (`docs/TASKS.md`).
 - [x] Tarea 6: Dashboard Web en Next.js (`docs/TASKS.md`).
 - [x] Tarea 7: Arnés de Simulación de Telegram Headless (`docs/LOCAL_TESTING_SPEC.md`).
+- [x] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral (`scripts/simulate-flow.ts`).
 - [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
 - [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
 
 ### En Curso / Próximos Hitos (SDD)
-- [ ] **Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral**:
-  - Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) y script `npm run simulate`.
-  - Ejecutar flujo completo de prueba local de punta a punta y verificar que ande todo.
 - [ ] **Tarea 9: Preparación y Validación del Entorno de Deploy a Producción**:
-  - Validar webhook serverless y scripts de configuración.
+  - Validar webhook serverless y scripts de configuración (`scripts/set-webhook.ts`).
   - Verificar variables de entorno y preparar merge a `master` para Vercel.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Ejecutar la **Tarea 8**: Desarrollar el script CLI `scripts/simulate-flow.ts`, agregar `npm run simulate` y validar la ejecución completa de pruebas de punta a punta con su respectivo commit atómico.
+Ejecutar la **Tarea 9**: Validar la configuración del entorno de producción y preparar el flujo de despliegue a Vercel con su respectivo commit atómico.

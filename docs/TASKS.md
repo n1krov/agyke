@@ -46,11 +46,11 @@
 - [x] Crear suite de tests de integración (`src/tests/integration.test.ts`) simulando `/gasto`, mensajes ambiguos y callbacks de botones.
 - [x] Añadir script `npm run test:integration` en `package.json`.
 
-### [ ] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral
-- [ ] Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) para ejecutar escenarios desde la terminal con salida formateada.
-- [ ] Añadir script `npm run simulate` a `package.json`.
-- [ ] Ejecutar el flujo completo de prueba local de punta a punta (alta de usuarios, comandos, callbacks, recálculo de balance) y verificar que ande todo.
-- [ ] Asegurar que toda la suite de calidad (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`) esté en verde.
+### [x] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral
+- [x] Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) para ejecutar escenarios desde la terminal con salida formateada.
+- [x] Añadir script `npm run simulate` a `package.json`.
+- [x] Ejecutar el flujo completo de prueba local de punta a punta (alta de usuarios, comandos, callbacks, recálculo de balance) y verificar que ande todo.
+- [x] Asegurar que toda la suite de calidad (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`) esté en verde.
 
 ### [ ] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción
 - [ ] Validar endpoint serverless y configuración de webhook (`/api/telegram/webhook`, `/api/telegram/setup-webhook`, `scripts/set-webhook.ts`).

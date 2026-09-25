@@ -22,13 +22,23 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
     // Caso A: Botón proveniente de menú rápido de comandos (action:gasto, action:saldo, action:help)
     if (data.startsWith('action:')) {
       const action = data.split(':')[1];
-      await ctx.answerCallbackQuery().catch(() => {});
+      console.log(`[CallbackHandler] 🔘 Botón de menú rápido recibido: "${data}" de ${ctx.from?.first_name || ctx.from?.id}`);
+
+      try {
+        await ctx.answerCallbackQuery();
+        console.log(`[CallbackHandler] ✅ answerCallbackQuery respondido para ${action}`);
+      } catch (cbErr) {
+        console.warn(`[CallbackHandler] ⚠️ No se pudo responder answerCallbackQuery:`, cbErr);
+      }
 
       if (action === 'gasto') {
+        console.log('[CallbackHandler] 💰 Ejecutando gastoCommandHandler desde botón');
         await gastoCommandHandler(ctx, '');
       } else if (action === 'saldo') {
+        console.log('[CallbackHandler] 📊 Ejecutando saldoCommandHandler desde botón');
         await saldoCommandHandler(ctx);
       } else if (action === 'help') {
+        console.log('[CallbackHandler] 💡 Ejecutando helpCommandHandler desde botón');
         await helpCommandHandler(ctx);
       }
       return;

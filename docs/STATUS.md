@@ -41,6 +41,7 @@
 * **ADR-010 (Sistema de Diseño UI/UX y Carpeta docs/ui):** Se formalizó el estándar visual del frontend en la nueva subcarpeta `docs/ui/` (`DESIGN_SYSTEM_SPEC.md`, `TOKENS_AND_PALETTE.md`, `COMPONENTS_SPEC.md`, `ROADMAP_UI.md`). Establece la paleta *Obsidian Slate*, números tabulares para montos financieros, jerarquía de balance en 3 segundos y modularización de la interfaz en componentes limpios.
 * **ADR-011 (Recálculo Bajo Demanda y Resiliencia en Callbacks):** Se blindó `saldoCommandHandler` para ejecutar automáticamente `updateBalance()` si la tabla `balances` en Supabase aún no tiene registros inicializados, evitando valores en $0 incorrectos. Se añadió fallback de texto plano si Telegram rechaza Markdown y se envolvió `answerCallbackQuery` con captura de excepciones para que ningún botón interactivo quede con el spinner trabado.
 * **ADR-012 (Logging Estructurado y Blindaje de Markdown en Comandos):** Se incorporó `bot.catch` global en `src/bot/index.ts` y logs detallados en el endpoint `/api/telegram/webhook` para visibilidad de updates en Vercel. Se añadieron fallbacks a texto plano en los comandos `/gasto` y `/help` para garantizar entrega de mensajes aún si Telegram rechaza entidades Markdown.
+* **ADR-013 (Desactivación de Webhook Reply y Entrega Multicapa en Serverless):** Se configuró `canUseWebhookReply: () => false` en la inicialización de `grammY` para garantizar que la función serverless en Vercel no cierre prematuramente la respuesta HTTP antes de completar los envíos de mensajes. Se añadió entrega multicapa en `/saldo`, `/help` y `/gasto` (`Markdown` -> texto plano -> `ctx.api.sendMessage(chatId, ...)`) con logs de trazabilidad en consola para cada callback query.
 
 ---
 
@@ -61,15 +62,17 @@
 - [x] Corrección de dependencias y compatibilidad de build en Vercel.
 - [x] Soporte para consulta de saldo en lenguaje natural directo sin IA.
 - [x] Especificación formal del Sistema de Diseño UI/UX en `docs/ui/`.
-
-### En Curso / Próxima Fase: Rediseño Visual Frontend (`docs/ui/ROADMAP_UI.md`)
-- [ ] Fase 1: Tokens y estilos globales en `globals.css` (Tailwind v4 `@theme`).
-- [ ] Fase 2: Componentes atómicos (`BadgeClassification`, `UserAvatar`, `StatCard`).
-- [ ] Fase 3: Master Balance Hero y HeaderBar interactivo.
-- [ ] Fase 4: Tabla interactiva con búsqueda en vivo y filtros instantáneos.
-- [ ] Fase 5: Gráficos Recharts estilizados y Muro Agyke Queue.
+- [x] Rediseño Visual Frontend completo (`docs/ui/ROADMAP_UI.md` Fases 1 a 5):
+  - [x] Tokens y paleta *Obsidian Slate* en `web/src/app/globals.css`.
+  - [x] `<BadgeClassification />`, `<UserAvatar />`, `<HeaderBar />`.
+  - [x] `<MasterBalanceHero />` con visualización de flujo de deuda en 3 segundos.
+  - [x] `<StatMetricCard />` (4 métricas financieras agregadas).
+  - [x] `<TransactionsTable />` con búsqueda en vivo, chips de filtro y estado vacío.
+  - [x] `<AnalyticsSection />` con gráficos Recharts (Área y Donut).
+  - [x] `<QueueViewer />` para auditoría visual del pipeline de Gemini.
+  - [x] Refactor modular de `web/src/app/page.tsx`.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Pushear la nueva especificación a `dev` (`git push origin dev`) y comenzar con la Fase 1 del rediseño visual (`web/src/app/globals.css` y modularización de componentes en `web/src/components/`).
+Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el bot de Telegram en vivo y el dashboard en producción (`https://agyke.vercel.app`).

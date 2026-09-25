@@ -13,7 +13,11 @@ dotenv.config();
 
 const token = process.env.TELEGRAM_BOT_TOKEN || 'dummy_token_for_build';
 
-export const bot = new Bot<AgykeContext>(token);
+export const bot = new Bot<AgykeContext>(token, {
+  client: {
+    canUseWebhookReply: () => false
+  }
+});
 
 // Middleware de autenticación global
 bot.use(authMiddleware);

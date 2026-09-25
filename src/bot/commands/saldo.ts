@@ -49,13 +49,29 @@ export async function saldoCommandHandler(ctx: AgykeContext): Promise<void> {
       `🌐 Podés ver el desglose en agyke.vercel.app`
     );
 
-    try {
-      await ctx.reply(message, { parse_mode: 'Markdown' });
-    } catch {
-      await ctx.reply(message.replace(/[*_`]/g, ''));
+    const chatId = ctx.chatId || ctx.from?.id;
+    console.log(`[SaldoCommand] 📊 Enviando balance a chat ${chatId}: ${estado.replace(/[*_`]/g, '')}`);
+
+    if (chatId) {
+      try {
+        await ctx.reply(message, { parse_mode: 'Markdown' });
+      } catch (markdownErr) {
+        console.warn('[SaldoCommand] Falló reply Markdown, reintentando texto plano:', markdownErr);
+        try {
+          await ctx.reply(message.replace(/[*_`]/g, ''));
+        } catch (plainErr) {
+          console.warn('[SaldoCommand] Falló ctx.reply, usando ctx.api.sendMessage:', plainErr);
+          await ctx.api.sendMessage(chatId, message.replace(/[*_`]/g, '')).catch((sendErr) => {
+            console.error('[SaldoCommand] Falló sendMessage directo:', sendErr);
+          });
+        }
+      }
     }
   } catch (err) {
     console.error('[SaldoCommand] Error:', err);
-    await ctx.reply('⚠️ Ocurrió un error al obtener el saldo.');
+    const chatId = ctx.chatId || ctx.from?.id;
+    if (chatId) {
+      await ctx.api.sendMessage(chatId, '⚠️ Ocurrió un error al obtener el saldo.').catch(() => {});
+    }
   }
 }

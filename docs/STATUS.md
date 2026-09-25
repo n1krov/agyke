@@ -5,9 +5,9 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 24 de Septiembre de 2026.
+* **Fecha de corte:** 25 de Septiembre de 2026.
 * **Rama Activa:** `dev`.
-* **Último Commit:** `0b536cd` (*feat(simulate): add --live flag support to populate real supabase database on demand*).
+* **Último Commit:** `f230df9` (*fix(build): configure webpack resolve modules in next.config.ts for shared src imports*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---
@@ -23,7 +23,7 @@
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
 | **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 26/26 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
-| **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 | Corrección de versiones de dependencias para `npm install` limpio en Vercel. |
+| **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 a ADR-008 | Compilación Webpack explícita (`--webpack`) y módulos compartidos en Next.js 16. |
 
 ---
 
@@ -36,6 +36,7 @@
 * **ADR-005 (Resolución de Dependencias para Vercel):** Se ajustaron las versiones de `devDependencies` en el `package.json` raíz (`typescript@^5.7.2`, `@types/node@^22.10.0`, `tsx@^4.19.2`) para evitar errores 404 durante el paso `installCommand` en Vercel.
 * **ADR-006 (Regla Mandatoria Pre-Commit SDD):** Ningún cambio de código se commitea sin haber actualizado previamente `docs/STATUS.md` y la documentación correspondiente en `docs/`.
 * **ADR-007 (Resolución de Módulos Compartidos en Next.js):** Se añadió `webpack.resolve.modules` en `web/next.config.ts` referenciando `web/node_modules`. Esto resuelve los errores `module-not-found` (`grammy`, `dotenv`) al compilar código de `../src/` dentro de Vercel.
+* **ADR-008 (Compatibilidad Next.js 16 con Webpack):** Next.js 16 activa Turbopack por defecto en `next build`, lo que genera conflicto si se detecta configuración de `webpack` sin `turbopack`. Se fijó `"build": "next build --webpack"` en `web/package.json` y se declaró `turbopack: {}` en `web/next.config.ts` para compilar directamente con Webpack.
 
 ---
 

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  turbopack: {},
   webpack: (config) => {
     config.resolve.modules = [
       path.resolve(process.cwd(), 'node_modules'),

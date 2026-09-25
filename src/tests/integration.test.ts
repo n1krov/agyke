@@ -98,6 +98,21 @@ describe('Pruebas de Integración y Simulación Headless (Tarea 7)', () => {
     assert.ok(lastMsg && lastMsg.includes('5.000'));
   });
 
+  it('Escenario 4.1: Mensaje de texto "ver saldo" en lenguaje natural responde directamente sin IA', async () => {
+    const update = createTextMessageUpdate({
+      userId: 1001,
+      name: 'Lautaro',
+      text: 'ver saldo'
+    });
+
+    await bot.handleUpdate(update);
+
+    const lastMsg = interceptor.getLastMessage();
+    assert.ok(lastMsg && lastMsg.includes('Estado de Saldos en Agyke'));
+    assert.ok(lastMsg && lastMsg.includes('Cholo') && lastMsg.includes('Lautaro'));
+    assert.ok(lastMsg && lastMsg.includes('5.000'));
+  });
+
   it('Escenario 5: Flujo conversacional paso a paso con Callback Query', async () => {
     // Paso 1: Usuario escribe /gasto sin argumentos
     await bot.handleUpdate(createTextMessageUpdate({

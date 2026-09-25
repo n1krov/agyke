@@ -22,7 +22,7 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
     // Caso A: Botón proveniente de menú rápido de comandos (action:gasto, action:saldo, action:help)
     if (data.startsWith('action:')) {
       const action = data.split(':')[1];
-      await ctx.answerCallbackQuery();
+      await ctx.answerCallbackQuery().catch(() => {});
 
       if (action === 'gasto') {
         await gastoCommandHandler(ctx, '');

@@ -113,6 +113,20 @@ describe('Pruebas de Integración y Simulación Headless (Tarea 7)', () => {
     assert.ok(lastMsg && lastMsg.includes('5.000'));
   });
 
+  it('Escenario 4.2: Callback Query action:saldo responde con el saldo correctamente', async () => {
+    const callbackUpdate = createCallbackQueryUpdate({
+      userId: 1001,
+      name: 'Lautaro',
+      data: 'action:saldo'
+    });
+
+    await bot.handleUpdate(callbackUpdate);
+
+    const lastMsg = interceptor.getLastMessage();
+    assert.ok(lastMsg && lastMsg.includes('Estado de Saldos en Agyke'));
+    assert.ok(lastMsg && lastMsg.includes('5.000'));
+  });
+
   it('Escenario 5: Flujo conversacional paso a paso con Callback Query', async () => {
     // Paso 1: Usuario escribe /gasto sin argumentos
     await bot.handleUpdate(createTextMessageUpdate({

@@ -35,12 +35,16 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
         step: 'AWAITING_AMOUNT'
       });
 
-      await ctx.reply(
+      const promptMsg = (
         '💰 *Nuevo Registro de Gasto*\n\n' +
         'Por favor, ingresa el *monto* del gasto (ejemplo: `15000` o `$15.000`):\n' +
-        '_(Escribe /cancelar para salir)_',
-        { parse_mode: 'Markdown' }
+        '_(Escribe /cancelar para salir)_'
       );
+      try {
+        await ctx.reply(promptMsg, { parse_mode: 'Markdown' });
+      } catch {
+        await ctx.reply(promptMsg.replace(/[*_`]/g, ''));
+      }
       return;
     }
 

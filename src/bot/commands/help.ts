@@ -23,7 +23,11 @@ export async function helpCommandHandler(ctx: AgykeContext): Promise<void> {
       `🌐 *4. Dashboard Web:*\n` +
       `Podés ver el resumen de gastos en agyke.vercel.app`;
 
-    await ctx.reply(message, { parse_mode: 'Markdown' });
+    try {
+      await ctx.reply(message, { parse_mode: 'Markdown' });
+    } catch {
+      await ctx.reply(message.replace(/[*_`]/g, ''));
+    }
   } catch (error) {
     console.error('[HelpCommand] Error al responder /help:', error);
     await ctx.reply('⚠️ Ocurrió un error al procesar el comando /help.');

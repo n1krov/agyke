@@ -65,6 +65,11 @@ bot.on('callback_query:data', callbackQueryHandler);
 // Listener de Muro Agyke (Flujo asistido para audio, foto, documento o texto libre)
 bot.on(['message:voice', 'message:audio', 'message:photo', 'message:document', 'message:text'], assistedFlowHandler);
 
+// Manejador global de errores para Webhook y Long Polling
+bot.catch((err) => {
+  console.error('❌ [Global Bot Error]:', err.error || err);
+});
+
 // Función de inicio del bot para modo long-polling (desarrollo local)
 export async function startBot() {
   console.log('🤖 Iniciando Bot de Agyke (Long Polling)...');

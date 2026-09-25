@@ -35,12 +35,29 @@ export async function gastoCommandHandler(ctx: AgykeContext, overrideText?: stri
         step: 'AWAITING_AMOUNT'
       });
 
-      await ctx.reply(
+      const promptMsg = (
         '💰 *Nuevo Registro de Gasto*\n\n' +
         'Por favor, ingresa el *monto* del gasto (ejemplo: `15000` o `$15.000`):\n' +
-        '_(Escribe /cancelar para salir)_',
-        { parse_mode: 'Markdown' }
+        '_(Escribe /cancelar para salir)_'
       );
+      const chatId = ctx.chatId || ctx.from?.id;
+      console.log(`[GastoCommand] 💰 Iniciando wizard pidiendo monto a chat: ${chatId}`);
+
+      if (chatId) {
+        try {
+          await ctx.reply(promptMsg, { parse_mode: 'Markdown' });
+        } catch (markdownErr) {
+          console.warn('[GastoCommand] Falló reply Markdown, reintentando texto plano:', markdownErr);
+          try {
+            await ctx.reply(promptMsg.replace(/[*_`]/g, ''));
+          } catch (plainErr) {
+            console.warn('[GastoCommand] Falló ctx.reply, usando ctx.api.sendMessage:', plainErr);
+            await ctx.api.sendMessage(chatId, promptMsg.replace(/[*_`]/g, '')).catch((sendErr) => {
+              console.error('[GastoCommand] Falló sendMessage directo:', sendErr);
+            });
+          }
+        }
+      }
       return;
     }
 

@@ -23,9 +23,29 @@ export async function helpCommandHandler(ctx: AgykeContext): Promise<void> {
       `🌐 *4. Dashboard Web:*\n` +
       `Podés ver el resumen de gastos en agyke.vercel.app`;
 
-    await ctx.reply(message, { parse_mode: 'Markdown' });
+    const chatId = ctx.chatId || ctx.from?.id;
+    console.log(`[HelpCommand] 💡 Enviando guía de ayuda a chat: ${chatId}`);
+
+    if (chatId) {
+      try {
+        await ctx.reply(message, { parse_mode: 'Markdown' });
+      } catch (markdownErr) {
+        console.warn('[HelpCommand] Falló reply Markdown, reintentando texto plano:', markdownErr);
+        try {
+          await ctx.reply(message.replace(/[*_`]/g, ''));
+        } catch (plainErr) {
+          console.warn('[HelpCommand] Falló ctx.reply, usando ctx.api.sendMessage:', plainErr);
+          await ctx.api.sendMessage(chatId, message.replace(/[*_`]/g, '')).catch((sendErr) => {
+            console.error('[HelpCommand] Falló sendMessage directo:', sendErr);
+          });
+        }
+      }
+    }
   } catch (error) {
     console.error('[HelpCommand] Error al responder /help:', error);
-    await ctx.reply('⚠️ Ocurrió un error al procesar el comando /help.');
+    const chatId = ctx.chatId || ctx.from?.id;
+    if (chatId) {
+      await ctx.api.sendMessage(chatId, '⚠️ Ocurrió un error al procesar el comando /help.').catch(() => {});
+    }
   }
 }

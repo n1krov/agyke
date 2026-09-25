@@ -25,7 +25,7 @@ export async function GET() {
       const userA = usersData[0];
       const userB = usersData[1] || { id: 'user_b_placeholder', name: 'Usuario B' };
       let calc = 0;
-      txData.forEach((tx: any) => {
+      txData.forEach((tx: { debt_impact: number | string; user_id: string }) => {
         const impact = Number(tx.debt_impact);
         if (tx.user_id === userA.id) calc += impact;
         else if (tx.user_id === userB.id) calc -= impact;
@@ -39,8 +39,9 @@ export async function GET() {
       queueItems: queueRes.data || [],
       netBalance: netBalance
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[API Dashboard Error]:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Error desconocido';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

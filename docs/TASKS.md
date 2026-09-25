@@ -40,3 +40,19 @@
 - [x] Crear página `/` (Dashboard): muestra tarjetas con el `net_balance` actual (quién le debe a quién).
 - [x] Crear tabla con el historial de la tabla `transactions`.
 - [x] Crear gráficos de barras/torta (usando Recharts o Chart.js) para mostrar los gastos personales vs. compartidos.
+
+### [x] Tarea 7: Arnés de Simulación de Telegram Headless (Spec: LOCAL_TESTING_SPEC.md)
+- [x] Implementar helper de `Update` sintéticos (`src/tests/telegram-mock.ts`).
+- [x] Crear suite de tests de integración (`src/tests/integration.test.ts`) simulando `/gasto`, mensajes ambiguos y callbacks de botones.
+- [x] Añadir script `npm run test:integration` en `package.json`.
+
+### [x] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral
+- [x] Crear script CLI interactivo de simulación (`scripts/simulate-flow.ts`) para ejecutar escenarios desde la terminal con salida formateada.
+- [x] Añadir script `npm run simulate` a `package.json`.
+- [x] Ejecutar el flujo completo de prueba local de punta a punta (alta de usuarios, comandos, callbacks, recálculo de balance) y verificar que ande todo.
+- [x] Asegurar que toda la suite de calidad (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`) esté en verde.
+
+### [x] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción
+- [x] Validar endpoint serverless y configuración de webhook (`/api/telegram/webhook`, `/api/telegram/setup-webhook`, `scripts/set-webhook.ts`).
+- [x] Verificar la matriz de variables de entorno para Vercel y Supabase según `REQUIREMENTS_PROD.md`.
+- [x] Documentar y verificar el checklist de paso a producción (`dev` -> `master`) con CI validado.

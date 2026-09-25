@@ -13,9 +13,10 @@ export async function GET() {
     const data = await res.json();
 
     return NextResponse.json(data);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[SetupWebhook GET] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Error desconocido';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -67,8 +68,9 @@ export async function POST(req: Request) {
       target_url: targetUrl,
       telegram_response: data
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[SetupWebhook POST] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Error desconocido';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

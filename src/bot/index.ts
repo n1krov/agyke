@@ -19,7 +19,7 @@ export const bot = new Bot<AgykeContext>(token);
 bot.use(authMiddleware);
 
 // Comando /gasto
-bot.command('gasto', gastoCommandHandler);
+bot.command('gasto', (ctx) => gastoCommandHandler(ctx));
 
 // Comando /help y /ayuda
 bot.command(['help', 'ayuda'], helpCommandHandler);
@@ -65,15 +65,12 @@ bot.on('callback_query:data', callbackQueryHandler);
 // Listener de Muro Agyke (Flujo asistido para audio, foto, documento o texto libre)
 bot.on(['message:voice', 'message:audio', 'message:photo', 'message:document', 'message:text'], assistedFlowHandler);
 
-// Función de inicio del bot
+// Función de inicio del bot para modo long-polling (desarrollo local)
 export async function startBot() {
-  console.log('🤖 Iniciando Bot de Agyke...');
+  console.log('🤖 Iniciando Bot de Agyke (Long Polling)...');
   bot.catch((err) => {
     console.error('❌ Error capturado en el Bot:', err);
   });
   await bot.start();
 }
 
-if (process.env.NODE_ENV !== 'test') {
-  startBot();
-}

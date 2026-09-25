@@ -38,6 +38,8 @@
 * **ADR-007 (Resolución de Módulos Compartidos en Next.js):** Se añadió `webpack.resolve.modules` en `web/next.config.ts` referenciando `web/node_modules`. Esto resuelve los errores `module-not-found` (`grammy`, `dotenv`) al compilar código de `../src/` dentro de Vercel.
 * **ADR-008 (Compatibilidad Next.js 16 con Webpack):** Next.js 16 activa Turbopack por defecto en `next build`, lo que genera conflicto si se detecta configuración de `webpack` sin `turbopack`. Se fijó `"build": "next build --webpack"` en `web/package.json` y se declaró `turbopack: {}` en `web/next.config.ts` para compilar directamente con Webpack.
 * **ADR-009 (Respuesta Directa de Saldo en Lenguaje Natural sin IA):** Se implementó intercepción de frases clave ("ver saldo", "saldo", "balance", "cuanto debemos", "ayuda", "cancelar") en `assistedFlowHandler` para responder inmediatamente con la plantilla preconfigurada de `saldoCommandHandler` y `helpCommandHandler` sin invocar a Gemini ni enviar menús intermedios. Además, se sanitizan los nombres de usuario para prevenir errores de parsing en Markdown.
+* **ADR-010 (Sistema de Diseño UI/UX y Carpeta docs/ui):** Se formalizó el estándar visual del frontend en la nueva subcarpeta `docs/ui/` (`DESIGN_SYSTEM_SPEC.md`, `TOKENS_AND_PALETTE.md`, `COMPONENTS_SPEC.md`, `ROADMAP_UI.md`). Establece la paleta *Obsidian Slate*, números tabulares para montos financieros, jerarquía de balance en 3 segundos y modularización de la interfaz en componentes limpios.
+* **ADR-011 (Recálculo Bajo Demanda y Resiliencia en Callbacks):** Se blindó `saldoCommandHandler` para ejecutar automáticamente `updateBalance()` si la tabla `balances` en Supabase aún no tiene registros inicializados, evitando valores en $0 incorrectos. Se añadió fallback de texto plano si Telegram rechaza Markdown y se envolvió `answerCallbackQuery` con captura de excepciones para que ningún botón interactivo quede con el spinner trabado.
 
 ---
 
@@ -56,8 +58,17 @@
 - [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
 - [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
 - [x] Corrección de dependencias y compatibilidad de build en Vercel.
+- [x] Soporte para consulta de saldo en lenguaje natural directo sin IA.
+- [x] Especificación formal del Sistema de Diseño UI/UX en `docs/ui/`.
+
+### En Curso / Próxima Fase: Rediseño Visual Frontend (`docs/ui/ROADMAP_UI.md`)
+- [ ] Fase 1: Tokens y estilos globales en `globals.css` (Tailwind v4 `@theme`).
+- [ ] Fase 2: Componentes atómicos (`BadgeClassification`, `UserAvatar`, `StatCard`).
+- [ ] Fase 3: Master Balance Hero y HeaderBar interactivo.
+- [ ] Fase 4: Tabla interactiva con búsqueda en vivo y filtros instantáneos.
+- [ ] Fase 5: Gráficos Recharts estilizados y Muro Agyke Queue.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Hacer push de los cambios de `dev` a GitHub (`git push origin dev`) para que el preview deployment de Vercel compile exitosamente, y posteriormente crear/aprobar el Pull Request de `dev` a `master` para publicar en producción. Una vez publicado en `master`, ejecutar `scripts/set-webhook.ts` o consultar `/api/telegram/setup-webhook` para validar la conexión en vivo con Telegram.
+Pushear la nueva especificación a `dev` (`git push origin dev`) y comenzar con la Fase 1 del rediseño visual (`web/src/app/globals.css` y modularización de componentes en `web/src/components/`).

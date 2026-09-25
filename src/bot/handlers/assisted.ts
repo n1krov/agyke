@@ -6,6 +6,8 @@ import { SourceType, ClassificationType } from '../../types/database';
 import { getSession, setSession, clearSession } from '../../services/session';
 import { gastoCommandHandler, getClassificationKeyboard, VALID_CLASSIFICATIONS } from '../commands/gasto';
 import { calculateDebtImpact, updateBalance } from '../../services/balance';
+import { saldoCommandHandler } from '../commands/saldo';
+import { helpCommandHandler } from '../commands/help';
 
 export function tryParseNumberPrefix(text: string): number | null {
   const firstToken = text.split(/\s+/)[0];
@@ -238,7 +240,34 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
 
-      // Caso C: Cualquier otro texto plano (ej: "hola", "buenas", "que tal")
+      const normalizedText = textMsg.toLowerCase().trim();
+
+      // Caso C: Consultar saldo en lenguaje natural (ej: "ver saldo", "saldo", "balance", "ver balance", "cuanto debemos")
+      const isSaldoQuery = /^(ver\s+)?(saldo|balance)s?$/i.test(normalizedText) ||
+                           normalizedText === 'cuanto debemos' ||
+                           normalizedText === 'cuánto debemos' ||
+                           normalizedText === 'estado';
+      if (isSaldoQuery) {
+        await saldoCommandHandler(ctx);
+        return;
+      }
+
+      // Caso D: Consultar ayuda en lenguaje natural (ej: "ayuda", "help", "comandos")
+      const isHelpQuery = /^(ayuda|help|comandos)$/i.test(normalizedText);
+      if (isHelpQuery) {
+        await helpCommandHandler(ctx);
+        return;
+      }
+
+      // Caso E: Cancelar en lenguaje natural (ej: "cancelar", "cancel")
+      const isCancelQuery = /^(cancelar|cancel)$/i.test(normalizedText);
+      if (isCancelQuery) {
+        clearSession(telegramId);
+        await ctx.reply('❌ Operación cancelada.');
+        return;
+      }
+
+      // Caso F: Cualquier otro texto plano (ej: "hola", "buenas", "que tal")
       // Responder con un menú interactivo de botones de acceso rápido
       const quickMenuKeyboard = new InlineKeyboard()
         .text('💰 Registrar Gasto', 'action:gasto')

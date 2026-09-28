@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Scale, Send, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Scale, Send, ShieldCheck, Lock } from 'lucide-react';
 
 interface HeaderBarProps {
   onRefresh: () => void;
@@ -8,6 +8,15 @@ interface HeaderBarProps {
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({ onRefresh, isLoading, lastUpdated }) => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    } catch {
+      window.location.href = '/login';
+    }
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full glass-panel border-b border-white/[0.08] backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -40,7 +49,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onRefresh, isLoading, last
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg glass-panel-interactive border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white text-xs font-medium inline-flex items-center gap-2 disabled:opacity-50"
+            className="p-2 sm:px-3 sm:py-1.5 rounded-lg glass-panel-interactive border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white text-xs font-medium inline-flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             title={lastUpdated ? `Última sincronización: ${lastUpdated.toLocaleTimeString('es-AR')}` : 'Sincronizar'}
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-400' : ''}`} />
@@ -57,6 +66,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onRefresh, isLoading, last
             <Send className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Abrir en Telegram</span>
           </a>
+
+          {/* Lock / Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="p-2 sm:px-3 sm:py-1.5 rounded-lg glass-panel-interactive border border-white/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-300 text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer"
+            title="Bloquear acceso / Cerrar sesión"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Bloquear</span>
+          </button>
         </div>
       </div>
     </header>

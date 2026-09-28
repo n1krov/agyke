@@ -65,14 +65,13 @@
 - [x] Especificación formal del Sistema de Diseño UI/UX en `docs/ui/`.
 - [x] Rediseño Visual Frontend completo (`docs/ui/ROADMAP_UI.md` Fases 1 a 5).
 - [x] Especificación formal de Control de Acceso y Privacidad por PIN (`docs/auth/`).
-
-### En Curso: Implementación de Autenticación Ligera (`docs/auth/TASKS_AUTH.md`)
-- [ ] Tarea AUTH-1 a AUTH-3: Módulo criptográfico HMAC y endpoints `/api/auth/login` y `/api/auth/logout`.
-- [ ] Tarea AUTH-4: Next.js Middleware de intercepción y protección de rutas.
-- [ ] Tarea AUTH-5 a AUTH-6: Pantalla `/login` y botón de bloqueo en `HeaderBar.tsx`.
-- [ ] Tarea AUTH-7 a AUTH-9: Verificación de webhook Telegram y pruebas automatizadas.
+- [x] Implementación completa de Autenticación Ligera por PIN ([`docs/auth/TASKS_AUTH.md`](./auth/TASKS_AUTH.md)):
+  - [x] Tarea AUTH-1 a AUTH-3: Módulo criptográfico HMAC (`web/src/lib/auth.ts`), endpoints `/api/auth/login`, `/api/auth/logout` y `/api/auth/check`.
+  - [x] Tarea AUTH-4: Next.js Middleware (`web/src/middleware.ts`) con bypass estricto a `/api/telegram/webhook` y `/login`.
+  - [x] Tarea AUTH-5 a AUTH-6: Pantalla `web/src/app/login/page.tsx` estilo *Obsidian Slate* y botón de bloqueo en `HeaderBar.tsx`.
+  - [x] Tarea AUTH-7 a AUTH-9: Suite de tests unitarios de autenticación (`src/tests/auth.test.ts` 5/5 pasando).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Implementar Fase 1 y Fase 2 de `docs/auth/TASKS_AUTH.md`: módulo de firma criptográfica `web/src/lib/auth.ts`, endpoints `/api/auth/login` y `/api/auth/logout`, y el `middleware.ts` en Next.js.
+Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el despliegue de Vercel la pantalla de login por PIN y el funcionamiento intacto del bot de Telegram.

@@ -5,9 +5,9 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 25 de Septiembre de 2026.
+* **Fecha de corte:** 28 de Septiembre de 2026.
 * **Rama Activa:** `dev`.
-* **Último Commit:** `f230df9` (*fix(build): configure webpack resolve modules in next.config.ts for shared src imports*).
+* **Último Commit:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---
@@ -43,6 +43,7 @@
 * **ADR-012 (Logging Estructurado y Blindaje de Markdown en Comandos):** Se incorporó `bot.catch` global en `src/bot/index.ts` y logs detallados en el endpoint `/api/telegram/webhook` para visibilidad de updates en Vercel. Se añadieron fallbacks a texto plano en los comandos `/gasto` y `/help` para garantizar entrega de mensajes aún si Telegram rechaza entidades Markdown.
 * **ADR-013 (Desactivación de Webhook Reply y Entrega Multicapa en Serverless):** Se configuró `canUseWebhookReply: () => false` en la inicialización de `grammY` para garantizar que la función serverless en Vercel no cierre prematuramente la respuesta HTTP antes de completar los envíos de mensajes. Se añadió entrega multicapa en `/saldo`, `/help` y `/gasto` (`Markdown` -> texto plano -> `ctx.api.sendMessage(chatId, ...)`) con logs de trazabilidad en consola para cada callback query.
 * **ADR-014 (Control de Acceso Ligero por PIN / Contraseña y Middleware):** Se especificó y construyó la protección del Dashboard Web mediante un sistema de PIN / Contraseña compartido (`docs/auth/AUTH_SPEC.md`). El módulo criptográfico reside en `src/lib/auth.ts` (alineado a `rootDir: "./src"` y ADR-002), utiliza tokens HMAC-SHA256 en cookies `httpOnly; Secure; SameSite=Lax`, e intercepta en `middleware.ts` las rutas `/` y `/api/dashboard`, excluyendo explícitamente el webhook de Telegram (`/api/telegram/webhook`).
+* **ADR-015 (Identidad Visual, Metadatos de Navegador y Favicon Personalizado):** Se eliminaron los metadatos por defecto de Next.js ("Create Next App" / "create vercel app" y el favicon triangular de Vercel) para consolidar la marca Agyke en el navegador. Se configuró `metadata.title` con plantilla dinámica (`%s | Agyke`) y valor por defecto `"Agyke - Control de Gastos Compartidos"`, idioma en español (`lang="es"`), layout dedicado para `/login` (`"Iniciar Sesión | Agyke"`), y se generaron los paquetes completos de iconos de balanza Agyke con degradado índigo oficial en `web/src/app` y `web/public`: vector SVG (`icon.svg`), `.ico` multi-resolución (16x16 a 256x256 con antialiasing Lanczos) y `apple-icon.png` (180x180).
 
 ---
 
@@ -70,8 +71,9 @@
   - [x] Tarea AUTH-4: Next.js Middleware (`web/src/middleware.ts`) con bypass estricto a `/api/telegram/webhook` y `/login`.
   - [x] Tarea AUTH-5 a AUTH-6: Pantalla `web/src/app/login/page.tsx` estilo *Obsidian Slate* y botón de bloqueo en `HeaderBar.tsx`.
   - [x] Tarea AUTH-7 a AUTH-9: Suite de tests unitarios de autenticación (`src/tests/auth.test.ts` 5/5 pasando).
+- [x] Identidad Visual y Favicon del Navegador (ADR-015): Reemplazo total del branding de Vercel/Next por Agyke (título dinámico, balanza SVG, favicon.ico multi-resolución y apple-icon).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el despliegue de Vercel la pantalla de login por PIN y el funcionamiento intacto del bot de Telegram.
+Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el despliegue de Vercel la pestaña del navegador con la identidad oficial de Agyke y el favicon de la balanza.

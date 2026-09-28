@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { verifyPin, createSessionToken, verifySessionToken } from '../../web/src/lib/auth.ts';
+import { verifyPin, createSessionToken, verifySessionToken } from '../lib/auth';
 
 describe('Sistema de Autenticación por PIN y Sesión Criptográfica (Auth)', () => {
   it('debe validar correctamente el PIN configurado', () => {

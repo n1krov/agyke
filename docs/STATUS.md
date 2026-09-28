@@ -42,6 +42,7 @@
 * **ADR-011 (Recálculo Bajo Demanda y Resiliencia en Callbacks):** Se blindó `saldoCommandHandler` para ejecutar automáticamente `updateBalance()` si la tabla `balances` en Supabase aún no tiene registros inicializados, evitando valores en $0 incorrectos. Se añadió fallback de texto plano si Telegram rechaza Markdown y se envolvió `answerCallbackQuery` con captura de excepciones para que ningún botón interactivo quede con el spinner trabado.
 * **ADR-012 (Logging Estructurado y Blindaje de Markdown en Comandos):** Se incorporó `bot.catch` global en `src/bot/index.ts` y logs detallados en el endpoint `/api/telegram/webhook` para visibilidad de updates en Vercel. Se añadieron fallbacks a texto plano en los comandos `/gasto` y `/help` para garantizar entrega de mensajes aún si Telegram rechaza entidades Markdown.
 * **ADR-013 (Desactivación de Webhook Reply y Entrega Multicapa en Serverless):** Se configuró `canUseWebhookReply: () => false` en la inicialización de `grammY` para garantizar que la función serverless en Vercel no cierre prematuramente la respuesta HTTP antes de completar los envíos de mensajes. Se añadió entrega multicapa en `/saldo`, `/help` y `/gasto` (`Markdown` -> texto plano -> `ctx.api.sendMessage(chatId, ...)`) con logs de trazabilidad en consola para cada callback query.
+* **ADR-014 (Activación de Webhook de Producción y Fallback Automático en Scripts):** Se identificó que al utilizar `bot.start()` en desarrollo local grammY elimina el webhook registrado en Telegram (`deleteWebhook()`), dejando la URL en blanco (`url: ""`) y acumulando mensajes en la cola (`pending_update_count`). Se añadió fallback automático a `https://agyke.vercel.app/api/telegram/webhook` en `scripts/set-webhook.ts`, el script `"set:webhook"` en `package.json`, y se activó el webhook en Telegram para restablecer la comunicación 24/7 en producción.
 
 ---
 
@@ -71,8 +72,9 @@
   - [x] `<AnalyticsSection />` con gráficos Recharts (Área y Donut).
   - [x] `<QueueViewer />` para auditoría visual del pipeline de Gemini.
   - [x] Refactor modular de `web/src/app/page.tsx`.
+- [x] Registro y activación de Webhook en producción (`https://agyke.vercel.app/api/telegram/webhook`).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el bot de Telegram en vivo y el dashboard en producción (`https://agyke.vercel.app`).
+Probar el bot en Telegram enviando `/saldo`, `/gasto` o mensajes libres para confirmar respuestas en vivo desde Vercel. Pushear mejoras de scripts y bitácora a `dev`.

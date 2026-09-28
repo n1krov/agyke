@@ -18,7 +18,8 @@
     "simulate": "tsx scripts/simulate-flow.ts",
     "simulate:live": "tsx scripts/simulate-flow.ts --live",
     "typecheck": "tsc --noEmit",
-    "lint": "npm run lint --prefix web"
+    "lint": "npm run lint --prefix web",
+    "set:webhook": "tsx scripts/set-webhook.ts"
   },
   "keywords": [],
   "type": "module",

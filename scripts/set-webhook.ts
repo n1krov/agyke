@@ -15,13 +15,9 @@ async function main() {
     if (vercelUrl) {
       const protocol = vercelUrl.startsWith('http') ? '' : 'https://';
       webhookUrl = `${protocol}${vercelUrl}/api/telegram/webhook`;
+    } else {
+      webhookUrl = 'https://agyke.vercel.app/api/telegram/webhook';
     }
-  }
-
-  if (!webhookUrl) {
-    console.error('❌ Error: Debe especificar WEBHOOK_URL o VERCEL_URL.');
-    console.log('Uso: TELEGRAM_BOT_TOKEN="..." WEBHOOK_URL="https://tu-dominio.vercel.app/api/telegram/webhook" npx tsx scripts/set-webhook.ts');
-    process.exit(1);
   }
 
   console.log(`🔗 Configurando Webhook en Telegram...`);
@@ -31,6 +27,7 @@ async function main() {
 
   const apiUrl = new URL(`https://api.telegram.org/bot${token}/setWebhook`);
   apiUrl.searchParams.append('url', webhookUrl);
+  apiUrl.searchParams.append('allowed_updates', JSON.stringify(['message', 'callback_query']));
   if (secretToken) {
     apiUrl.searchParams.append('secret_token', secretToken);
     console.log(`🔑 Secret Token adjuntado.`);

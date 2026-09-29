@@ -7,7 +7,7 @@
 ## 1. Identificación y Estado de Git
 * **Fecha de corte:** 28 de Septiembre de 2026.
 * **Rama Activa:** `lab/multimodal-receipts` (laboratorio experimental derivado de `dev`).
-* **Último Commit en dev:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
+* **Último Commit:** `0016eab` (*fix(gemini): update model to gemini-3.6-flash with resilient fallback chain*).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
 
 ---
@@ -47,6 +47,7 @@
 * **ADR-014 (Control de Acceso Ligero por PIN / Contraseña y Middleware):** Se especificó y construyó la protección del Dashboard Web mediante un sistema de PIN / Contraseña compartido (`docs/auth/AUTH_SPEC.md`). El módulo criptográfico reside en `src/lib/auth.ts` (alineado a `rootDir: "./src"` y ADR-002), utiliza tokens HMAC-SHA256 en cookies `httpOnly; Secure; SameSite=Lax`, e intercepta en `middleware.ts` las rutas `/` y `/api/dashboard`, excluyendo explícitamente el webhook de Telegram (`/api/telegram/webhook`).
 * **ADR-015 (Identidad Visual, Metadatos de Navegador y Favicon Personalizado):** Se eliminaron los metadatos por defecto de Next.js ("Create Next App" / "create vercel app" y el favicon triangular de Vercel) para consolidar la marca Agyke en el navegador. Se configuró `metadata.title` con plantilla dinámica (`%s | Agyke`) y valor por defecto `"Agyke - Control de Gastos Compartidos"`, idioma en español (`lang="es"`), layout dedicado para `/login` (`"Iniciar Sesión | Agyke"`), y se generaron los paquetes completos de iconos de balanza Agyke con degradado índigo oficial en `web/src/app` y `web/public`: vector SVG (`icon.svg`), `.ico` multi-resolución (16x16 a 256x256 con antialiasing Lanczos) y `apple-icon.png` (180x180).
 * **ADR-016 (Especificación de Ingestión Multimodal y Arnés Local Test-First):** Se formalizó en `docs/multimodal/` la arquitectura completa para el procesamiento inteligente de notas de voz (OGG/Opus), comprobantes físicos (JPEG/PNG) y facturas digitales (PDF). Se estableció como principio innegociable el Contrato Canónico JSON (`ExtractedExpenseDraft`) para desacoplar el formato binario de origen del motor financiero de Agyke. Se especificaron prompts dedicados para modismos argentinos ("lucas", "mitad y mitad", etc.), un arnés CLI local (`scripts/test-multimodal.ts`) para validación rápida sin depender del bot en vivo, y un modo de vista previa transparente en Telegram con cancelación inmediata con un toque (`[ ❌ Cancelar / Descartar ]`).
+* **ADR-017 (Actualización a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo):** Debido al retiro de `gemini-1.5-flash` en la API v1beta de Google, se actualizaron los servicios `receipt-parser.ts` y `gemini.ts` a `gemini-3.6-flash`. Para blindar el sistema contra errores 404 (modelos discontinuados) o 503 (picos temporales de alta demanda), se implementó una cadena de fallback en cascada (`gemini-3.6-flash` -> `gemini-3.5-flash-lite` -> `gemini-flash-latest`), garantizando continuidad operativa en inferencias de comprobantes y texto sin interrupción de la interfaz.
 
 ---
 

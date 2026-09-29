@@ -1,5 +1,6 @@
 import React from 'react';
-import { RefreshCw, Scale, Send, ShieldCheck, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { RefreshCw, Scale, Send, ShieldCheck, Lock, FlaskConical } from 'lucide-react';
 
 interface HeaderBarProps {
   onRefresh: () => void;
@@ -44,6 +45,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onRefresh, isLoading, last
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Webhook Activo</span>
           </div>
+
+          {/* Lab Link */}
+          <Link
+            href="/lab"
+            className="p-2 sm:px-3 sm:py-1.5 rounded-lg glass-panel-interactive border border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/10 text-indigo-300 hover:text-white text-xs font-medium inline-flex items-center gap-1.5 transition-all"
+            title="Laboratorio Multimodal (Imágenes, Audio, PDF)"
+          >
+            <FlaskConical className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="hidden sm:inline">Lab</span>
+          </Link>
 
           {/* Refresh Button */}
           <button

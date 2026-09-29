@@ -10,6 +10,8 @@ const PUBLIC_PATHS = [
   '/api/auth/check',
   '/api/telegram/webhook',       // Crítico: El webhook de Telegram se autentica por su secret token
   '/api/telegram/setup-webhook',
+  '/lab',                        // Laboratorio experimental multimodal
+  '/api/lab',
 ];
 
 export async function middleware(req: NextRequest) {

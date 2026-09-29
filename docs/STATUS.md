@@ -6,9 +6,9 @@
 
 ## 1. Identificación y Estado de Git
 * **Fecha de corte:** 28 de Septiembre de 2026.
-* **Rama Activa:** `dev`.
-* **Último Commit:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
-* **Rama de Producción:** `master` (conectada a despliegues en Vercel).
+* **Rama Activa:** `lab/multimodal-receipts` (laboratorio experimental derivado de `dev`).
+* **Último Commit en dev:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
+* **Rama Base:** `dev` | **Rama de Producción:** `master`.
 
 ---
 
@@ -18,11 +18,13 @@
 | :--- | :---: | :---: | :--- |
 | **Cálculo Financiero (`balance.ts`)** |  Listo | 10 tests unitarios | Invariante de `net_balance` y los 4 botones (`50`, `100`, `-100`, `0`). |
 | **Parser Gemini 1.5 Flash (`gemini.ts`)** |  Listo | 6 tests unitarios | Conexión real con `@google/generative-ai` + fallback regex local de alta precisión. |
+| **Parser Multimodal Tickets (`receipt-parser.ts`)** |  Listo | 4 tests unitarios | Inferencia de comprobantes con Gemini Vision y sanitización de contrato canónico. |
+| **Laboratorio Visual Web (`/lab`)** |  Listo | Validado en build | Playground interactivo en Next.js para carga y debug de comprobantes. |
 | **Gestor de Sesiones (`session.ts`)** |  Listo | 4 tests unitarios | Manejo de borradores conversacionales paso a paso por usuario. |
 | **Bot Handlers (`src/bot/`)** |  Listo | Validado en build | Comandos `/start`, `/gasto`, `/saldo`, `/help`, `/cancelar`, callbacks y flujo asistido. |
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
-| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 26/26 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
+| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 37/37 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
 | **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 a ADR-008 | Compilación Webpack explícita (`--webpack`) y módulos compartidos en Next.js 16. |
 
 ---
@@ -80,8 +82,15 @@
   - [x] Especificación de Facturas y Documentos PDF (`SPEC_DOCUMENTS_PDF.md`).
   - [x] Especificación del Arnés de Pruebas Local y Metodología Test-First (`SPEC_TESTING_HARNESS.md`).
   - [x] Roadmap y Checklist de Implementación (`TASKS_MULTIMODAL.md`).
+- [x] **Laboratorio Experimental Multimodal (Rama `lab/multimodal-receipts`):**
+  - [x] Formalización de tipos `ExtractedExpenseDraft` y `MultimodalProcessResponse` en `src/types/multimodal.ts`.
+  - [x] Servicio desacoplado `parseReceiptImage` con Gemini 1.5 Flash Vision en `src/services/multimodal/receipt-parser.ts`.
+  - [x] Suite de tests unitarios y sanitización en `src/tests/multimodal/receipt.test.ts` (4/4 pasando).
+  - [x] Endpoint de inferencia `/api/lab/process-receipt` en Next.js con soporte multipart y telemetría.
+  - [x] Vista interactiva `/lab` en el Dashboard con drag & drop, generador de tickets de prueba, inspector JSON y logs en vivo.
+  - [x] Acceso directo desde `HeaderBar.tsx` (botón *Lab*).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el despliegue de Vercel la pestaña del navegador con la identidad oficial de Agyke y el favicon de la balanza. Iniciar Fase 1 y 2 de Ingestión Multimodal en la rama `feature/multimodal-inputs`.
+Iniciar el servidor de desarrollo local del Dashboard (`npm run dev:web`), abrir en el navegador `http://localhost:3000/lab` y realizar pruebas interactivas con comprobantes reales o con el botón *"Generar Ticket de Prueba"*. Verificar la extracción de montos y telemetría en pantalla y consola.

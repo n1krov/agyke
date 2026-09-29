@@ -5,9 +5,9 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 25 de Septiembre de 2026.
+* **Fecha de corte:** 28 de Septiembre de 2026.
 * **Rama Activa:** `dev`.
-* **Último Commit:** `f230df9` (*fix(build): configure webpack resolve modules in next.config.ts for shared src imports*).
+* **Último Commit:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---
@@ -42,7 +42,9 @@
 * **ADR-011 (Recálculo Bajo Demanda y Resiliencia en Callbacks):** Se blindó `saldoCommandHandler` para ejecutar automáticamente `updateBalance()` si la tabla `balances` en Supabase aún no tiene registros inicializados, evitando valores en $0 incorrectos. Se añadió fallback de texto plano si Telegram rechaza Markdown y se envolvió `answerCallbackQuery` con captura de excepciones para que ningún botón interactivo quede con el spinner trabado.
 * **ADR-012 (Logging Estructurado y Blindaje de Markdown en Comandos):** Se incorporó `bot.catch` global en `src/bot/index.ts` y logs detallados en el endpoint `/api/telegram/webhook` para visibilidad de updates en Vercel. Se añadieron fallbacks a texto plano en los comandos `/gasto` y `/help` para garantizar entrega de mensajes aún si Telegram rechaza entidades Markdown.
 * **ADR-013 (Desactivación de Webhook Reply y Entrega Multicapa en Serverless):** Se configuró `canUseWebhookReply: () => false` en la inicialización de `grammY` para garantizar que la función serverless en Vercel no cierre prematuramente la respuesta HTTP antes de completar los envíos de mensajes. Se añadió entrega multicapa en `/saldo`, `/help` y `/gasto` (`Markdown` -> texto plano -> `ctx.api.sendMessage(chatId, ...)`) con logs de trazabilidad en consola para cada callback query.
-* **ADR-014 (Activación de Webhook de Producción y Fallback Automático en Scripts):** Se identificó que al utilizar `bot.start()` en desarrollo local grammY elimina el webhook registrado en Telegram (`deleteWebhook()`), dejando la URL en blanco (`url: ""`) y acumulando mensajes en la cola (`pending_update_count`). Se añadió fallback automático a `https://agyke.vercel.app/api/telegram/webhook` en `scripts/set-webhook.ts`, el script `"set:webhook"` en `package.json`, y se activó el webhook en Telegram para restablecer la comunicación 24/7 en producción.
+* **ADR-014 (Control de Acceso Ligero por PIN / Contraseña y Middleware):** Se especificó y construyó la protección del Dashboard Web mediante un sistema de PIN / Contraseña compartido (`docs/auth/AUTH_SPEC.md`). El módulo criptográfico reside en `src/lib/auth.ts` (alineado a `rootDir: "./src"` y ADR-002), utiliza tokens HMAC-SHA256 en cookies `httpOnly; Secure; SameSite=Lax`, e intercepta en `middleware.ts` las rutas `/` y `/api/dashboard`, excluyendo explícitamente el webhook de Telegram (`/api/telegram/webhook`).
+* **ADR-015 (Identidad Visual, Metadatos de Navegador y Favicon Personalizado):** Se eliminaron los metadatos por defecto de Next.js ("Create Next App" / "create vercel app" y el favicon triangular de Vercel) para consolidar la marca Agyke en el navegador. Se configuró `metadata.title` con plantilla dinámica (`%s | Agyke`) y valor por defecto `"Agyke - Control de Gastos Compartidos"`, idioma en español (`lang="es"`), layout dedicado para `/login` (`"Iniciar Sesión | Agyke"`), y se generaron los paquetes completos de iconos de balanza Agyke con degradado índigo oficial en `web/src/app` y `web/public`: vector SVG (`icon.svg`), `.ico` multi-resolución (16x16 a 256x256 con antialiasing Lanczos) y `apple-icon.png` (180x180).
+* **ADR-016 (Especificación de Ingestión Multimodal y Arnés Local Test-First):** Se formalizó en `docs/multimodal/` la arquitectura completa para el procesamiento inteligente de notas de voz (OGG/Opus), comprobantes físicos (JPEG/PNG) y facturas digitales (PDF). Se estableció como principio innegociable el Contrato Canónico JSON (`ExtractedExpenseDraft`) para desacoplar el formato binario de origen del motor financiero de Agyke. Se especificaron prompts dedicados para modismos argentinos ("lucas", "mitad y mitad", etc.), un arnés CLI local (`scripts/test-multimodal.ts`) para validación rápida sin depender del bot en vivo, y un modo de vista previa transparente en Telegram con cancelación inmediata con un toque (`[ ❌ Cancelar / Descartar ]`).
 
 ---
 
@@ -63,18 +65,23 @@
 - [x] Corrección de dependencias y compatibilidad de build en Vercel.
 - [x] Soporte para consulta de saldo en lenguaje natural directo sin IA.
 - [x] Especificación formal del Sistema de Diseño UI/UX en `docs/ui/`.
-- [x] Rediseño Visual Frontend completo (`docs/ui/ROADMAP_UI.md` Fases 1 a 5):
-  - [x] Tokens y paleta *Obsidian Slate* en `web/src/app/globals.css`.
-  - [x] `<BadgeClassification />`, `<UserAvatar />`, `<HeaderBar />`.
-  - [x] `<MasterBalanceHero />` con visualización de flujo de deuda en 3 segundos.
-  - [x] `<StatMetricCard />` (4 métricas financieras agregadas).
-  - [x] `<TransactionsTable />` con búsqueda en vivo, chips de filtro y estado vacío.
-  - [x] `<AnalyticsSection />` con gráficos Recharts (Área y Donut).
-  - [x] `<QueueViewer />` para auditoría visual del pipeline de Gemini.
-  - [x] Refactor modular de `web/src/app/page.tsx`.
-- [x] Registro y activación de Webhook en producción (`https://agyke.vercel.app/api/telegram/webhook`).
+- [x] Rediseño Visual Frontend completo (`docs/ui/ROADMAP_UI.md` Fases 1 a 5).
+- [x] Especificación formal de Control de Acceso y Privacidad por PIN (`docs/auth/`).
+- [x] Implementación completa de Autenticación Ligera por PIN ([`docs/auth/TASKS_AUTH.md`](./auth/TASKS_AUTH.md)):
+  - [x] Tarea AUTH-1 a AUTH-3: Módulo criptográfico HMAC (`web/src/lib/auth.ts`), endpoints `/api/auth/login`, `/api/auth/logout` y `/api/auth/check`.
+  - [x] Tarea AUTH-4: Next.js Middleware (`web/src/middleware.ts`) con bypass estricto a `/api/telegram/webhook` y `/login`.
+  - [x] Tarea AUTH-5 a AUTH-6: Pantalla `web/src/app/login/page.tsx` estilo *Obsidian Slate* y botón de bloqueo en `HeaderBar.tsx`.
+  - [x] Tarea AUTH-7 a AUTH-9: Suite de tests unitarios de autenticación (`src/tests/auth.test.ts` 5/5 pasando).
+- [x] Identidad Visual y Favicon del Navegador (ADR-015): Reemplazo total del branding de Vercel/Next por Agyke (título dinámico, balanza SVG, favicon.ico multi-resolución y apple-icon).
+- [x] Especificación de Ingestión Multimodal (ADR-016 en `docs/multimodal/`):
+  - [x] Arquitectura y Contrato Canónico JSON (`ExtractedExpenseDraft`).
+  - [x] Especificación de Notas de Voz y Audio (`SPEC_VOICE_AUDIO.md`).
+  - [x] Especificación de Comprobantes Físicos e Imágenes (`SPEC_RECEIPTS_IMAGES.md`).
+  - [x] Especificación de Facturas y Documentos PDF (`SPEC_DOCUMENTS_PDF.md`).
+  - [x] Especificación del Arnés de Pruebas Local y Metodología Test-First (`SPEC_TESTING_HARNESS.md`).
+  - [x] Roadmap y Checklist de Implementación (`TASKS_MULTIMODAL.md`).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Probar el bot en Telegram enviando `/saldo`, `/gasto` o mensajes libres para confirmar respuestas en vivo desde Vercel. Pushear mejoras de scripts y bitácora a `dev`.
+Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el despliegue de Vercel la pestaña del navegador con la identidad oficial de Agyke y el favicon de la balanza. Iniciar Fase 1 y 2 de Ingestión Multimodal en la rama `feature/multimodal-inputs`.

@@ -98,15 +98,15 @@ export async function parseReceiptImage(
     };
   }
 
+  const CANDIDATE_MODELS = [
+    process.env.GEMINI_MODEL,
+    'gemini-3.6-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-latest'
+  ].filter(Boolean) as string[];
+
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.1
-      }
-    });
 
     addLog('Codificando imagen a Base64 para inlineData...');
     const mediaPart = {
@@ -116,12 +116,39 @@ export async function parseReceiptImage(
       }
     };
 
-    addLog('Enviando payload a Gemini 1.5 Flash (Visión Contable)...');
-    const result = await model.generateContent([IMAGE_EXTRACTION_SYSTEM_PROMPT, mediaPart]);
-    const response = await result.response;
-    const rawText = response.text().trim();
+    let rawText = '';
+    let lastError: unknown = null;
+    let usedModel = '';
 
-    addLog(`Respuesta recibida de Gemini (${rawText.length} caracteres). Parseando JSON...`);
+    for (const modelName of CANDIDATE_MODELS) {
+      try {
+        addLog(`Enviando payload a Gemini Visión (Modelo: ${modelName})...`);
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.1
+          }
+        });
+
+        const result = await model.generateContent([IMAGE_EXTRACTION_SYSTEM_PROMPT, mediaPart]);
+        const response = await result.response;
+        rawText = response.text().trim();
+        usedModel = modelName;
+        addLog(`✅ Respuesta recibida exitosamente desde ${modelName} (${rawText.length} caracteres).`);
+        break;
+      } catch (err: unknown) {
+        lastError = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        addLog(`⚠️ Falló intento con ${modelName}: ${msg}. Probando siguiente modelo...`);
+      }
+    }
+
+    if (!rawText) {
+      throw lastError || new Error('No se pudo obtener respuesta de ningún modelo de Gemini disponible');
+    }
+
+    addLog(`Parseando JSON obtenido de ${usedModel}...`);
 
     const cleanJson = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
     const parsedData = JSON.parse(cleanJson);

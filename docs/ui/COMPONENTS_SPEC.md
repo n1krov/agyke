@@ -68,10 +68,13 @@ Diseño en 2 columnas con Recharts estilizado:
    * Tipo: `AreaChart` con curva suave (`type="monotone"`).
    * Gradiente vertical: de `rgba(99, 102, 241, 0.4)` a `rgba(99, 102, 241, 0)`.
    * Tooltip personalizado con fondo glassmorphism oscuro y valores tabulares.
-2. **Distribución por Clasificación:**
-   * Tipo: `PieChart` / `DonutChart` con radio interior del 65%.
-   * Segmentos en los 4 colores semánticos (`50` índigo, `100` esmeralda, `-100` rose, `0` slate).
-   * Leyenda interactiva con porcentajes calculados.
+2. **Donut Chart Interactivo con Centro KPI Vivo (`PieChart`):**
+   * **Radio y Geometría:** Radio interior 62%, radio exterior 80%, esquinas redondeadas (`cornerRadius={6}`) y separación de segmentos (`paddingAngle={4}`).
+   * **Centro KPI Dinámico:**
+     * En reposo: Muestra `"TOTAL"` en tipografía secundaria, la cifra monetaria consolidada y la cantidad de compras registradas.
+     * En hover (`ActiveShape`): El centro muta en tiempo real para mostrar el nombre del sector enfocado, el monto exacto y el porcentaje del total (`X%`).
+   * **Expansión Radial Activa:** El segmento bajo el cursor se expande dinámicamente con un halo exterior translúcido.
+   * **Leyenda Enriquecida:** Cada ítem incluye el punto semántico (`50` índigo, `100` esmeralda, `-100` rose, `0` slate), el nombre de la categoría, el monto abreviado (`$ Xk`) y un pill con el porcentaje relativo calculado sin requerir hover.
 
 ---
 
@@ -93,7 +96,16 @@ La sección operativa donde los usuarios consultan el desglose de sus compras.
 
 ---
 
-## 6. Cola de Mensajes del Muro Agyke (`<QueueDrawer />`)
+## 6. Cola de Mensajes del Muro Agyke (`<QueueViewer />`)
 Sección colapsable o tarjeta dedicada para inspeccionar lo que Gemini procesó automáticamente:
 * Lista de tickets pendientes o procesados con etiquetas `audio`, `foto` o `texto`.
 * Indicador de estado `PENDING`, `PROCESSED` o `DISCARDED`.
+
+---
+
+## 7. Tarjeta Viva de Autenticación (`/login`)
+Experiencia de desbloqueo privada con micro-dinamismo:
+* **Fondo:** Doble orbe ambiental flotante con deriva continua lenta (`ambient-float-slow` y `ambient-float-reverse`).
+* **Isotipo de Balanza:** Halo con respiración lumínica índigo suave (`animate-pulse`).
+* **Micro-interacción de Error:** Efecto de sacudida horizontal (`shake-x`) de 400ms con borde carmesí si el PIN es incorrecto.
+* **Botón de Acción:** Haz de luz (*shimmer*) al pasar el cursor y spinner suave durante la validación del token HMAC.

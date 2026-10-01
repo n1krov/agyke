@@ -8,9 +8,11 @@ El proyecto se rige estrictamente bajo la metodología **Spec-Driven Development
 
 ## 1. Fuente de Verdad Innegociable (`docs/`)
 La carpeta [`docs/`](./docs) es la **única fuente de información oficial y verdad técnica** del proyecto.
-Antes de proponer cambios, escribir código o responder sobre el estado de la arquitectura, debes consultar obligatoriamente:
-- [`docs/STATUS.md`](./docs/STATUS.md): **Bitácora viva del proyecto**. Contiene el estado actual, versión de ramas, decisiones recientes y qué tarea toca ejecutar. **Debe mantenerse actualizada tras cada cambio relevante**.
-- [`docs/board.json`](./docs/board.json): **Tablero operativo de tareas estructurado para la IA**. Contiene el desglose JSON con estados (`done`, `in_progress`, `pending`, `backlog`), dependencias y criterios de aceptación, validado por [`docs/schemas/board.schema.json`](./docs/schemas/board.schema.json). Se inspecciona mediante `npm run board`.
+El **dúo primordial innegociable** que rige toda acción operativa es:
+1. **[`docs/board.json`](./docs/board.json) (El Tablero Operativo de la IA):** Brújula de ejecución máquina-a-máquina. Define qué tarea está en progreso (`in_progress`), sus dependencias, criterios de aceptación y archivos a tocar. Debe validarse siempre contra [`docs/schemas/board.schema.json`](./docs/schemas/board.schema.json) y verificarse con `npm run board`.
+2. **[`docs/STATUS.md`](./docs/STATUS.md) (La Bitácora Viva del Proyecto):** Memoria técnica en lenguaje natural. Contiene el estado general, versiones de Git, Decisions de Arquitectura (ADRs) y el resumen ejecutivo de situación.
+
+Antes de proponer cambios, escribir código o responder sobre el estado de la arquitectura, debes consultar obligatoriamente este dúo, junto con:
 - [`docs/REQUIREMENTS.md`](./docs/REQUIREMENTS.md) y [`docs/REQUIREMENTS_PROD.md`](./docs/REQUIREMENTS_PROD.md): Requerimientos de negocio, reglas de deuda e infraestructura.
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) y [`docs/ARCHITECTURE_PROD.md`](./docs/ARCHITECTURE_PROD.md): Esquema de base de datos, flujos de datos y serverless webhooks.
 - [`docs/TASKS.md`](./docs/TASKS.md) y [`docs/TASKS_PROD.md`](./docs/TASKS_PROD.md): Roadmap y checklist de tareas activas.
@@ -21,11 +23,11 @@ Antes de proponer cambios, escribir código o responder sobre el estado de la ar
 ## 2. Metodología Spec-Driven Development (SDD)
 El ciclo de desarrollo debe seguir este orden estricto:
 1. **Especificar (Spec):** Definir o actualizar los requerimientos y arquitectura en [`docs/`](./docs).
-2. **Planificar Tareas (Tasks & Board):** Desglosar en tareas atómicas en [`docs/TASKS.md`](./docs/TASKS.md) y registrar su estado estructurado en [`docs/board.json`](./docs/board.json). Verificar consistencia con `npm run board`.
+2. **Planificar y Activar Tarea (Board & Tasks):** Registrar la tarea en [`docs/board.json`](./docs/board.json) y pasarla a estado `in_progress` antes de programar. Sincronizar con [`docs/TASKS.md`](./docs/TASKS.md) y validar con `npm run board`.
 3. **Pruebas Primero (Test-Driven / Simulation):** Diseñar las pruebas automatizadas que validen el comportamiento esperado.
 4. **Implementar:** Escribir el código estrictamente necesario para cumplir la especificación.
 5. **Verificar:** Correr tests unitarios, typecheck estricto y linter (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`).
-6. **Bitácora, Tablero y Docs Pre-Commit (Obligatorio):** Actualizar obligatoriamente [`docs/STATUS.md`](./docs/STATUS.md), [`docs/board.json`](./docs/board.json) y toda la carpeta [`docs/`](./docs) ANTES de realizar cualquier commit. No se permite ningún commit sin su correspondiente registro en la bitácora y sincronización del tablero.
+6. **Cierre de Tarea, Bitácora y Pre-Commit (Mandatorio):** Marcar la tarea como `done` en [`docs/board.json`](./docs/board.json) con su `completed_at`, actualizar [`docs/STATUS.md`](./docs/STATUS.md) con el ADR/hito correspondiente y sincronizar [`docs/`](./docs) ANTES de realizar cualquier commit. No se permite ningún commit sin la sincronización de este dúo.
 
 ---
 

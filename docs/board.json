@@ -1,0 +1,768 @@
+{
+  "version": "1.0.0",
+  "project": "Agyke",
+  "last_updated": "2026-10-01T09:40:00-03:00",
+  "active_sprint": "Fase 7 - Living UI, Animación de Fondo y Donut Interactivo",
+  "summary": {
+    "total": 48,
+    "done": 33,
+    "in_progress": 0,
+    "pending": 11,
+    "backlog": 4
+  },
+  "tasks": [
+    {
+      "id": "CORE-01",
+      "title": "Estructura del Proyecto y Supabase Setup",
+      "domain": "core",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/TASKS.md#tarea-1",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Configurar Node.js con TypeScript estricto y ESM",
+        "Conectar cliente Supabase con SUPABASE_URL y SERVICE_ROLE_KEY",
+        "Crear interfaces de base de datos en src/types/database.ts"
+      ],
+      "files_to_touch": ["src/lib/supabase.ts", "src/types/database.ts", "package.json"],
+      "completed_at": "2026-07-28T09:30:00Z"
+    },
+    {
+      "id": "CORE-02",
+      "title": "Inicialización del Bot y Middleware de Autenticación",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/TASKS.md#tarea-2",
+      "dependencies": ["CORE-01"],
+      "acceptance_criteria": [
+        "Instanciar grammY Bot desacoplado de polling",
+        "Auto-registro de usuarios en tabla users ante comando /start",
+        "Middleware de autenticación de Telegram ID"
+      ],
+      "files_to_touch": ["src/bot/index.ts", "src/bot/middlewares/auth.ts"],
+      "completed_at": "2026-07-28T10:15:00Z"
+    },
+    {
+      "id": "CORE-03",
+      "title": "Handler de Carga Directa /gasto",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/TASKS.md#tarea-3",
+      "dependencies": ["CORE-02"],
+      "acceptance_criteria": [
+        "Parsear argumentos /gasto <monto> <concepto> <clasif>",
+        "Validar clasificación permitida ('50', '100', '-100', '0')",
+        "Actualizar net_balance en tabla balances atómicamente"
+      ],
+      "files_to_touch": ["src/bot/commands/gasto.ts", "src/services/balance.ts"],
+      "completed_at": "2026-07-28T11:00:00Z"
+    },
+    {
+      "id": "CORE-04",
+      "title": "Pipeline Asistido con Gemini 1.5 Flash",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/TASKS.md#tarea-4",
+      "dependencies": ["CORE-03"],
+      "acceptance_criteria": [
+        "Integrar SDK @google/generative-ai con modelo gemini-1.5-flash",
+        "Extraer monto y concepto estructurados de mensajes libres",
+        "Insertar en agyke_queue con estado PENDING y enviar teclado inline"
+      ],
+      "files_to_touch": ["src/services/gemini.ts", "src/bot/handlers/assisted.ts"],
+      "completed_at": "2026-07-28T12:30:00Z"
+    },
+    {
+      "id": "CORE-05",
+      "title": "Handler de Botones Agyke (Inline Keyboards)",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/TASKS.md#tarea-5",
+      "dependencies": ["CORE-04"],
+      "acceptance_criteria": [
+        "Listener callback_query para botones '50', '100', '-100', '0'",
+        "Consumir agyke_queue y persistir en transactions",
+        "Disparar updateBalance() y editar mensaje original"
+      ],
+      "files_to_touch": ["src/bot/handlers/callback.ts", "src/services/balance.ts"],
+      "completed_at": "2026-07-28T13:45:00Z"
+    },
+    {
+      "id": "CORE-06",
+      "title": "Dashboard Web en Next.js 16",
+      "domain": "web",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/TASKS.md#tarea-6",
+      "dependencies": ["CORE-05"],
+      "acceptance_criteria": [
+        "App Router en carpeta web/",
+        "Lectura de transacciones y balances desde Supabase",
+        "Gráficos analíticos Recharts y visualización de balance"
+      ],
+      "files_to_touch": ["web/src/app/page.tsx", "web/src/app/api/dashboard/route.ts"],
+      "completed_at": "2026-07-28T15:00:00Z"
+    },
+    {
+      "id": "CORE-07",
+      "title": "Arnés de Simulación Headless de Telegram",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/LOCAL_TESTING_SPEC.md",
+      "dependencies": ["CORE-05"],
+      "acceptance_criteria": [
+        "Crear generador de Updates sintéticos de Telegram",
+        "Tests de integración simulando comandos y callbacks",
+        "Script npm run test:integration funcionando sin bot en vivo"
+      ],
+      "files_to_touch": ["src/tests/telegram-mock.ts", "src/tests/integration.test.ts"],
+      "completed_at": "2026-09-24T09:00:00Z"
+    },
+    {
+      "id": "CORE-08",
+      "title": "Entorno de Pruebas Local Completo (Simulate CLI)",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/TASKS.md#tarea-8",
+      "dependencies": ["CORE-07"],
+      "acceptance_criteria": [
+        "Script interactivo scripts/simulate-flow.ts",
+        "Formato visual con emojis y pasos contables en consola",
+        "Suite npm test con 26/26 tests en verde"
+      ],
+      "files_to_touch": ["scripts/simulate-flow.ts", "package.json"],
+      "completed_at": "2026-09-24T11:30:00Z"
+    },
+    {
+      "id": "CORE-09",
+      "title": "Preparación y Validación de Deploy Serverless a Producción",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/TASKS_PROD.md",
+      "dependencies": ["CORE-06"],
+      "acceptance_criteria": [
+        "Desacoplar bot.start() y exportar bot en modo stateless",
+        "Endpoint serverless /api/telegram/webhook con canUseWebhookReply: false",
+        "Compilación exitosa con Webpack en Next.js 16 para Vercel"
+      ],
+      "files_to_touch": ["web/src/app/api/telegram/webhook/route.ts", "web/next.config.ts"],
+      "completed_at": "2026-09-24T13:00:00Z"
+    },
+    {
+      "id": "AUTH-01",
+      "title": "Módulo Criptográfico HMAC-SHA256",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-4",
+      "dependencies": ["CORE-06"],
+      "acceptance_criteria": [
+        "Crear src/lib/auth.ts alineado a rootDir",
+        "Firmar tokens de sesión con HMAC-SHA256 y timestamp",
+        "Verificar tokens rechazando expirados (>30 días) o manipulados"
+      ],
+      "files_to_touch": ["src/lib/auth.ts"],
+      "completed_at": "2026-09-28T09:40:00Z"
+    },
+    {
+      "id": "AUTH-02",
+      "title": "Endpoint POST /api/auth/login con Cookie Segura",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-6",
+      "dependencies": ["AUTH-01"],
+      "acceptance_criteria": [
+        "Validar PIN contra process.env.DASHBOARD_ACCESS_PIN",
+        "Setear cookie agyke_session (httpOnly, Secure, SameSite=Lax, Max-Age 30 días)",
+        "Retornar 401 ante PIN inválido"
+      ],
+      "files_to_touch": ["web/src/app/api/auth/login/route.ts"],
+      "completed_at": "2026-09-28T09:45:00Z"
+    },
+    {
+      "id": "AUTH-03",
+      "title": "Endpoint POST /api/auth/logout para Cierre de Sesión",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-6",
+      "dependencies": ["AUTH-02"],
+      "acceptance_criteria": [
+        "Limpiar cookie agyke_session seteando Max-Age=0",
+        "Responder 200 OK con confirmación"
+      ],
+      "files_to_touch": ["web/src/app/api/auth/logout/route.ts"],
+      "completed_at": "2026-09-28T09:47:00Z"
+    },
+    {
+      "id": "AUTH-04",
+      "title": "Next.js Middleware de Protección de Rutas",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-5",
+      "dependencies": ["AUTH-02"],
+      "acceptance_criteria": [
+        "Interceptar rutas / y /api/dashboard",
+        "Bypass estricto para /login, /api/auth/* y /api/telegram/webhook",
+        "Redirección 307 a /login ante falta de sesión"
+      ],
+      "files_to_touch": ["web/src/middleware.ts"],
+      "completed_at": "2026-09-28T09:50:00Z"
+    },
+    {
+      "id": "AUTH-05",
+      "title": "Pantalla de Login /login estilo Obsidian Slate",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-7",
+      "dependencies": ["AUTH-04"],
+      "acceptance_criteria": [
+        "Tarjeta glassmorphism centrada con isotipo de balanza",
+        "Input de contraseña con botón mostrar/ocultar y validación reactiva",
+        "Redirección suave al Dashboard principal tras autenticación exitosa"
+      ],
+      "files_to_touch": ["web/src/app/login/page.tsx", "web/src/app/login/layout.tsx"],
+      "completed_at": "2026-09-28T09:55:00Z"
+    },
+    {
+      "id": "AUTH-06",
+      "title": "Botón de Bloqueo Manual en HeaderBar",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-7",
+      "dependencies": ["AUTH-05"],
+      "acceptance_criteria": [
+        "Icono Lock en barra superior para invocar /api/auth/logout",
+        "Redirección automática a /login al cerrar sesión"
+      ],
+      "files_to_touch": ["web/src/components/HeaderBar.tsx"],
+      "completed_at": "2026-09-28T09:57:00Z"
+    },
+    {
+      "id": "AUTH-07",
+      "title": "Tests Automatizados de Validación de PIN y Sesión HMAC",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/auth/TASKS_AUTH.md#fase-4",
+      "dependencies": ["AUTH-01"],
+      "acceptance_criteria": [
+        "Suite src/tests/auth.test.ts con 5 tests unitarios",
+        "Validar tokens manipulados, expirados y firma válida"
+      ],
+      "files_to_touch": ["src/tests/auth.test.ts"],
+      "completed_at": "2026-09-28T10:05:00Z"
+    },
+    {
+      "id": "AUTH-08",
+      "title": "Verificación de Bypass Serverless para Webhook de Telegram",
+      "domain": "auth",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/auth/AUTH_SPEC.md#seccion-2",
+      "dependencies": ["AUTH-04"],
+      "acceptance_criteria": [
+        "Verificar que peticiones POST a /api/telegram/webhook no sean bloqueadas por middleware",
+        "Operatividad continua del bot sin interferencias"
+      ],
+      "files_to_touch": ["web/src/middleware.ts"],
+      "completed_at": "2026-09-28T10:10:00Z"
+    },
+    {
+      "id": "AUTH-09",
+      "title": "Documentación y Registro en Bitácora Pre-Commit",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/STATUS.md#adr-014",
+      "dependencies": ["AUTH-07"],
+      "acceptance_criteria": [
+        "Registrar ADR-014 en docs/STATUS.md",
+        "Completar checklist en docs/auth/TASKS_AUTH.md"
+      ],
+      "files_to_touch": ["docs/STATUS.md", "docs/auth/TASKS_AUTH.md"],
+      "completed_at": "2026-09-28T10:15:00Z"
+    },
+    {
+      "id": "UI-01",
+      "title": "Tokens Semánticos de @theme en globals.css",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/DESIGN_SYSTEM_SPEC.md",
+      "dependencies": ["CORE-06"],
+      "acceptance_criteria": [
+        "Paleta Obsidian Slate (#080B11, #0B0F19)",
+        "Clases glass-panel y utilidades de desenfoque",
+        "Variables de color semántico para clasificaciones"
+      ],
+      "files_to_touch": ["web/src/app/globals.css"],
+      "completed_at": "2026-09-25T11:00:00Z"
+    },
+    {
+      "id": "UI-02",
+      "title": "Fuentes y Tipografía con Variantes tabular-nums",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/TOKENS_AND_PALETTE.md",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Formato tabular-nums en todos los montos de dinero",
+        "Evitar saltos visuales al comparar filas numéricas"
+      ],
+      "files_to_touch": ["web/src/app/globals.css"],
+      "completed_at": "2026-09-25T11:15:00Z"
+    },
+    {
+      "id": "UI-03",
+      "title": "Componente BadgeClassification",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-5",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Pills coloreadas según clasificación: 50 (índigo), 100 (esmeralda), -100 (rose), 0 (slate)",
+        "Etiquetas legibles y micro-bordes translúcidos"
+      ],
+      "files_to_touch": ["web/src/components/BadgeClassification.tsx"],
+      "completed_at": "2026-09-25T11:45:00Z"
+    },
+    {
+      "id": "UI-04",
+      "title": "Componente UserAvatar con Iniciales Dinámicas",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-5",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Avatar circular con gradiente determinístico según ID",
+        "Iniciales nítidas y dimensiones consistentes"
+      ],
+      "files_to_touch": ["web/src/components/UserAvatar.tsx"],
+      "completed_at": "2026-09-25T12:00:00Z"
+    },
+    {
+      "id": "UI-05",
+      "title": "Componente StatMetricCard para KPIs Secundarios",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-3",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Card glassmorphic con icono en burbuja translúcida",
+        "Variantes de acento cyan, indigo, emerald, amber",
+        "Micro-interacción de elevación en hover"
+      ],
+      "files_to_touch": ["web/src/components/StatMetricCard.tsx"],
+      "completed_at": "2026-09-25T12:30:00Z"
+    },
+    {
+      "id": "UI-06",
+      "title": "Componente MasterBalanceHero (KPI Principal)",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-2",
+      "dependencies": ["UI-04", "UI-05"],
+      "acceptance_criteria": [
+        "Respuesta visual en <3 segundos: quién le debe a quién",
+        "Flujo direccional de flechas deudor -> acreedor",
+        "Estados condicionales: B debe a A, A debe a B, y cuentas saldadas"
+      ],
+      "files_to_touch": ["web/src/components/MasterBalanceHero.tsx"],
+      "completed_at": "2026-09-25T14:00:00Z"
+    },
+    {
+      "id": "UI-07",
+      "title": "Micro-indicador de Webhook en HeaderBar",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-1",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Pill con punto pulsante verde indicando webhook activo",
+        "Botón de refresco con animación de giro al cargar datos"
+      ],
+      "files_to_touch": ["web/src/components/HeaderBar.tsx"],
+      "completed_at": "2026-09-25T14:30:00Z"
+    },
+    {
+      "id": "UI-08",
+      "title": "Buscador Reactivo y Chips de Filtro Rápido",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-5",
+      "dependencies": ["UI-03"],
+      "acceptance_criteria": [
+        "Filtrado instantáneo en memoria por texto y clasificación",
+        "Chips píldora interactivos [Todos | 50 | 100 | -100 | 0]"
+      ],
+      "files_to_touch": ["web/src/components/TransactionsTable.tsx"],
+      "completed_at": "2026-09-25T15:00:00Z"
+    },
+    {
+      "id": "UI-09",
+      "title": "Refactor de Tabla TransactionsTable",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-5",
+      "dependencies": ["UI-08"],
+      "acceptance_criteria": [
+        "Filas estructuradas con avatar, fecha amigable, badges e impacto de saldo",
+        "Colores semánticos verde/rojo para impacto financiero"
+      ],
+      "files_to_touch": ["web/src/components/TransactionsTable.tsx"],
+      "completed_at": "2026-09-25T15:30:00Z"
+    },
+    {
+      "id": "UI-10",
+      "title": "Estado Vacío Ilustrado EmptyState",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-5",
+      "dependencies": ["UI-09"],
+      "acceptance_criteria": [
+        "Mensaje claro cuando los filtros no arrojan resultados",
+        "Botón para limpiar filtros rápidamente"
+      ],
+      "files_to_touch": ["web/src/components/TransactionsTable.tsx"],
+      "completed_at": "2026-09-25T15:45:00Z"
+    },
+    {
+      "id": "UI-11",
+      "title": "Gráfico de Evolución Temporal con Gradientes Recharts",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-4",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "AreaChart con curva monótona suave y gradiente índigo",
+        "Tooltip personalizado en glassmorphism oscuro con montos tabulares"
+      ],
+      "files_to_touch": ["web/src/components/AnalyticsSection.tsx"],
+      "completed_at": "2026-09-25T16:15:00Z"
+    },
+    {
+      "id": "UI-12",
+      "title": "Gráfico Donut de Distribución de Gastos",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-4",
+      "dependencies": ["UI-11"],
+      "acceptance_criteria": [
+        "PieChart tipo donut con radio interior 55%",
+        "Colores de los 4 tipos de deuda y leyenda básica"
+      ],
+      "files_to_touch": ["web/src/components/AnalyticsSection.tsx"],
+      "completed_at": "2026-09-25T16:30:00Z"
+    },
+    {
+      "id": "UI-13",
+      "title": "Visor de Cola QueueViewer para Gemini",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/ui/COMPONENTS_SPEC.md#seccion-6",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Visualizar comprobantes y audios pendientes de procesar",
+        "Badges de estado PENDING, PROCESSED, DISCARDED"
+      ],
+      "files_to_touch": ["web/src/components/QueueViewer.tsx"],
+      "completed_at": "2026-09-25T16:50:00Z"
+    },
+    {
+      "id": "UI-14",
+      "title": "Comprobación Adaptabilidad Mobile y Desktop",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/ROADMAP_UI.md#fase-6",
+      "dependencies": ["UI-06", "UI-09"],
+      "acceptance_criteria": [
+        "Diseño responsivo sin scroll horizontal en smartphones",
+        "Ajuste fluido de grids en tablets y pantallas 1080p+"
+      ],
+      "files_to_touch": ["web/src/app/page.tsx"],
+      "completed_at": "2026-09-25T17:15:00Z"
+    },
+    {
+      "id": "UI-15",
+      "title": "Modularización Completa de page.tsx",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/ROADMAP_UI.md#fase-6",
+      "dependencies": ["UI-14"],
+      "acceptance_criteria": [
+        "Reducir page.tsx a <150 líneas orquestando subcomponentes",
+        "0 warnings de ESLint y tipado estricto"
+      ],
+      "files_to_touch": ["web/src/app/page.tsx"],
+      "completed_at": "2026-09-25T17:30:00Z"
+    },
+    {
+      "id": "UI-16",
+      "title": "Orbes Dinámicos y Animación de Fondo en globals.css",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#2-atmósfera-viva-de-fondo-living-ambient-motion",
+      "dependencies": ["UI-01"],
+      "acceptance_criteria": [
+        "Definir keyframes ambient-float-slow y ambient-float-reverse",
+        "Aceleración por GPU (transform3d y will-change: transform)",
+        "60 FPS estables sin render lag en dashboard y login"
+      ],
+      "files_to_touch": [
+        "web/src/app/globals.css",
+        "web/src/app/page.tsx",
+        "web/src/app/login/page.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-17",
+      "title": "Rediseño de Login con Shake Animation, Shimmer y Halo",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#3-rediseño-elevado-de-la-pantalla-de-login-login",
+      "dependencies": ["UI-16", "AUTH-05"],
+      "acceptance_criteria": [
+        "Micro-animación de sacudida shake-x de 400ms ante PIN erróneo",
+        "Borde momentáneo carmesí con resplandor suave",
+        "Efecto shimmer de luz en botón de desbloqueo e isotipo con halo de respiración"
+      ],
+      "files_to_touch": ["web/src/app/login/page.tsx", "web/src/app/globals.css"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-18",
+      "title": "Donut Chart Interactivo con KPI Dinámico Central",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#4-rediseño-radical-del-gráfico-de-tarta--donut-chart-analyticssection-",
+      "dependencies": ["UI-12"],
+      "acceptance_criteria": [
+        "Centro dinámico exhibiendo TOTAL GASTADO y mutando a la clasificación activa con porcentaje en hover",
+        "Expansión radial suave del sector activo (ActiveShape de Recharts)",
+        "Leyenda interactiva con porcentajes calculados visibles sin hover",
+        "Esquinas redondeadas cornerRadius={6} y espaciado paddingAngle={4}"
+      ],
+      "files_to_touch": ["web/src/components/AnalyticsSection.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-19",
+      "title": "Halos de Pulsación en Balance Hero y Radar en HeaderBar",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p2",
+      "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#5-micro-dinamismo-en-componentes-del-dashboard",
+      "dependencies": ["UI-06", "UI-07"],
+      "acceptance_criteria": [
+        "Halo perimetral pulsante en MasterBalanceHero según saldo esmeralda/carmesí",
+        "Doble anillo radar (punto fijo + ping expansivo) en Webhook Indicator"
+      ],
+      "files_to_touch": [
+        "web/src/components/MasterBalanceHero.tsx",
+        "web/src/components/HeaderBar.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-20",
+      "title": "Pruebas de Rendimiento a 60 FPS y Validación Responsive",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#6-checklist-de-implementación-sdd",
+      "dependencies": ["UI-16", "UI-17", "UI-18", "UI-19"],
+      "acceptance_criteria": [
+        "Verificar 60 FPS sin caídas de cuadros en Chrome/Safari/Firefox",
+        "Validar renderizado sin desbordes en viewport móvil",
+        "Build de producción exitoso (npm run build)"
+      ],
+      "files_to_touch": ["web/src/app/globals.css"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-21",
+      "title": "Migración SQL para Campos Extendidos del Gran Dashboard",
+      "domain": "core",
+      "status": "backlog",
+      "priority": "p3",
+      "spec_reference": "docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md#3-limitaciones-actuales-y-campos-futuros-requeridos",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Agregar columna category y payment_method en transactions",
+        "Crear tabla budgets para techos presupuestarios compartidos",
+        "Actualizar interfaces TypeScript en src/types/database.ts"
+      ],
+      "files_to_touch": ["supabase/schema.sql", "src/types/database.ts"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-22",
+      "title": "Vista Dedicada Fullscreen 100vh / 100vw (/analytics)",
+      "domain": "web",
+      "status": "backlog",
+      "priority": "p3",
+      "spec_reference": "docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md#4-arquitectura-de-pantalla-y-wireframe-mental-100vh",
+      "dependencies": ["UI-21"],
+      "acceptance_criteria": [
+        "Crear ruta web/src/app/analytics/page.tsx",
+        "Grid de 12 columnas sin scroll vertical (100vh exacto)",
+        "Tema oscuro OLED-safe anti retención de imagen"
+      ],
+      "files_to_touch": ["web/src/app/analytics/page.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-23",
+      "title": "Integración Screen Wake Lock API y Fullscreen API",
+      "domain": "web",
+      "status": "backlog",
+      "priority": "p3",
+      "spec_reference": "docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md#5-especificaciones-técnicas-y-de-experiencia",
+      "dependencies": ["UI-22"],
+      "acceptance_criteria": [
+        "Activar navigator.wakeLock para mantener encendida la pantalla en Smart TVs",
+        "Botón de alternancia de pantalla completa con document.documentElement.requestFullscreen()",
+        "Auto-refresco silencioso cada 60 segundos"
+      ],
+      "files_to_touch": ["web/src/app/analytics/page.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-24",
+      "title": "Visualizaciones Avanzadas (Treemap, Head-to-Head, Velocidad)",
+      "domain": "ui_ux",
+      "status": "backlog",
+      "priority": "p3",
+      "spec_reference": "docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md#2-análisis-de-viabilidad-con-el-esquema-actual-de-supabase",
+      "dependencies": ["UI-22", "UI-21"],
+      "acceptance_criteria": [
+        "Gráfico Sunburst / Treemap de desglose por categoría",
+        "BarChart comparativo de paridad de aporte Usuario A vs B",
+        "Gráfico de velocidad y quema de presupuesto mensual"
+      ],
+      "files_to_touch": ["web/src/app/analytics/page.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "MULTI-01",
+      "title": "Formalizar Contrato Canónico ExtractedExpenseDraft",
+      "domain": "multimodal",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#1-fase-1-arquitectura-y-contrato-canónico-json",
+      "dependencies": ["CORE-04"],
+      "acceptance_criteria": [
+        "Crear interfaz ExtractedExpenseDraft con tipado estricto en src/types/multimodal.ts",
+        "Campos obligatorios: amount, concept, suggested_classification, raw_transcription, confidence",
+        "Exportar tipos para consumo compartido en bot y web"
+      ],
+      "files_to_touch": ["src/types/multimodal.ts", "src/types/database.ts"],
+      "completed_at": null
+    },
+    {
+      "id": "MULTI-02",
+      "title": "Validador y Sanitizador de Esquemas Multimodales",
+      "domain": "multimodal",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#1-fase-1-arquitectura-y-contrato-canónico-json",
+      "dependencies": ["MULTI-01"],
+      "acceptance_criteria": [
+        "Garantizar que ningún extractor devuelva valores NaN o montos negativos",
+        "Fallback seguro si Gemini devuelve formato no conforme"
+      ],
+      "files_to_touch": ["src/services/multimodal-sanitizer.ts"],
+      "completed_at": null
+    },
+    {
+      "id": "MULTI-03",
+      "title": "Configuración de Timeouts y Límites de Buffer en Memoria",
+      "domain": "multimodal",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#1-fase-1-arquitectura-y-contrato-canónico-json",
+      "dependencies": ["MULTI-01"],
+      "acceptance_criteria": [
+        "AbortSignal.timeout(15000) para llamadas a Gemini",
+        "Límite de tamaño máximo de buffer (10 MB) para serverless safety"
+      ],
+      "files_to_touch": ["src/services/gemini.ts"],
+      "completed_at": null
+    },
+    {
+      "id": "MULTI-04",
+      "title": "Fixtures Locales de Prueba (Audio OGG, Ticket JPG, Factura PDF)",
+      "domain": "multimodal",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/multimodal/SPEC_TESTING_HARNESS.md",
+      "dependencies": ["MULTI-01"],
+      "acceptance_criteria": [
+        "Crear carpeta tests/fixtures/multimodal/",
+        "Incluir audio_sample.ogg, ticket_sample.jpg y factura_sample.pdf sintéticos"
+      ],
+      "files_to_touch": ["tests/fixtures/multimodal/README.md"],
+      "completed_at": null
+    },
+    {
+      "id": "MULTI-05",
+      "title": "Script CLI scripts/test-multimodal.ts",
+      "domain": "multimodal",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/multimodal/SPEC_TESTING_HARNESS.md",
+      "dependencies": ["MULTI-04"],
+      "acceptance_criteria": [
+        "Script ejecutable en terminal para probar inferencias multimodales contra Gemini",
+        "Salida estructurada con transcripción y JSON extraído"
+      ],
+      "files_to_touch": ["scripts/test-multimodal.ts"],
+      "completed_at": null
+    },
+    {
+      "id": "MULTI-06",
+      "title": "Comando npm test:multimodal",
+      "domain": "multimodal",
+      "status": "pending",
+      "priority": "p2",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#2-fase-2-arnés-de-pruebas-local-y-fixtures-test-first",
+      "dependencies": ["MULTI-05"],
+      "acceptance_criteria": [
+        "Añadir script 'test:multimodal': 'tsx scripts/test-multimodal.ts' en package.json",
+        "Verificar ejecución local en dev"
+      ],
+      "files_to_touch": ["package.json"],
+      "completed_at": null
+    }
+  ]
+}

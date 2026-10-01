@@ -7,7 +7,7 @@
 ## 1. Identificación y Estado de Git
 * **Fecha de corte:** 01 de Octubre de 2026.
 * **Rama Activa:** `dev`.
-* **Último Commit:** `7ca434c` (*add(docs): nuevas specs a implementar a futuro | update(readme)*).
+* **Último Commit:** `324cf2a` (*fix: repair LaTeX math mode block in README.md*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---
@@ -47,6 +47,7 @@
 * **ADR-016 (Especificación de Ingestión Multimodal y Arnés Local Test-First):** Se formalizó en `docs/multimodal/` la arquitectura completa para el procesamiento inteligente de notas de voz (OGG/Opus), comprobantes físicos (JPEG/PNG) y facturas digitales (PDF). Se estableció como principio innegociable el Contrato Canónico JSON (`ExtractedExpenseDraft`) para desacoplar el formato binario de origen del motor financiero de Agyke. Se especificaron prompts dedicados para modismos argentinos ("lucas", "mitad y mitad", etc.), un arnés CLI local (`scripts/test-multimodal.ts`) para validación rápida sin depender del bot en vivo, y un modo de vista previa transparente en Telegram con cancelación inmediata con un toque (`[ ❌ Cancelar / Descartar ]`).
 * **ADR-017 (Living UI, Dinamismo de Fondo, Rediseño de Login y Gráfico de Tarta Interactivo):** Se formalizó en `docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` el estándar para dotar de vida a la interfaz web sin penalizaciones de rendimiento (Pure CSS GPU con `ambient-float-slow` y `ambient-float-reverse`). Se especificó la elevación de la pantalla `/login` con feedback reactivo ante credenciales inválidas (animación `shake-x` de 400ms, pulsación de error y haz de luz en botón) y la revolución del gráfico de tarta a un Donut Chart con KPI Central Dinámico que exhibe el gasto total consolidado en reposo y muta a la clasificación activa con porcentajes calculados en tiempo real sobre hover.
 * **ADR-018 (Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog):** Se formalizó en `docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` la visión de la vista de pantalla completa (100vh / 100vw sin scroll) estilo Kiosk / Command Center para Smart TVs y monitores secundarios. Se determinó de forma estricta mantener esta funcionalidad en estado **PENDIENTE / BACKLOG** en el roadmap hasta que se apliquen migraciones a Supabase con campos analíticos extendidos (`category`, `payment_method`, `tags` y tabla `budgets`), detallando las 4 gráficas preliminares viables hoy y las avanzadas desbloqueadas a futuro.
+* **ADR-019 (Tablero Operativo de Tareas en JSON para el Agente de IA):** Se formalizó e implementó un tablero estructurado en [`docs/board.json`](./board.json) validado mediante esquema estricto [`docs/schemas/board.schema.json`](./schemas/board.schema.json). Diseñado para optimizar el razonamiento del modelo de IA eliminando ambigüedades de Markdown, define metadatos explícitos por tarea (`domain`, `status`, `priority`, `spec_reference`, `dependencies`, `acceptance_criteria`, `files_to_touch`). Se creó la herramienta CLI `scripts/board-summary.ts` (`npm run board`) para visualización inmediata en terminal con barra de progreso y se actualizó [`GEMINI.md`](../GEMINI.md) para establecer `docs/board.json` como requisito mandatorio del ciclo SDD.
 
 ---
 
@@ -85,8 +86,9 @@
 - [x] Especificación de Interfaz Viva, Dinamismo y Rediseño de Login (`docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` - ADR-017).
 - [x] Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog (`docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` - ADR-018).
 - [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN, Muro Multimodal y SDD.
+- [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, CLI `scripts/board-summary.ts`, `npm run board` - ADR-019).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Ejecutar la Fase 7 del Roadmap de UI ([`docs/ui/ROADMAP_UI.md`](./ui/ROADMAP_UI.md)): implementación de los orbes dinámicos de fondo (`globals.css`), micro-interacción de sacudida en el login (`web/src/app/login/page.tsx`) y refactor del Donut Chart con centro KPI dinámico en `web/src/components/AnalyticsSection.tsx`. Mantener la vista del Gran Dashboard Fullscreen en Backlog hasta la migración de campos.
+Ejecutar la Fase 7 del Roadmap de UI ([`docs/ui/ROADMAP_UI.md`](./ui/ROADMAP_UI.md)): implementación de los orbes dinámicos de fondo (`globals.css`), micro-interacción de sacudida en el login (`web/src/app/login/page.tsx`) y refactor del Donut Chart con centro KPI dinámico en `web/src/components/AnalyticsSection.tsx`. Mantener la vista del Gran Dashboard Fullscreen en Backlog hasta la migración de campos. Actualizar `docs/board.json` al completar cada subtarea.

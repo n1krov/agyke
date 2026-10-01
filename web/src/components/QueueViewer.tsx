@@ -1,6 +1,5 @@
 import React from 'react';
 import { Mic, Image as ImageIcon, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { UserAvatar } from './UserAvatar';
 import type { AgykeItem } from '../types/database';
 
 interface QueueViewerProps {

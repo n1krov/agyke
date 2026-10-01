@@ -1,6 +1,6 @@
 # ROADMAP_UI.md - Plan de Implementación del Rediseño Visual
 
-Este documento desglosa el plan de ejecución atómico para implementar el nuevo sistema de diseño de **Agyke** bajo la metodología **Spec-Driven Development (SDD)**.
+Este documento desglosa el plan de ejecución atómico para implementar el sistema de diseño y las evoluciones visuales de **Agyke** bajo la metodología **Spec-Driven Development (SDD)**.
 
 ---
 
@@ -32,3 +32,24 @@ Este documento desglosa el plan de ejecución atómico para implementar el nuevo
 ### Fase 6: Verificación Integral y Responsive
 - [x] **Tarea UI-14:** Comprobar adaptabilidad mobile (iPhone / Android) y desktop.
 - [x] **Tarea UI-15:** Modularizar completamente `web/src/app/page.tsx` sin deuda técnica.
+
+---
+
+### Fase 7: Interfaz Viva, Dinamismo de Fondo, Login Elevado y Gráfico de Tarta Interactivo (`SPEC_LIVING_UI_MOTION_AND_LOGIN.md`)
+- [ ] **Tarea UI-16:** Implementar orbes luminosos dinámicos multicapa y keyframes de deriva suave (`ambient-float-slow`, `ambient-float-reverse`) en `globals.css` y canvas principal.
+- [ ] **Tarea UI-17:** Rediseñar la pantalla `/login` con entrada animada, efecto de sacudida (`shake-x`) ante PIN incorrecto, haz de luz (*shimmer*) en botón de desbloqueo e isotipo con halo de respiración.
+- [ ] **Tarea UI-18:** Revolucionar el gráfico de tarta en `<AnalyticsSection />` a un **Donut Interactivo con KPI Central**:
+  - Centro dinámico que exhibe el gasto total acumulado en reposo y muta a la clasificación activa con porcentaje en hover.
+  - Expansión radial del segmento activo (`ActiveShape`).
+  - Leyenda enriquecida con chips de porcentaje (`%`) calculados en tiempo real.
+- [ ] **Tarea UI-19:** Incorporar micro-animaciones en `<MasterBalanceHero />` (halo de respiración perimetral según saldo deudor/acreedor) y radar pulsante en `<HeaderBar />`.
+- [ ] **Tarea UI-20:** Pruebas de rendimiento y verificación visual (60 FPS, aceleración por hardware, cero saltos de layout).
+
+---
+
+### Fase 8: El Gran Dashboard Fullscreen (Command Center) (`SPEC_GRAN_DASHBOARD_FULLSCREEN.md`)
+> **Estado:** ⏳ **PENDIENTE / BACKLOG ARQUITECTURAL** (A la espera de ampliación de esquema de datos en Supabase).
+- [ ] **Tarea UI-21 (Pendiente):** Migración SQL para nuevos campos contables (`category`, `payment_method`, `tags` y tabla `budgets`).
+- [ ] **Tarea UI-22 (Pendiente):** Creación de la vista dedicada a pantalla completa `/analytics` con layout 100vh / 100vw responsivo.
+- [ ] **Tarea UI-23 (Pendiente):** Integración de Screen Wake Lock API y Fullscreen API para modo Kiosk / Smart TV continuo.
+- [ ] **Tarea UI-24 (Pendiente):** Visualizaciones avanzadas: Treemap de categorías, Comparativa de volumen A vs B y Velocidad semanal de gasto.

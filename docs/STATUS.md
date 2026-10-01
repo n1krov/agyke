@@ -5,9 +5,9 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 28 de Septiembre de 2026.
+* **Fecha de corte:** 01 de Octubre de 2026.
 * **Rama Activa:** `dev`.
-* **Último Commit:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
+* **Último Commit:** `324cf2a` (*fix: repair LaTeX math mode block in README.md*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---
@@ -45,6 +45,9 @@
 * **ADR-014 (Control de Acceso Ligero por PIN / Contraseña y Middleware):** Se especificó y construyó la protección del Dashboard Web mediante un sistema de PIN / Contraseña compartido (`docs/auth/AUTH_SPEC.md`). El módulo criptográfico reside en `src/lib/auth.ts` (alineado a `rootDir: "./src"` y ADR-002), utiliza tokens HMAC-SHA256 en cookies `httpOnly; Secure; SameSite=Lax`, e intercepta en `middleware.ts` las rutas `/` y `/api/dashboard`, excluyendo explícitamente el webhook de Telegram (`/api/telegram/webhook`).
 * **ADR-015 (Identidad Visual, Metadatos de Navegador y Favicon Personalizado):** Se eliminaron los metadatos por defecto de Next.js ("Create Next App" / "create vercel app" y el favicon triangular de Vercel) para consolidar la marca Agyke en el navegador. Se configuró `metadata.title` con plantilla dinámica (`%s | Agyke`) y valor por defecto `"Agyke - Control de Gastos Compartidos"`, idioma en español (`lang="es"`), layout dedicado para `/login` (`"Iniciar Sesión | Agyke"`), y se generaron los paquetes completos de iconos de balanza Agyke con degradado índigo oficial en `web/src/app` y `web/public`: vector SVG (`icon.svg`), `.ico` multi-resolución (16x16 a 256x256 con antialiasing Lanczos) y `apple-icon.png` (180x180).
 * **ADR-016 (Especificación de Ingestión Multimodal y Arnés Local Test-First):** Se formalizó en `docs/multimodal/` la arquitectura completa para el procesamiento inteligente de notas de voz (OGG/Opus), comprobantes físicos (JPEG/PNG) y facturas digitales (PDF). Se estableció como principio innegociable el Contrato Canónico JSON (`ExtractedExpenseDraft`) para desacoplar el formato binario de origen del motor financiero de Agyke. Se especificaron prompts dedicados para modismos argentinos ("lucas", "mitad y mitad", etc.), un arnés CLI local (`scripts/test-multimodal.ts`) para validación rápida sin depender del bot en vivo, y un modo de vista previa transparente en Telegram con cancelación inmediata con un toque (`[ ❌ Cancelar / Descartar ]`).
+* **ADR-017 (Living UI, Dinamismo de Fondo, Rediseño de Login y Gráfico de Tarta Interactivo):** Se formalizó en `docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` el estándar para dotar de vida a la interfaz web sin penalizaciones de rendimiento (Pure CSS GPU con `ambient-float-slow` y `ambient-float-reverse`). Se especificó la elevación de la pantalla `/login` con feedback reactivo ante credenciales inválidas (animación `shake-x` de 400ms, pulsación de error y haz de luz en botón) y la revolución del gráfico de tarta a un Donut Chart con KPI Central Dinámico que exhibe el gasto total consolidado en reposo y muta a la clasificación activa con porcentajes calculados en tiempo real sobre hover.
+* **ADR-018 (Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog):** Se formalizó en `docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` la visión de la vista de pantalla completa (100vh / 100vw sin scroll) estilo Kiosk / Command Center para Smart TVs y monitores secundarios. Se determinó de forma estricta mantener esta funcionalidad en estado **PENDIENTE / BACKLOG** en el roadmap hasta que se apliquen migraciones a Supabase con campos analíticos extendidos (`category`, `payment_method`, `tags` y tabla `budgets`), detallando las 4 gráficas preliminares viables hoy y las avanzadas desbloqueadas a futuro.
+* **ADR-019 (Tablero Operativo de Tareas en JSON para el Agente de IA):** Se formalizó e implementó un tablero estructurado en [`docs/board.json`](./board.json) validado mediante esquema estricto [`docs/schemas/board.schema.json`](./schemas/board.schema.json). Diseñado para optimizar el razonamiento del modelo de IA eliminando ambigüedades de Markdown, define metadatos explícitos por tarea (`domain`, `status`, `priority`, `spec_reference`, `dependencies`, `acceptance_criteria`, `files_to_touch`). Se creó la herramienta CLI `scripts/board-summary.ts` (`npm run board`) para visualización inmediata en terminal con barra de progreso y se actualizó [`GEMINI.md`](../GEMINI.md) para establecer `docs/board.json` como requisito mandatorio del ciclo SDD.
 
 ---
 
@@ -80,8 +83,12 @@
   - [x] Especificación de Facturas y Documentos PDF (`SPEC_DOCUMENTS_PDF.md`).
   - [x] Especificación del Arnés de Pruebas Local y Metodología Test-First (`SPEC_TESTING_HARNESS.md`).
   - [x] Roadmap y Checklist de Implementación (`TASKS_MULTIMODAL.md`).
+- [x] Especificación de Interfaz Viva, Dinamismo y Rediseño de Login (`docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` - ADR-017).
+- [x] Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog (`docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` - ADR-018).
+- [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN, Muro Multimodal y SDD.
+- [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, CLI `scripts/board-summary.ts`, `npm run board` - ADR-019).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Pushear cambios a `dev` (`git push origin dev`), generar Pull Request hacia `master`, fusionar y verificar en el despliegue de Vercel la pestaña del navegador con la identidad oficial de Agyke y el favicon de la balanza. Iniciar Fase 1 y 2 de Ingestión Multimodal en la rama `feature/multimodal-inputs`.
+Ejecutar la Fase 7 del Roadmap de UI ([`docs/ui/ROADMAP_UI.md`](./ui/ROADMAP_UI.md)): implementación de los orbes dinámicos de fondo (`globals.css`), micro-interacción de sacudida en el login (`web/src/app/login/page.tsx`) y refactor del Donut Chart con centro KPI dinámico en `web/src/components/AnalyticsSection.tsx`. Mantener la vista del Gran Dashboard Fullscreen en Backlog hasta la migración de campos. Actualizar `docs/board.json` al completar cada subtarea.

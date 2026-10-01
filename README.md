@@ -58,18 +58,18 @@ Intercepción nativa de intenciones frecuentes antes de invocar a la IA:
 
 El sistema mantiene una única verdad contable consolidada en la tabla `balances`. No existe adivinación financiera:
 
-$$\text{net\_balance} > 0 \implies \text{El Usuario B le debe dinero al Usuario A}$$
-$$\text{net\_balance} < 0 \implies \text{El Usuario A le debe dinero al Usuario B}$$
-$$\text{net\_balance} = 0 \implies \text{Cuentas perfectamente saldadas}$$
+* **`net_balance > 0`** ➔ **El Usuario B le debe dinero al Usuario A.**
+* **`net_balance < 0`** ➔ **El Usuario A le debe dinero al Usuario B.**
+* **`net_balance == 0`** ➔ **Cuentas perfectamente saldadas.**
 
 ### Matriz de Impacto de los 4 Botones
 
 | Botón Inline | Clasificación | Fórmula de Impacto (`debt_impact`) | Explicación Contable |
 | :---: | :--- | :--- | :--- |
-| **`50`** | Compartido 50/50 | $+ (\text{Monto} / 2)$ para el pagador | Gasto conjunto dividido en partes iguales. |
-| **`100`** | Favor 100% | $+ \text{Monto}$ para el pagador | El pagador cubrió la totalidad por el otro usuario. |
-| **`-100`** | Deuda Propia | $- \text{Monto}$ para el pagador | El pagador asume una deuda propia a favor del otro. |
-| **`0`** | Personal | $\$0$ de impacto en balance | Gasto individual propio; no altera el saldo mutuo. |
+| **`50`** | Compartido 50/50 | `+ (Monto / 2)` para el pagador | Gasto conjunto dividido en partes iguales. |
+| **`100`** | Favor 100% | `+ Monto` para el pagador | El pagador cubrió la totalidad por el otro usuario. |
+| **`-100`** | Deuda Propia | `- Monto` para el pagador | El pagador asume una deuda propia a favor del otro. |
+| **`0`** | Personal | `$0` (sin impacto) | Gasto individual propio; no altera el saldo mutuo. |
 
 ---
 

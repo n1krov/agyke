@@ -5,9 +5,9 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 30 de Septiembre de 2026.
+* **Fecha de corte:** 01 de Octubre de 2026.
 * **Rama Activa:** `dev`.
-* **Último Commit:** `d5e3122` (*fix(ci): relocate auth utility to src/lib/auth.ts to satisfy rootDir and clean imports*).
+* **Último Commit:** `7ca434c` (*add(docs): nuevas specs a implementar a futuro | update(readme)*).
 * **Rama de Producción:** `master` (conectada a despliegues en Vercel).
 
 ---

@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-01T09:40:00-03:00",
-  "active_sprint": "Fase 7 - Living UI, Animación de Fondo y Donut Interactivo",
+  "last_updated": "2026-10-02T15:25:00-03:00",
+  "active_sprint": "Laboratorio Multimodal 3-en-1 (Fotos, Audio y PDF)",
   "summary": {
-    "total": 48,
-    "done": 33,
+    "total": 51,
+    "done": 38,
     "in_progress": 0,
-    "pending": 11,
+    "pending": 9,
     "backlog": 4
   },
   "tasks": [
@@ -677,7 +677,7 @@
       "id": "MULTI-01",
       "title": "Formalizar Contrato Canónico ExtractedExpenseDraft",
       "domain": "multimodal",
-      "status": "pending",
+      "status": "done",
       "priority": "p0",
       "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#1-fase-1-arquitectura-y-contrato-canónico-json",
       "dependencies": ["CORE-04"],
@@ -687,13 +687,13 @@
         "Exportar tipos para consumo compartido en bot y web"
       ],
       "files_to_touch": ["src/types/multimodal.ts", "src/types/database.ts"],
-      "completed_at": null
+      "completed_at": "2026-10-02T14:40:00Z"
     },
     {
       "id": "MULTI-02",
       "title": "Validador y Sanitizador de Esquemas Multimodales",
       "domain": "multimodal",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#1-fase-1-arquitectura-y-contrato-canónico-json",
       "dependencies": ["MULTI-01"],
@@ -701,8 +701,54 @@
         "Garantizar que ningún extractor devuelva valores NaN o montos negativos",
         "Fallback seguro si Gemini devuelve formato no conforme"
       ],
-      "files_to_touch": ["src/services/multimodal-sanitizer.ts"],
-      "completed_at": null
+      "files_to_touch": ["src/services/multimodal/receipt-parser.ts"],
+      "completed_at": "2026-10-02T14:40:00Z"
+    },
+    {
+      "id": "MULTI-07",
+      "title": "Motor de Audio y Notas de Voz (Voice Engine)",
+      "domain": "multimodal",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/SPEC_VOICE_AUDIO.md",
+      "dependencies": ["MULTI-01"],
+      "acceptance_criteria": [
+        "Implementar parseAudioMessage en src/services/multimodal/audio-parser.ts",
+        "Prompt calibrado para modismos rioplatenses (lucas, mitad y mitad)",
+        "Extracción de monto, concepto, suggested_classification y transcripción"
+      ],
+      "files_to_touch": ["src/services/multimodal/audio-parser.ts", "src/tests/multimodal/audio.test.ts"],
+      "completed_at": "2026-10-02T15:20:00Z"
+    },
+    {
+      "id": "MULTI-10",
+      "title": "Motor de Comprobantes e Imágenes (Image Engine)",
+      "domain": "multimodal",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/SPEC_RECEIPTS_IMAGES.md",
+      "dependencies": ["MULTI-01"],
+      "acceptance_criteria": [
+        "Implementar parseReceiptImage en src/services/multimodal/receipt-parser.ts",
+        "Extracción OCR de Total a Pagar, emisor y fecha"
+      ],
+      "files_to_touch": ["src/services/multimodal/receipt-parser.ts", "src/tests/multimodal/receipt.test.ts"],
+      "completed_at": "2026-10-02T14:40:00Z"
+    },
+    {
+      "id": "MULTI-13",
+      "title": "Motor de Facturas y Documentos PDF (PDF Engine)",
+      "domain": "multimodal",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/SPEC_DOCUMENTS_PDF.md",
+      "dependencies": ["MULTI-01"],
+      "acceptance_criteria": [
+        "Implementar parsePdfDocument en src/services/multimodal/pdf-parser.ts",
+        "Extracción de Facturas AFIP A/B/C y comprobantes de Mercado Pago"
+      ],
+      "files_to_touch": ["src/services/multimodal/pdf-parser.ts", "src/tests/multimodal/pdf.test.ts"],
+      "completed_at": "2026-10-02T15:20:00Z"
     },
     {
       "id": "MULTI-03",

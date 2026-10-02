@@ -52,17 +52,15 @@
 - [x] Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog (`docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` - ADR-018).
 - [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN y SDD.
 - [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, `npm run board` - ADR-019).
-- [x] **Laboratorio Experimental Multimodal (Fase Comprobantes / Tickets):**
+- [x] **Laboratorio Experimental Multimodal 3-en-1 (Rama `lab/multimodal-receipts`):**
   - [x] Formalización de tipos `ExtractedExpenseDraft` y `MultimodalProcessResponse` en `src/types/multimodal.ts`.
-  - [x] Servicio desacoplado `parseReceiptImage` con Gemini Visión en `src/services/multimodal/receipt-parser.ts`.
-  - [x] Suite de tests unitarios y sanitización en `src/tests/multimodal/receipt.test.ts` (4/4 pasando).
-  - [x] Endpoint de inferencia `/api/lab/process-receipt` en Next.js con soporte multipart y telemetría.
-  - [x] Vista interactiva `/lab` en el Dashboard para comprobantes físicos.
+  - [x] Motor de Comprobantes e Imágenes en `src/services/multimodal/receipt-parser.ts` y endpoint `/api/lab/process-receipt`.
+  - [x] Motor de Audio y Notas de Voz en `src/services/multimodal/audio-parser.ts` y endpoint `/api/lab/process-audio`.
+  - [x] Motor de Facturas PDF en `src/services/multimodal/pdf-parser.ts` y endpoint `/api/lab/process-pdf`.
+  - [x] Suites de tests unitarios y sanitización en `src/tests/multimodal/` (`receipt.test.ts`, `audio.test.ts`, `pdf.test.ts`).
+  - [x] Playground 3-en-1 interactivo montado en `web/src/app/lab/page.tsx` con tabs para fotos, notas de voz (reproductor `<audio>`) y documentos PDF.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Ampliar el Playground del Laboratorio (`/lab`) para convertirlo en un banco de pruebas multimodal unificado 3-en-1:
-1. Implementar el motor de Audio (`src/services/multimodal/audio-parser.ts`) y endpoint `/api/lab/process-audio`.
-2. Implementar el motor de Facturas PDF (`src/services/multimodal/pdf-parser.ts`) y endpoint `/api/lab/process-pdf`.
-3. Integrar las 3 pestañas interactivas en `web/src/app/lab/page.tsx` (Comprobantes, Notas de Voz y Facturas PDF) para pruebas en vivo en el navegador.
+Probar interactivamente el Playground Multimodal en local con `npm run dev:web` navegando a `http://localhost:3000/lab`. Verificar la extracción de montos y conceptos con los 3 tipos de comprobantes. Una vez verificado todo en el laboratorio, preparar la integración limpia hacia `dev`.

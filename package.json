@@ -19,6 +19,7 @@
     "simulate:live": "tsx scripts/simulate-flow.ts --live",
     "typecheck": "tsc --noEmit",
     "lint": "npm run lint --prefix web",
+    "board": "node --experimental-strip-types scripts/board-summary.ts",
     "set:webhook": "tsx scripts/set-webhook.ts"
   },
   "keywords": [],

@@ -8,7 +8,7 @@
 * **Fecha de corte:** 03 de Octubre de 2026.
 * **Rama Activa:** `lab/multimodal-receipts` (laboratorio experimental derivado de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** Sincronizado con `dev` (`19c543d`).
+* **Último Commit:** `53fb1c2` (`feat(bot): integrate multimodal ingestion with rich preview and discard button (ADR-021)`).
 
 ---
 

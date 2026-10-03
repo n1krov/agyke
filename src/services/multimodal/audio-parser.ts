@@ -109,8 +109,10 @@ export async function parseAudioMessage(
 
   const CANDIDATE_MODELS = [
     process.env.GEMINI_MODEL,
-    'gemini-3.6-flash',
     'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-3.6-flash',
+    'gemini-3-flash-preview',
     'gemini-flash-latest'
   ].filter(Boolean) as string[];
 
@@ -132,13 +134,16 @@ export async function parseAudioMessage(
     for (const modelName of CANDIDATE_MODELS) {
       try {
         addLog(`Enviando audio a Gemini (Modelo: ${modelName})...`);
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.1
-          }
-        });
+        const model = genAI.getGenerativeModel(
+          {
+            model: modelName,
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 0.1
+            }
+          },
+          { timeout: 7000 }
+        );
 
         const result = await model.generateContent([VOICE_EXTRACTION_SYSTEM_PROMPT, mediaPart]);
         const response = await result.response;

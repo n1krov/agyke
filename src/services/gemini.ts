@@ -50,8 +50,10 @@ export function fallbackParseText(text: string): GeminiExtractionResult {
 
 const CANDIDATE_MODELS = [
   process.env.GEMINI_MODEL,
-  'gemini-3.6-flash',
   'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.6-flash',
+  'gemini-3-flash-preview',
   'gemini-flash-latest'
 ].filter(Boolean) as string[];
 
@@ -73,12 +75,15 @@ export async function processMediaWithGemini(
 
   for (const modelName of CANDIDATE_MODELS) {
     try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const model = genAI.getGenerativeModel(
+        {
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        },
+        { timeout: 7000 }
+      );
 
       const result = await model.generateContent([SYSTEM_PROMPT, mediaPart]);
       const text = result.response.text().trim();
@@ -109,12 +114,15 @@ export async function processTextWithGemini(
 
   for (const modelName of CANDIDATE_MODELS) {
     try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const model = genAI.getGenerativeModel(
+        {
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        },
+        { timeout: 7000 }
+      );
 
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim();

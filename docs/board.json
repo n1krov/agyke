@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-02T15:25:00-03:00",
-  "active_sprint": "Laboratorio Multimodal 3-en-1 (Fotos, Audio y PDF)",
+  "last_updated": "2026-10-03T18:20:00-03:00",
+  "active_sprint": "Ingestión Multimodal Telegram (MULTI-16 a MULTI-18)",
   "summary": {
-    "total": 51,
-    "done": 38,
+    "total": 54,
+    "done": 41,
     "in_progress": 0,
     "pending": 9,
     "backlog": 4
@@ -809,6 +809,56 @@
       ],
       "files_to_touch": ["package.json"],
       "completed_at": null
+    },
+    {
+      "id": "MULTI-16",
+      "title": "Refactor de AssistedFlow para Canalización Multimodal Unificada",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#6-fase-6-refactor-de-handlers-de-telegram-y-modo-preview-seguro",
+      "dependencies": ["MULTI-07", "MULTI-10", "MULTI-13"],
+      "acceptance_criteria": [
+        "Canalizar notas de voz hacia parseAudioMessage en assistedFlowHandler",
+        "Canalizar fotos de comprobantes hacia parseReceiptImage",
+        "Canalizar documentos PDF hacia parsePdfDocument",
+        "Fallback conversacional pidiendo monto si la inferencia devuelve 0"
+      ],
+      "files_to_touch": ["src/bot/handlers/assisted.ts"],
+      "completed_at": "2026-10-03T18:20:00Z"
+    },
+    {
+      "id": "MULTI-17",
+      "title": "Tarjeta Enriquecida con Preview y Transcripción en Telegram",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#6-fase-6-refactor-de-handlers-de-telegram-y-modo-preview-seguro",
+      "dependencies": ["MULTI-16"],
+      "acceptance_criteria": [
+        "Tarjeta con encabezado temático por medio (voz, comprobante, documento)",
+        "Monto formateado en pesos argentinos y concepto extraído",
+        "Inclusión de transcripción o resumen detectado",
+        "Resaltado visual del botón sugerido si se detectó clasificación en el audio"
+      ],
+      "files_to_touch": ["src/bot/handlers/assisted.ts"],
+      "completed_at": "2026-10-03T18:20:00Z"
+    },
+    {
+      "id": "MULTI-18",
+      "title": "Botón Inline de Descarte y Cancelación Inmediata de Gastos",
+      "domain": "bot",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/multimodal/TASKS_MULTIMODAL.md#6-fase-6-refactor-de-handlers-de-telegram-y-modo-preview-seguro",
+      "dependencies": ["MULTI-16"],
+      "acceptance_criteria": [
+        "Incorporar botón '❌ Descartar Gasto' en inline keyboard de confirmación",
+        "Handler en callback.ts para marcar status DISCARDED en agyke_queue",
+        "Edición del mensaje en Telegram confirmando el descarte sin tocar balance"
+      ],
+      "files_to_touch": ["src/bot/handlers/callback.ts", "src/tests/integration.test.ts"],
+      "completed_at": "2026-10-03T18:20:00Z"
     }
   ]
 }

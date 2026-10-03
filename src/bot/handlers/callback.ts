@@ -52,10 +52,16 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
 
-      const [, telegramIdStr, classification] = parts as [string, string, ClassificationType];
+      const [, telegramIdStr, classification] = parts as [string, string, string];
       const telegramId = parseInt(telegramIdStr, 10);
 
       await ctx.answerCallbackQuery();
+
+      if (classification === 'discard' || classification === 'cancel') {
+        clearSession(telegramId);
+        await ctx.editMessageText('❌ *Operación cancelada.*\nNo se registró ningún gasto.', { parse_mode: 'Markdown' });
+        return;
+      }
 
       const draft = getSession(telegramId);
       if (!draft || !draft.amount) {
@@ -70,7 +76,8 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
       }
 
       const concept = draft.concept || 'Gasto general';
-      const debtImpact = calculateDebtImpact(draft.amount, classification);
+      const classType = classification as ClassificationType;
+      const debtImpact = calculateDebtImpact(draft.amount, classType);
 
       const { error: txError } = await supabase
         .from('transactions')
@@ -78,7 +85,7 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
           user_id: user.id,
           amount: draft.amount,
           concept: concept,
-          classification: classification,
+          classification: classType,
           debt_impact: debtImpact
         });
 
@@ -91,7 +98,7 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
       clearSession(telegramId);
       await updateBalance();
 
-      const label = CLASSIFICATION_LABELS[classification] || classification;
+      const label = CLASSIFICATION_LABELS[classType] || classification;
       const formattedAmount = draft.amount.toLocaleString('es-AR', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2
@@ -115,7 +122,7 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
 
-      const [, agykeId, classification] = parts as [string, string, ClassificationType];
+      const [, agykeId, classification] = parts as [string, string, string];
       await ctx.answerCallbackQuery();
 
       const { data: queueItem, error: queueError } = await supabase
@@ -135,7 +142,21 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
         return;
       }
 
-      const debtImpact = calculateDebtImpact(Number(queueItem.amount), classification);
+      // Si el usuario presionó [ ❌ Descartar Gasto ] (MULTI-18)
+      if (classification === 'discard' || classification === 'cancel') {
+        await supabase
+          .from('agyke_queue')
+          .update({ status: 'DISCARDED' })
+          .eq('id', agykeId);
+
+        await ctx.editMessageText(
+          '❌ *Gasto descartado.*\nNo se registró ningún movimiento en tu balance.',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      const debtImpact = calculateDebtImpact(Number(queueItem.amount), classification as ClassificationType);
 
       const { error: txError } = await supabase
         .from('transactions')
@@ -160,7 +181,8 @@ export async function callbackQueryHandler(ctx: AgykeContext): Promise<void> {
 
       await updateBalance();
 
-      const label = CLASSIFICATION_LABELS[classification] || classification;
+      const classType = classification as ClassificationType;
+      const label = CLASSIFICATION_LABELS[classType] || classification;
       const formattedAmount = Number(queueItem.amount).toLocaleString('es-AR', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2

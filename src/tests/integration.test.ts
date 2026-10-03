@@ -194,4 +194,37 @@ describe('Pruebas de Integración y Simulación Headless (Tarea 7)', () => {
     lastMsg = interceptor.getLastMessage();
     assert.ok(lastMsg && lastMsg.includes('Operación cancelada'));
   });
+
+  it('Escenario 7: Botón [ ❌ Descartar Gasto ] descarta el ítem de agyke_queue sin registrar transacción (MULTI-18)', async () => {
+    // 1. Crear un ítem PENDING en agyke_queue
+    const queueId = 'queue-test-discard-1';
+    memorySupabase.db.queue.push({
+      id: queueId,
+      user_id: 'user-a-uuid',
+      amount: 12000,
+      concept: 'Cena Amigos',
+      source_type: 'audio',
+      status: 'PENDING',
+      created_at: new Date().toISOString()
+    });
+
+    const txCountBefore = memorySupabase.db.transactions.length;
+
+    // 2. Simular clic en [ ❌ Descartar Gasto ]
+    const callbackUpdate = createCallbackQueryUpdate({
+      userId: 1001,
+      name: 'Lautaro',
+      data: `agyke:${queueId}:discard`
+    });
+    await bot.handleUpdate(callbackUpdate);
+
+    // 3. Verificar que el mensaje editado indique descarte
+    const lastMsg = interceptor.getLastMessage();
+    assert.ok(lastMsg && lastMsg.includes('Gasto descartado'));
+
+    // 4. Verificar que el status cambió a DISCARDED y no se generó ninguna transacción
+    const queueItem = memorySupabase.db.queue.find(q => q.id === queueId);
+    assert.equal(queueItem?.status, 'DISCARDED');
+    assert.equal(memorySupabase.db.transactions.length, txCountBefore, 'No debe generarse ninguna transacción');
+  });
 });

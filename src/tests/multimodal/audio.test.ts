@@ -26,11 +26,10 @@ describe('Audio Parser & Voice Sanitization (Multimodal)', () => {
   });
 
   it('debe rechazar clasificaciones inválidas y dejarlas en null', () => {
-    const corruptedAiOutput = {
+    const corruptedAiOutput: Record<string, unknown> = {
       raw_transcription: 'Pagué 5000 en el kiosco',
       amount: 5000,
       concept: 'Kiosco',
-      // @ts-expect-error test invalid classification
       suggested_classification: 'INVALID_TAG',
       confidence: 0.8
     };

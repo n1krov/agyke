@@ -30,14 +30,14 @@ Reglas específicas de interpretación financiera argentina:
 const VALID_CLASSIFICATIONS: ClassificationType[] = ['50', '100', '-100', '0'];
 
 export function sanitizeAudioDraft(
-  parsed: Partial<ExtractedExpenseDraft> | null | undefined
+  parsed: Partial<ExtractedExpenseDraft> | Record<string, unknown> | null | undefined
 ): ExtractedExpenseDraft {
   let amount = 0;
   if (typeof parsed?.amount === 'number' && !isNaN(parsed.amount)) {
     amount = Math.max(0, Math.round(parsed.amount * 100) / 100);
   }
 
-  let concept = (parsed?.concept || '').trim();
+  let concept = typeof parsed?.concept === 'string' ? parsed.concept.trim() : '';
   if (!concept) {
     concept = 'Nota de Voz';
   }
@@ -50,8 +50,11 @@ export function sanitizeAudioDraft(
   }
 
   let suggested_classification: ClassificationType | null = null;
-  if (parsed?.suggested_classification && VALID_CLASSIFICATIONS.includes(parsed.suggested_classification)) {
-    suggested_classification = parsed.suggested_classification;
+  if (
+    typeof parsed?.suggested_classification === 'string' &&
+    VALID_CLASSIFICATIONS.includes(parsed.suggested_classification as ClassificationType)
+  ) {
+    suggested_classification = parsed.suggested_classification as ClassificationType;
   }
 
   let payer_hint: string | null = null;

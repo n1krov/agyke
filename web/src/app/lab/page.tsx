@@ -663,7 +663,7 @@ function audioBufferToWav(buffer: AudioBuffer): Blob {
   const length = buffer.length * numOfChan * 2 + 44;
   const out = new DataView(new ArrayBuffer(length));
   const channels: Float32Array[] = [];
-  let sampleRate = buffer.sampleRate;
+  const sampleRate = buffer.sampleRate;
   let offset = 0;
   let pos = 0;
 

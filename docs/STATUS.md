@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 02 de Octubre de 2026.
+* **Fecha de corte:** 03 de Octubre de 2026.
 * **Rama Activa:** `lab/multimodal-receipts` (laboratorio experimental derivado de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** `020e9cd` + merge de sincronización `dev`.
+* **Último Commit:** Sincronizado con `dev` (`19c543d`).
 
 ---
 
@@ -23,9 +23,9 @@
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
 | **Autenticación Ligera PIN (`/login`)** |  Listo | 5 tests unitarios | Tokens HMAC-SHA256, cookies httpOnly y middleware Next.js. |
-| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 48 tareas, verificado con `npm run board`. |
-| **Laboratorio Multimodal (`/lab`)** | 🔬 En Desarrollo | Tests unitarios passing | Playground experimental para comprobantes físicos, audio y facturas PDF. |
-| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 30/30 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
+| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 51 tareas, verificado con `npm run board`. |
+| **Laboratorio Multimodal (`/lab`)** | 🔬 Listo | 12 tests unitarios | Playground experimental 3-en-1: Fotos, Audio y Facturas PDF. |
+| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 45/45 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
 | **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 a ADR-008 | Compilación Webpack explícita (`--webpack`) y módulos compartidos en Next.js 16. |
 
 ---

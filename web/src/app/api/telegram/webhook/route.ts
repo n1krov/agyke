@@ -2,6 +2,7 @@ import { webhookCallback } from 'grammy';
 import { bot } from '@/shared/bot';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
@@ -19,8 +20,9 @@ export async function POST(req: Request) {
       const body = await clonedReq.json();
       const updateDesc = body?.callback_query ? `callback_query [${body.callback_query.data}] de ${body.callback_query.from?.first_name || body.callback_query.from?.id}` :
                          body?.message?.text ? `texto "${body.message.text}" de ${body.message.from?.first_name || body.message.from?.id}` :
-                         body?.message?.voice ? `audio de ${body.message.from?.first_name || body.message.from?.id}` :
+                         body?.message?.voice || body?.message?.audio ? `audio de ${body.message.from?.first_name || body.message.from?.id}` :
                          body?.message?.photo ? `foto de ${body.message.from?.first_name || body.message.from?.id}` :
+                         body?.message?.document ? `documento de ${body.message.from?.first_name || body.message.from?.id}` :
                          'otro';
       console.log(`[TelegramWebhook] 📥 Update recibido: ${updateDesc}`);
     } catch {

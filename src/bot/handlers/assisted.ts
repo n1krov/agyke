@@ -2,6 +2,10 @@ import { InlineKeyboard } from 'grammy';
 import { AgykeContext } from '../../types/context';
 import { supabase } from '../../lib/supabase';
 import { processMediaWithGemini } from '../../services/gemini';
+import { parseAudioMessage } from '../../services/multimodal/audio-parser';
+import { parseReceiptImage } from '../../services/multimodal/receipt-parser';
+import { parsePdfDocument } from '../../services/multimodal/pdf-parser';
+import type { ExtractedExpenseDraft } from '../../types/multimodal';
 import { SourceType, ClassificationType } from '../../types/database';
 import { getSession, setSession, clearSession } from '../../services/session';
 import { gastoCommandHandler, getClassificationKeyboard, VALID_CLASSIFICATIONS } from '../commands/gasto';
@@ -336,18 +340,44 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
-    // Extraer contenido multimedia con Gemini
-    let extraction;
+    // Extraer contenido multimedia con el parser correspondiente
+    let draft: ExtractedExpenseDraft | null = null;
     try {
-      if (fileBuffer) {
-        extraction = await processMediaWithGemini(fileBuffer, mimeType);
-      } else {
+      if (!fileBuffer) {
         await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
-        await ctx.reply('⚠️ No se pudo obtener contenido para procesar.');
+        await ctx.reply('⚠️ No se pudo obtener el archivo para procesar.');
         return;
       }
+
+      if (isAudio) {
+        const res = await parseAudioMessage(fileBuffer, mimeType);
+        if (res.success && res.draft) {
+          draft = res.draft;
+        }
+      } else if (isPhoto) {
+        const res = await parseReceiptImage(fileBuffer, mimeType);
+        if (res.success && res.draft) {
+          draft = res.draft;
+        }
+      } else if (isDocument) {
+        if (mimeType === 'application/pdf' || rawFilePath?.toLowerCase().endsWith('.pdf')) {
+          const res = await parsePdfDocument(fileBuffer);
+          if (res.success && res.draft) {
+            draft = res.draft;
+          }
+        } else if (mimeType.startsWith('image/')) {
+          const res = await parseReceiptImage(fileBuffer, mimeType);
+          if (res.success && res.draft) {
+            draft = res.draft;
+          }
+        } else {
+          await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
+          await ctx.reply('⚠️ Formato de documento no soportado. Envía una factura en PDF o una foto.');
+          return;
+        }
+      }
     } catch (geminiErr) {
-      console.error('[AssistedFlow] Error procesando contenido multimedia:', geminiErr);
+      console.error('[AssistedFlow] Error procesando contenido multimedia con Gemini:', geminiErr);
       await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
       await ctx.reply('⚠️ Ocurrió un error al analizar la información.');
       return;
@@ -356,8 +386,8 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
     await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
 
     // Si no se extrajo un monto (> 0), pasar al flujo conversacional solicitándolo
-    if (!extraction || typeof extraction.amount !== 'number' || extraction.amount <= 0) {
-      const detectedConcept = extraction?.concept && extraction.concept !== 'Gasto general' ? extraction.concept : undefined;
+    if (!draft || typeof draft.amount !== 'number' || draft.amount <= 0) {
+      const detectedConcept = draft?.concept && draft.concept !== 'Gasto general' && draft.concept !== 'Comprobante' ? draft.concept : undefined;
 
       setSession(telegramId, {
         userId: user.id,
@@ -365,12 +395,16 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         concept: detectedConcept
       });
 
-      const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' : '📄 *Documento recibido*';
+      const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' :
+                         isPhoto ? '📷 *Comprobante recibido*' :
+                         '📄 *Documento recibido*';
 
       await ctx.reply(
         `${mediaTitle}\n` +
-        (detectedConcept ? `*Concepto:* ${detectedConcept}\n\n` : '') +
-        `💰 Por favor ingresa el *monto* del gasto (ej: \`1000\` o \`1000 fideos\`):`,
+        `⚠️ No se pudo identificar el monto total con certeza.\n\n` +
+        (detectedConcept ? `*Concepto:* ${detectedConcept}\n` : '') +
+        (draft?.raw_transcription ? `🗣️ *Detectado:* _"${draft.raw_transcription}"_\n\n` : '\n') +
+        `💰 Por favor responde este mensaje con el *monto* del gasto (ej: \`15000\` o \`15000 ${detectedConcept || 'gasto'}\`):`,
         { parse_mode: 'Markdown' }
       );
       return;
@@ -381,8 +415,8 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       .from('agyke_queue')
       .insert({
         user_id: user.id,
-        amount: extraction.amount,
-        concept: extraction.concept || 'Gasto general',
+        amount: draft.amount,
+        concept: draft.concept || 'Gasto general',
         file_path: rawFilePath,
         source_type: sourceType,
         status: 'PENDING'
@@ -396,25 +430,51 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       return;
     }
 
+    // Botonera interactiva de Agyke con sugerencia destacada (si aplica) y botón de descarte (MULTI-17 & MULTI-18)
+    const suggested = draft.suggested_classification;
     const keyboard = new InlineKeyboard()
-      .text('50 (Mitad y Mitad)', `agyke:${queueItem.id}:50`)
-      .text('100 (Favor 100%)', `agyke:${queueItem.id}:100`)
+      .text(suggested === '50' ? '✨ 50 (Mitad y Mitad)' : '50 (Mitad y Mitad)', `agyke:${queueItem.id}:50`)
+      .text(suggested === '100' ? '✨ 100 (Favor 100%)' : '100 (Favor 100%)', `agyke:${queueItem.id}:100`)
       .row()
-      .text('-100 (Deuda Mía)', `agyke:${queueItem.id}:-100`)
-      .text('0 (Personal)', `agyke:${queueItem.id}:0`);
+      .text(suggested === '-100' ? '✨ -100 (Deuda Mía)' : '-100 (Deuda Mía)', `agyke:${queueItem.id}:-100`)
+      .text(suggested === '0' ? '✨ 0 (Personal)' : '0 (Personal)', `agyke:${queueItem.id}:0`)
+      .row()
+      .text('❌ Descartar Gasto', `agyke:${queueItem.id}:discard`);
 
-    const formattedAmount = extraction.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    const formattedAmount = draft.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
-    const sentMessage = await ctx.reply(
-      `📝 *Nuevo gasto detectado en Agyke*\n` +
-      `*Monto:* $${formattedAmount}\n` +
-      `*Concepto:* ${extraction.concept || 'Gasto general'}\n\n` +
-      `Selecciona la clasificación:`,
-      {
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-      }
-    );
+    const header = isAudio ? '🎙️ *Nota de voz procesada*' :
+                   isPhoto ? '📷 *Comprobante analizado*' :
+                   '📄 *Documento analizado*';
+
+    const lines: string[] = [
+      header,
+      `*Monto:* $${formattedAmount}`,
+      `*Concepto:* ${draft.concept}`
+    ];
+
+    if (draft.metadata?.merchant) {
+      lines.push(`*Comercio:* ${draft.metadata.merchant}`);
+    }
+    if (draft.date) {
+      lines.push(`*Fecha:* ${draft.date}`);
+    }
+    if (draft.raw_transcription) {
+      lines.push(`🗣️ *Detectado:* _"${draft.raw_transcription}"_`);
+    }
+    if (suggested) {
+      const label = suggested === '50' ? '50/50 (Mitad y Mitad)' :
+                    suggested === '100' ? 'Favor 100%' :
+                    suggested === '-100' ? 'Deuda Propia' : 'Personal';
+      lines.push(`⚖️ *Sugerencia:* ${label}`);
+    }
+
+    lines.push('\nSelecciona la clasificación:');
+
+    const sentMessage = await ctx.reply(lines.join('\n'), {
+      parse_mode: 'Markdown',
+      reply_markup: keyboard
+    });
 
     await supabase
       .from('agyke_queue')

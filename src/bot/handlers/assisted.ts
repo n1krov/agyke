@@ -342,6 +342,7 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
 
     // Extraer contenido multimedia con el parser correspondiente
     let draft: ExtractedExpenseDraft | null = null;
+    let multimodalError: string | null = null;
     try {
       if (!fileBuffer) {
         await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
@@ -353,22 +354,34 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         const res = await parseAudioMessage(fileBuffer, mimeType);
         if (res.success && res.draft) {
           draft = res.draft;
+        } else {
+          multimodalError = res.error || 'Error al procesar el audio';
+          console.warn('[AssistedFlow] ❌ Error en parseAudioMessage:', res.error);
         }
       } else if (isPhoto) {
         const res = await parseReceiptImage(fileBuffer, mimeType);
         if (res.success && res.draft) {
           draft = res.draft;
+        } else {
+          multimodalError = res.error || 'Error al procesar la imagen';
+          console.warn('[AssistedFlow] ❌ Error en parseReceiptImage:', res.error);
         }
       } else if (isDocument) {
         if (mimeType === 'application/pdf' || rawFilePath?.toLowerCase().endsWith('.pdf')) {
           const res = await parsePdfDocument(fileBuffer);
           if (res.success && res.draft) {
             draft = res.draft;
+          } else {
+            multimodalError = res.error || 'Error al procesar el PDF';
+            console.warn('[AssistedFlow] ❌ Error en parsePdfDocument:', res.error);
           }
         } else if (mimeType.startsWith('image/')) {
           const res = await parseReceiptImage(fileBuffer, mimeType);
           if (res.success && res.draft) {
             draft = res.draft;
+          } else {
+            multimodalError = res.error || 'Error al procesar la imagen del documento';
+            console.warn('[AssistedFlow] ❌ Error en parseReceiptImage (doc):', res.error);
           }
         } else {
           await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
@@ -385,6 +398,31 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
 
     await ctx.api.deleteMessage(ctx.chat!.id, statusMsg.message_id).catch(() => {});
 
+    // Si falló el servicio de IA (por timeout o 503 de Google)
+    const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' :
+                       isPhoto ? '📷 *Comprobante recibido*' :
+                       '📄 *Documento recibido*';
+
+    if (multimodalError && !draft) {
+      setSession(telegramId, {
+        userId: user.id,
+        step: 'AWAITING_AMOUNT'
+      });
+
+      const isOverload = multimodalError.includes('503') || multimodalError.includes('demand') || multimodalError.includes('timeout') || multimodalError.includes('aborted');
+      const errorMsg = isOverload
+        ? '⚠️ Los servidores de IA tuvieron un pico de saturación temporal (error 503).'
+        : '⚠️ No se pudo conectar con el servicio de IA.';
+
+      await ctx.reply(
+        `${mediaTitle}\n` +
+        `${errorMsg}\n\n` +
+        `💰 Podés reintentar en unos segundos o responder este mensaje con el *monto* del gasto (ej: \`15000\`):`,
+        { parse_mode: 'Markdown' }
+      );
+      return;
+    }
+
     // Si no se extrajo un monto (> 0), pasar al flujo conversacional solicitándolo
     if (!draft || typeof draft.amount !== 'number' || draft.amount <= 0) {
       const detectedConcept = draft?.concept && draft.concept !== 'Gasto general' && draft.concept !== 'Comprobante' ? draft.concept : undefined;
@@ -394,10 +432,6 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
         step: 'AWAITING_AMOUNT',
         concept: detectedConcept
       });
-
-      const mediaTitle = isAudio ? '🎙️ *Audio de voz recibido*' :
-                         isPhoto ? '📷 *Comprobante recibido*' :
-                         '📄 *Documento recibido*';
 
       await ctx.reply(
         `${mediaTitle}\n` +

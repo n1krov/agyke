@@ -6,9 +6,9 @@
 
 ## 1. Identificación y Estado de Git
 * **Fecha de corte:** 03 de Octubre de 2026.
-* **Rama Activa:** `lab/multimodal-receipts` (laboratorio experimental derivado de `dev`).
+* **Rama Activa:** `dev` (preparación de paso a producción en `master`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** `53fb1c2` (`feat(bot): integrate multimodal ingestion with rich preview and discard button (ADR-021)`).
+* **Último Commit:** Sincronizado con PR #11 (`b829208`) + optimización de webhook serverless.
 
 ---
 
@@ -68,4 +68,4 @@
 ---
 
 ## 5. Próxima Acción Inmediata
-Hacer el push de la rama `lab/multimodal-receipts`, abrir el Pull Request hacia `dev`, fusionar y verificar en el entorno de despliegue y en Telegram la recepción de audios, fotos y PDFs con descarte interactivo. Continuar con el sprint de Interfaz Viva (UI-16 a UI-20).
+Hacer el push de `dev`, abrir el Pull Request hacia `master`, desplegar en Vercel y verificar en Telegram la recepción de audios, fotos y PDFs con descarte interactivo en producción (Checklist de TASKS_PROD.md). Continuar luego con el sprint de Interfaz Viva (UI-16 a UI-20).

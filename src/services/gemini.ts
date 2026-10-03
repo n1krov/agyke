@@ -48,6 +48,13 @@ export function fallbackParseText(text: string): GeminiExtractionResult {
 }
 
 
+const CANDIDATE_MODELS = [
+  process.env.GEMINI_MODEL,
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-latest'
+].filter(Boolean) as string[];
+
 export async function processMediaWithGemini(
   fileBuffer: Buffer,
   mimeType: string
@@ -57,35 +64,38 @@ export async function processMediaWithGemini(
     return { amount: 0, concept: 'Gasto general' };
   }
 
-  try {
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        responseMimeType: 'application/json'
-      }
-    });
+  const mediaPart = {
+    inlineData: {
+      data: fileBuffer.toString('base64'),
+      mimeType: mimeType
+    }
+  };
 
-    const mediaPart = {
-      inlineData: {
-        data: fileBuffer.toString('base64'),
-        mimeType: mimeType
-      }
-    };
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+          responseMimeType: 'application/json'
+        }
+      });
 
-    const result = await model.generateContent([SYSTEM_PROMPT, mediaPart]);
-    const text = result.response.text().trim();
-    
-    const cleanText = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    const parsed = JSON.parse(cleanText) as GeminiExtractionResult;
+      const result = await model.generateContent([SYSTEM_PROMPT, mediaPart]);
+      const text = result.response.text().trim();
+      
+      const cleanText = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleanText) as GeminiExtractionResult;
 
-    return {
-      amount: typeof parsed.amount === 'number' && !isNaN(parsed.amount) ? parsed.amount : 0,
-      concept: parsed.concept ? String(parsed.concept) : 'Gasto general'
-    };
-  } catch (err) {
-    console.error('[GeminiService] Error al procesar media con Gemini 1.5 Flash:', err);
-    return { amount: 0, concept: 'Gasto general' };
+      return {
+        amount: typeof parsed.amount === 'number' && !isNaN(parsed.amount) ? parsed.amount : 0,
+        concept: parsed.concept ? String(parsed.concept) : 'Gasto general'
+      };
+    } catch (err) {
+      console.warn(`[GeminiService] Reintento: error con modelo ${modelName}:`, err);
+    }
   }
+
+  return { amount: 0, concept: 'Gasto general' };
 }
 
 export async function processTextWithGemini(
@@ -95,30 +105,34 @@ export async function processTextWithGemini(
     return fallbackParseText(textPrompt);
   }
 
-  try {
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        responseMimeType: 'application/json'
+  const prompt = `${SYSTEM_PROMPT}\n\nTexto a analizar: "${textPrompt}"`;
+
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+          responseMimeType: 'application/json'
+        }
+      });
+
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      
+      const cleanText = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleanText) as GeminiExtractionResult;
+
+      const amount = typeof parsed.amount === 'number' && !isNaN(parsed.amount) ? parsed.amount : 0;
+      const concept = parsed.concept ? String(parsed.concept) : 'Gasto general';
+
+      if (amount > 0) {
+        return { amount, concept };
       }
-    });
-
-    const prompt = `${SYSTEM_PROMPT}\n\nTexto a analizar: "${textPrompt}"`;
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    
-    const cleanText = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    const parsed = JSON.parse(cleanText) as GeminiExtractionResult;
-
-    const amount = typeof parsed.amount === 'number' && !isNaN(parsed.amount) ? parsed.amount : 0;
-    const concept = parsed.concept ? String(parsed.concept) : 'Gasto general';
-
-    if (amount > 0) {
-      return { amount, concept };
+      return fallbackParseText(textPrompt);
+    } catch (err) {
+      console.warn(`[GeminiService] Reintento: error en processText con modelo ${modelName}:`, err);
     }
-    return fallbackParseText(textPrompt);
-  } catch (err) {
-    console.error('[GeminiService] Error al procesar texto con Gemini:', err);
-    return fallbackParseText(textPrompt);
   }
+
+  return fallbackParseText(textPrompt);
 }

@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 01 de Octubre de 2026.
-* **Rama Activa:** `dev`.
-* **Último Commit:** `324cf2a` (*fix: repair LaTeX math mode block in README.md*).
-* **Rama de Producción:** `master` (conectada a despliegues en Vercel).
+* **Fecha de corte:** 03 de Octubre de 2026.
+* **Rama Activa:** `lab/multimodal-receipts` (laboratorio experimental derivado de `dev`).
+* **Rama Base:** `dev` | **Rama de Producción:** `master`.
+* **Último Commit:** Sincronizado con `dev` (`19c543d`).
 
 ---
 
@@ -17,78 +17,55 @@
 | Componente | Estado | Cobertura / Tests | Notas |
 | :--- | :---: | :---: | :--- |
 | **Cálculo Financiero (`balance.ts`)** |  Listo | 10 tests unitarios | Invariante de `net_balance` y los 4 botones (`50`, `100`, `-100`, `0`). |
-| **Parser Gemini 1.5 Flash (`gemini.ts`)** |  Listo | 6 tests unitarios | Conexión real con `@google/generative-ai` + fallback regex local de alta precisión. |
+| **Parser Gemini Flash (`gemini.ts`)** |  Listo | 6 tests unitarios | Resiliencia multimodelo (`gemini-3.6-flash` -> `3.5-flash-lite` -> fallback local). |
 | **Gestor de Sesiones (`session.ts`)** |  Listo | 4 tests unitarios | Manejo de borradores conversacionales paso a paso por usuario. |
 | **Bot Handlers (`src/bot/`)** |  Listo | Validado en build | Comandos `/start`, `/gasto`, `/saldo`, `/help`, `/cancelar`, callbacks y flujo asistido. |
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
-| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 26/26 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
+| **Autenticación Ligera PIN (`/login`)** |  Listo | 5 tests unitarios | Tokens HMAC-SHA256, cookies httpOnly y middleware Next.js. |
+| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 54 tareas, verificado con `npm run board`. |
+| **Ingestión Multimodal Bot (`src/bot/`)** |  Listo | 13 tests (unit + int) | Canalización de Notas de Voz, Comprobantes e Imágenes y Facturas PDF en Telegram. |
+| **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 46/46 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
 | **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 a ADR-008 | Compilación Webpack explícita (`--webpack`) y módulos compartidos en Next.js 16. |
 
 ---
 
 ## 3. Decisiones de Arquitectura Registradas (ADRs)
 
-* **ADR-001 (Git Flow Estricto):** `master` es exclusivo para releases a producción (Vercel). Todo desarrollo, integración y testing previo ocurre en la rama `dev`.
-* **ADR-002 (Unificación de Código en `/src`):** Se eliminó la carpeta duplicada `web/src/shared`. Next.js consume directamente `src/` mediante el path alias `@/shared/*` configurado en `web/tsconfig.json`.
-* **ADR-003 (Desacoplamiento de Polling vs Webhook):** `src/bot/index.ts` solo exporta la instancia del bot sin iniciar listeners continuos. `src/bot/cli.ts` es el único punto de entrada para Long Polling (`npm run dev:bot`). El Webhook corre de forma stateless en `/api/telegram/webhook`.
-* **ADR-004 (Testing Local sin Bot en Vivo):** En desarrollo local no se requiere conectar a Telegram con el celular. Las pruebas de flujos de gasto, parsing y recálculos se simulan con tests de integración automatizados.
-* **ADR-005 (Resolución de Dependencias para Vercel):** Se ajustaron las versiones de `devDependencies` en el `package.json` raíz (`typescript@^5.7.2`, `@types/node@^22.10.0`, `tsx@^4.19.2`) para evitar errores 404 durante el paso `installCommand` en Vercel.
-* **ADR-006 (Regla Mandatoria Pre-Commit SDD):** Ningún cambio de código se commitea sin haber actualizado previamente `docs/STATUS.md` y la documentación correspondiente en `docs/`.
-* **ADR-007 (Resolución de Módulos Compartidos en Next.js):** Se añadió `webpack.resolve.modules` en `web/next.config.ts` referenciando `web/node_modules`. Esto resuelve los errores `module-not-found` (`grammy`, `dotenv`) al compilar código de `../src/` dentro de Vercel.
-* **ADR-008 (Compatibilidad Next.js 16 con Webpack):** Next.js 16 activa Turbopack por defecto en `next build`, lo que genera conflicto si se detecta configuración de `webpack` sin `turbopack`. Se fijó `"build": "next build --webpack"` en `web/package.json` y se declaró `turbopack: {}` en `web/next.config.ts` para compilar directamente con Webpack.
-* **ADR-009 (Respuesta Directa de Saldo en Lenguaje Natural sin IA):** Se implementó intercepción de frases clave ("ver saldo", "saldo", "balance", "cuanto debemos", "ayuda", "cancelar") en `assistedFlowHandler` para responder inmediatamente con la plantilla preconfigurada de `saldoCommandHandler` y `helpCommandHandler` sin invocar a Gemini ni enviar menús intermedios. Además, se sanitizan los nombres de usuario para prevenir errores de parsing en Markdown.
-* **ADR-010 (Sistema de Diseño UI/UX y Carpeta docs/ui):** Se formalizó el estándar visual del frontend en la nueva subcarpeta `docs/ui/` (`DESIGN_SYSTEM_SPEC.md`, `TOKENS_AND_PALETTE.md`, `COMPONENTS_SPEC.md`, `ROADMAP_UI.md`). Establece la paleta *Obsidian Slate*, números tabulares para montos financieros, jerarquía de balance en 3 segundos y modularización de la interfaz en componentes limpios.
-* **ADR-011 (Recálculo Bajo Demanda y Resiliencia en Callbacks):** Se blindó `saldoCommandHandler` para ejecutar automáticamente `updateBalance()` si la tabla `balances` en Supabase aún no tiene registros inicializados, evitando valores en $0 incorrectos. Se añadió fallback de texto plano si Telegram rechaza Markdown y se envolvió `answerCallbackQuery` con captura de excepciones para que ningún botón interactivo quede con el spinner trabado.
-* **ADR-012 (Logging Estructurado y Blindaje de Markdown en Comandos):** Se incorporó `bot.catch` global en `src/bot/index.ts` y logs detallados en el endpoint `/api/telegram/webhook` para visibilidad de updates en Vercel. Se añadieron fallbacks a texto plano en los comandos `/gasto` y `/help` para garantizar entrega de mensajes aún si Telegram rechaza entidades Markdown.
-* **ADR-013 (Desactivación de Webhook Reply y Entrega Multicapa en Serverless):** Se configuró `canUseWebhookReply: () => false` en la inicialización de `grammY` para garantizar que la función serverless en Vercel no cierre prematuramente la respuesta HTTP antes de completar los envíos de mensajes. Se añadió entrega multicapa en `/saldo`, `/help` y `/gasto` (`Markdown` -> texto plano -> `ctx.api.sendMessage(chatId, ...)`) con logs de trazabilidad en consola para cada callback query.
-* **ADR-014 (Control de Acceso Ligero por PIN / Contraseña y Middleware):** Se especificó y construyó la protección del Dashboard Web mediante un sistema de PIN / Contraseña compartido (`docs/auth/AUTH_SPEC.md`). El módulo criptográfico reside en `src/lib/auth.ts` (alineado a `rootDir: "./src"` y ADR-002), utiliza tokens HMAC-SHA256 en cookies `httpOnly; Secure; SameSite=Lax`, e intercepta en `middleware.ts` las rutas `/` y `/api/dashboard`, excluyendo explícitamente el webhook de Telegram (`/api/telegram/webhook`).
-* **ADR-015 (Identidad Visual, Metadatos de Navegador y Favicon Personalizado):** Se eliminaron los metadatos por defecto de Next.js ("Create Next App" / "create vercel app" y el favicon triangular de Vercel) para consolidar la marca Agyke en el navegador. Se configuró `metadata.title` con plantilla dinámica (`%s | Agyke`) y valor por defecto `"Agyke - Control de Gastos Compartidos"`, idioma en español (`lang="es"`), layout dedicado para `/login` (`"Iniciar Sesión | Agyke"`), y se generaron los paquetes completos de iconos de balanza Agyke con degradado índigo oficial en `web/src/app` y `web/public`: vector SVG (`icon.svg`), `.ico` multi-resolución (16x16 a 256x256 con antialiasing Lanczos) y `apple-icon.png` (180x180).
-* **ADR-016 (Especificación de Ingestión Multimodal y Arnés Local Test-First):** Se formalizó en `docs/multimodal/` la arquitectura completa para el procesamiento inteligente de notas de voz (OGG/Opus), comprobantes físicos (JPEG/PNG) y facturas digitales (PDF). Se estableció como principio innegociable el Contrato Canónico JSON (`ExtractedExpenseDraft`) para desacoplar el formato binario de origen del motor financiero de Agyke. Se especificaron prompts dedicados para modismos argentinos ("lucas", "mitad y mitad", etc.), un arnés CLI local (`scripts/test-multimodal.ts`) para validación rápida sin depender del bot en vivo, y un modo de vista previa transparente en Telegram con cancelación inmediata con un toque (`[ ❌ Cancelar / Descartar ]`).
-* **ADR-017 (Living UI, Dinamismo de Fondo, Rediseño de Login y Gráfico de Tarta Interactivo):** Se formalizó en `docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` el estándar para dotar de vida a la interfaz web sin penalizaciones de rendimiento (Pure CSS GPU con `ambient-float-slow` y `ambient-float-reverse`). Se especificó la elevación de la pantalla `/login` con feedback reactivo ante credenciales inválidas (animación `shake-x` de 400ms, pulsación de error y haz de luz en botón) y la revolución del gráfico de tarta a un Donut Chart con KPI Central Dinámico que exhibe el gasto total consolidado en reposo y muta a la clasificación activa con porcentajes calculados en tiempo real sobre hover.
-* **ADR-018 (Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog):** Se formalizó en `docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` la visión de la vista de pantalla completa (100vh / 100vw sin scroll) estilo Kiosk / Command Center para Smart TVs y monitores secundarios. Se determinó de forma estricta mantener esta funcionalidad en estado **PENDIENTE / BACKLOG** en el roadmap hasta que se apliquen migraciones a Supabase con campos analíticos extendidos (`category`, `payment_method`, `tags` y tabla `budgets`), detallando las 4 gráficas preliminares viables hoy y las avanzadas desbloqueadas a futuro.
-* **ADR-019 (Tablero Operativo de Tareas en JSON para el Agente de IA):** Se formalizó e implementó un tablero estructurado en [`docs/board.json`](./board.json) validado mediante esquema estricto [`docs/schemas/board.schema.json`](./schemas/board.schema.json). Diseñado para optimizar el razonamiento del modelo de IA eliminando ambigüedades de Markdown, define metadatos explícitos por tarea (`domain`, `status`, `priority`, `spec_reference`, `dependencies`, `acceptance_criteria`, `files_to_touch`). Se creó la herramienta CLI `scripts/board-summary.ts` (`npm run board`) para visualización inmediata en terminal con barra de progreso y se actualizó [`GEMINI.md`](../GEMINI.md) para establecer `docs/board.json` como requisito mandatorio del ciclo SDD.
+* **ADR-001 a ADR-015:** Consultar historial de releases para Git Flow, unificación en `/src`, webhook desacoplado, testing local sin bot en vivo, compatibilidad Next.js 16/Webpack, respuesta rápida sin IA, Sistema de Diseño Obsidian Slate, resiliencia en callbacks, autenticación ligera por PIN e identidad visual oficial.
+* **ADR-016 (Especificación de Ingestión Multimodal y Arnés Local Test-First):** Se formalizó en `docs/multimodal/` la arquitectura completa para el procesamiento inteligente de notas de voz (OGG/Opus), comprobantes físicos (JPEG/PNG) y facturas digitales (PDF). Se estableció como principio innegociable el Contrato Canónico JSON (`ExtractedExpenseDraft`) para desacoplar el formato binario de origen del motor financiero de Agyke.
+* **ADR-017 (Living UI, Dinamismo de Fondo, Rediseño de Login y Gráfico de Tarta Interactivo):** Se formalizó en `docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` el estándar para dotar de vida a la interfaz web sin penalizaciones de rendimiento (Pure CSS GPU con `ambient-float-slow` y `ambient-float-reverse`), micro-animación `shake-x` en `/login` y Donut Chart interactivo con KPI central dinámico en `AnalyticsSection.tsx`.
+* **ADR-018 (Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog):** Se formalizó en `docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` la visión de la vista de pantalla completa (100vh / 100vw sin scroll) estilo Kiosk / Command Center para Smart TVs y monitores secundarios, manteniéndola en estado **PENDIENTE / BACKLOG** en el roadmap hasta que se apliquen migraciones con campos analíticos extendidos.
+* **ADR-019 (Tablero Operativo de Tareas en JSON para el Agente de IA):** Se formalizó e implementó un tablero estructurado en [`docs/board.json`](./board.json) validado mediante esquema estricto [`docs/schemas/board.schema.json`](./schemas/board.schema.json), con visualizador CLI `npm run board` y reglas de sincronización mandatorias en [`GEMINI.md`](../GEMINI.md).
+* **ADR-020 (Actualización a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo):** Debido al retiro de `gemini-1.5-flash` en la API v1beta de Google, se actualizaron los servicios `receipt-parser.ts`, `audio-parser.ts`, `pdf-parser.ts` y `gemini.ts` a `gemini-3.6-flash`. Para blindar el sistema contra errores 404 (modelos discontinuados) o 503 (picos temporales de alta demanda), se implementó una cadena de fallback en cascada (`gemini-3.6-flash` -> `gemini-3.5-flash-lite` -> `gemini-flash-latest`), garantizando continuidad operativa en inferencias de comprobantes y texto sin interrupción de la interfaz.
+* **ADR-021 (Integración de Ingestión Multimodal en Telegram y Botón de Descarte):** Se canalizaron en `src/bot/handlers/assisted.ts` las 3 fuentes de comprobantes (`parseAudioMessage`, `parseReceiptImage`, `parsePdfDocument`) hacia el contrato `ExtractedExpenseDraft`. Se diseñó la tarjeta de previsualización en Telegram con transcripción literal, datos comerciales, monto formateado en ARS y resaltado de clasificación sugerida. Se incorporó el botón `[ ❌ Descartar Gasto ]` (`MULTI-18`) con handler dedicado en `callback.ts` para cancelar ítems de `agyke_queue` a estado `DISCARDED` sin impacto contable, y se limpiaron las rutas temporales del laboratorio para mantener el árbol de producción pulcro y libre de código de prueba.
 
 ---
 
 ## 4. Estado de Tareas (Roadmap)
 
 ### Completadas
-- [x] Tarea 1: Estructura del Proyecto y Supabase Setup (`docs/TASKS.md`).
-- [x] Tarea 2: Inicialización del Bot y Middleware de Autenticación (`docs/TASKS.md`).
-- [x] Tarea 3: Handler de Carga Directa `/gasto` (`docs/TASKS.md`).
-- [x] Tarea 4: Pipeline Asistido con Gemini 1.5 Flash (`docs/TASKS.md`).
-- [x] Tarea 5: Handler de Botones Agyke (Inline Keyboards) (`docs/TASKS.md`).
-- [x] Tarea 6: Dashboard Web en Next.js (`docs/TASKS.md`).
-- [x] Tarea 7: Arnés de Simulación de Telegram Headless (`docs/LOCAL_TESTING_SPEC.md`).
-- [x] Tarea 8: Entorno de Pruebas Local Completo y Verificación Integral (`scripts/simulate-flow.ts`).
-- [x] Tarea 9: Preparación y Validación del Entorno de Deploy a Producción (`docs/TASKS_PROD.md`).
-- [x] Refactor Webhook Serverless y Buffer en memoria (`docs/TASKS_PROD.md` Tareas 1-3).
-- [x] Suite de Pruebas Unitarias y CI Pipeline (`docs/WORKFLOW_DEV_CI.md`).
-- [x] Corrección de dependencias y compatibilidad de build en Vercel.
-- [x] Soporte para consulta de saldo en lenguaje natural directo sin IA.
-- [x] Especificación formal del Sistema de Diseño UI/UX en `docs/ui/`.
-- [x] Rediseño Visual Frontend completo (`docs/ui/ROADMAP_UI.md` Fases 1 a 5).
-- [x] Especificación formal de Control de Acceso y Privacidad por PIN (`docs/auth/`).
-- [x] Implementación completa de Autenticación Ligera por PIN ([`docs/auth/TASKS_AUTH.md`](./auth/TASKS_AUTH.md)):
-  - [x] Tarea AUTH-1 a AUTH-3: Módulo criptográfico HMAC (`web/src/lib/auth.ts`), endpoints `/api/auth/login`, `/api/auth/logout` y `/api/auth/check`.
-  - [x] Tarea AUTH-4: Next.js Middleware (`web/src/middleware.ts`) con bypass estricto a `/api/telegram/webhook` y `/login`.
-  - [x] Tarea AUTH-5 a AUTH-6: Pantalla `web/src/app/login/page.tsx` estilo *Obsidian Slate* y botón de bloqueo en `HeaderBar.tsx`.
-  - [x] Tarea AUTH-7 a AUTH-9: Suite de tests unitarios de autenticación (`src/tests/auth.test.ts` 5/5 pasando).
-- [x] Identidad Visual y Favicon del Navegador (ADR-015): Reemplazo total del branding de Vercel/Next por Agyke (título dinámico, balanza SVG, favicon.ico multi-resolución y apple-icon).
-- [x] Especificación de Ingestión Multimodal (ADR-016 en `docs/multimodal/`):
-  - [x] Arquitectura y Contrato Canónico JSON (`ExtractedExpenseDraft`).
-  - [x] Especificación de Notas de Voz y Audio (`SPEC_VOICE_AUDIO.md`).
-  - [x] Especificación de Comprobantes Físicos e Imágenes (`SPEC_RECEIPTS_IMAGES.md`).
-  - [x] Especificación de Facturas y Documentos PDF (`SPEC_DOCUMENTS_PDF.md`).
-  - [x] Especificación del Arnés de Pruebas Local y Metodología Test-First (`SPEC_TESTING_HARNESS.md`).
-  - [x] Roadmap y Checklist de Implementación (`TASKS_MULTIMODAL.md`).
+- [x] Tareas Core 1 a 9 completadas (`docs/TASKS.md` y `docs/TASKS_PROD.md`).
+- [x] Autenticación Ligera por PIN (Fases 1 a 4 completadas en `docs/auth/TASKS_AUTH.md`).
+- [x] Identidad Visual y Favicon del Navegador (ADR-015).
+- [x] Especificación de Ingestión Multimodal (ADR-016 en `docs/multimodal/`).
 - [x] Especificación de Interfaz Viva, Dinamismo y Rediseño de Login (`docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md` - ADR-017).
 - [x] Especificación Arquitectural del Gran Dashboard Fullscreen en Backlog (`docs/ui/SPEC_GRAN_DASHBOARD_FULLSCREEN.md` - ADR-018).
-- [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN, Muro Multimodal y SDD.
-- [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, CLI `scripts/board-summary.ts`, `npm run board` - ADR-019).
+- [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN y SDD.
+- [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, `npm run board` - ADR-019).
+- [x] Actualización de Motor a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo (ADR-020).
+- [x] **Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021):**
+  - [x] Formalización de tipos canónicos `ExtractedExpenseDraft` en `src/types/multimodal.ts`.
+  - [x] Motor de Comprobantes e Imágenes (`src/services/multimodal/receipt-parser.ts` - `MULTI-10`).
+  - [x] Motor de Audio y Notas de Voz (`src/services/multimodal/audio-parser.ts` - `MULTI-07`).
+  - [x] Motor de Facturas PDF (`src/services/multimodal/pdf-parser.ts` - `MULTI-13`).
+  - [x] Canalización en `assistedFlowHandler` de notas de voz, fotos de tickets y facturas PDF (`MULTI-16`).
+  - [x] Tarjeta interactiva enriquecida con transcripción, datos comerciales y clasificación sugerida (`MULTI-17`).
+  - [x] Botón inline `[ ❌ Descartar Gasto ]` y handler de callback en `src/bot/handlers/callback.ts` (`MULTI-18`).
+  - [x] Cobertura automatizada integral en `src/tests/integration.test.ts` (Escenario 7 verificado).
+  - [x] Limpieza total de vistas temporales de laboratorio (`/lab`).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Ejecutar la Fase 7 del Roadmap de UI ([`docs/ui/ROADMAP_UI.md`](./ui/ROADMAP_UI.md)): implementación de los orbes dinámicos de fondo (`globals.css`), micro-interacción de sacudida en el login (`web/src/app/login/page.tsx`) y refactor del Donut Chart con centro KPI dinámico en `web/src/components/AnalyticsSection.tsx`. Mantener la vista del Gran Dashboard Fullscreen en Backlog hasta la migración de campos. Actualizar `docs/board.json` al completar cada subtarea.
+Hacer el push de la rama `lab/multimodal-receipts`, abrir el Pull Request hacia `dev`, fusionar y verificar en el entorno de despliegue y en Telegram la recepción de audios, fotos y PDFs con descarte interactivo. Continuar con el sprint de Interfaz Viva (UI-16 a UI-20).

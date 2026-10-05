@@ -9,23 +9,12 @@ import {
   PieChart,
   Pie,
   Cell,
-  Sector,
 } from 'recharts';
 import { TrendingUp, PieChart as PieIcon } from 'lucide-react';
 import type { Transaction, ClassificationType } from '../types/database';
 
 interface AnalyticsSectionProps {
   transactions: Transaction[];
-}
-
-interface ActiveShapeProps {
-  cx?: number;
-  cy?: number;
-  innerRadius?: number;
-  outerRadius?: number;
-  startAngle?: number;
-  endAngle?: number;
-  fill?: string;
 }
 
 const PIE_COLORS: Record<ClassificationType, string> = {
@@ -40,47 +29,6 @@ const PIE_LABELS: Record<ClassificationType, string> = {
   '100': 'Favor 100%',
   '-100': 'Deuda Mía',
   '0': 'Personal',
-};
-
-const renderActiveShape = (props: unknown) => {
-  const shape = props as ActiveShapeProps;
-  const {
-    cx = 0,
-    cy = 0,
-    innerRadius = 0,
-    outerRadius = 0,
-    startAngle = 0,
-    endAngle = 0,
-    fill = '#818CF8',
-  } = shape;
-
-  return (
-    <g>
-      {/* Outer subtle glow ring */}
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={outerRadius + 3}
-        outerRadius={outerRadius + 6}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-        opacity={0.35}
-        cornerRadius={3}
-      />
-      {/* Expanded Main Sector */}
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius - 2}
-        outerRadius={outerRadius + 4}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-        cornerRadius={6}
-      />
-    </g>
-  );
 };
 
 export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions }) => {
@@ -270,19 +218,26 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
                     cornerRadius={6}
                     paddingAngle={4}
                     dataKey="value"
-                    activeIndex={activeIndex ?? undefined}
-                    activeShape={renderActiveShape}
-                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseEnter={(_: unknown, index: number) => setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(null)}
                   >
-                    {pieData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.color}
-                        stroke="rgba(8, 11, 17, 0.7)"
-                        strokeWidth={2}
-                      />
-                    ))}
+                    {pieData.map((entry, index) => {
+                      const isHovered = activeIndex === index;
+                      return (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke={isHovered ? '#FFFFFF' : 'rgba(8, 11, 17, 0.7)'}
+                          strokeWidth={isHovered ? 3 : 2}
+                          opacity={activeIndex !== null && !isHovered ? 0.55 : 1}
+                          style={{
+                            filter: isHovered ? `drop-shadow(0 0 8px ${entry.color})` : undefined,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                          }}
+                        />
+                      );
+                    })}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>

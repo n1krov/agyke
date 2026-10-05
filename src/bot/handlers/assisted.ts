@@ -412,12 +412,12 @@ export async function assistedFlowHandler(ctx: AgykeContext): Promise<void> {
       const isOverload = multimodalError.includes('503') || multimodalError.includes('demand') || multimodalError.includes('timeout') || multimodalError.includes('aborted');
       const errorMsg = isOverload
         ? '⚠️ Los servidores de IA tuvieron un pico de saturación temporal (error 503).'
-        : '⚠️ No se pudo conectar con el servicio de IA.';
+        : `⚠️ Error al conectar con la IA: \`${multimodalError.substring(0, 180)}\``;
 
       await ctx.reply(
         `${mediaTitle}\n` +
         `${errorMsg}\n\n` +
-        `💰 Podés reintentar en unos segundos o responder este mensaje con el *monto* del gasto (ej: \`15000\`):`,
+        `💰 Podés responder este mensaje con el *monto* del gasto (ej: \`15000\`):`,
         { parse_mode: 'Markdown' }
       );
       return;

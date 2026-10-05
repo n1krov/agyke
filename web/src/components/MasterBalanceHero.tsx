@@ -26,46 +26,52 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
     maximumFractionDigits: 2,
   });
 
-  // Estilos condicionales según el estado
-  let statusGlow = 'bg-hero-glow-cyan border-cyan-500/30';
+  // Estilos condicionales según el estado con halos perimetrales pulsantes (UI-19)
+  let statusGlow = 'bg-hero-glow-cyan border-cyan-500/30 animate-pulse-hero-cyan';
   let badgeColor = 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300';
   let badgeText = 'Cuentas en Paz';
 
   if (isPositive) {
-    statusGlow = 'bg-hero-glow-emerald border-emerald-500/30';
+    statusGlow = 'bg-hero-glow-emerald border-emerald-500/30 animate-pulse-hero-emerald';
     badgeColor = 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300';
     badgeText = `${userB.name} debe a ${userA.name}`;
   } else if (isNegative) {
-    statusGlow = 'bg-hero-glow-rose border-rose-500/30';
+    statusGlow = 'bg-hero-glow-rose border-rose-500/30 animate-pulse-hero-rose';
     badgeColor = 'bg-rose-500/15 border-rose-500/30 text-rose-300';
     badgeText = `${userA.name} debe a ${userB.name}`;
   }
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl glass-panel border p-6 sm:p-8 transition-all ${statusGlow}`}
+      className={`relative overflow-hidden rounded-2xl glass-panel border p-4 sm:p-8 transition-all ${statusGlow} before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/25 before:to-transparent`}
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* Internal Atmospheric Radial Accent */}
+      <div
+        className={`absolute -right-20 -bottom-20 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
+          isPositive ? 'bg-emerald-500/15' : isNegative ? 'bg-rose-500/15' : 'bg-cyan-500/15'
+        }`}
+      />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
         {/* Lado Izquierdo: Cifra y Explicación */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
               Balance Neto Consolidado
             </span>
-            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeColor}`}>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-medium border ${badgeColor}`}>
               {isZero ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
               {badgeText}
             </span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white tabular-nums">
+            <span className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white tabular-nums">
               $ {formattedAbs}
             </span>
-            <span className="text-sm font-medium text-slate-400">ARS</span>
+            <span className="text-xs sm:text-sm font-medium text-slate-400">ARS</span>
           </div>
 
-          <p className="text-sm text-slate-300">
+          <p className="text-xs sm:text-sm text-slate-300">
             {isZero && '⚖️ Ambos usuarios están al día. No existen deudas pendientes entre las cuentas.'}
             {isPositive && (
               <>
@@ -85,7 +91,7 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
         </div>
 
         {/* Lado Derecho: Flujo Visual de Cuentas */}
-        <div className="flex items-center justify-center sm:justify-start gap-4 p-4 rounded-xl bg-slate-900/50 border border-white/5">
+        <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl bg-slate-900/50 border border-white/5 w-full sm:w-auto">
           {/* Acreedor / Deudor Usuario A */}
           <div className="flex flex-col items-center gap-1.5 text-center min-w-[70px]">
             <UserAvatar name={userA.name} size="md" />
@@ -95,10 +101,18 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
             </span>
           </div>
 
-          {/* Flecha de dirección */}
+          {/* Flecha de dirección con pulso de flujo financiero */}
           <div className="flex flex-col items-center justify-center px-2">
-            <div className={`p-1.5 rounded-full ${isZero ? 'bg-cyan-500/20 text-cyan-400' : isPositive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-              <ArrowRight className={`w-4 h-4 ${isNegative ? 'rotate-180' : ''}`} />
+            <div
+              className={`p-1.5 rounded-full transition-all ${
+                isZero
+                  ? 'bg-cyan-500/20 text-cyan-400'
+                  : isPositive
+                  ? 'bg-emerald-500/20 text-emerald-400 animate-pulse shadow-sm shadow-emerald-500/20'
+                  : 'bg-rose-500/20 text-rose-400 animate-pulse shadow-sm shadow-rose-500/20'
+              }`}
+            >
+              <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${isNegative ? 'rotate-180' : ''}`} />
             </div>
             <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
               {isZero ? 'Paz' : 'Deuda'}

@@ -9,6 +9,7 @@ import { StatMetricCard } from '../components/StatMetricCard';
 import { AnalyticsSection } from '../components/AnalyticsSection';
 import { TransactionsTable } from '../components/TransactionsTable';
 import { QueueViewer } from '../components/QueueViewer';
+import { MobileBottomDock } from '../components/MobileBottomDock';
 
 export default function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
@@ -85,12 +86,30 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 bg-gradient-radial selection:bg-indigo-500/30 selection:text-white pb-20">
+    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-28 sm:pb-20">
+      {/* Atmosphere: Living Ambient Background Layer */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+        {/* Subtle Grounding Grid Pattern */}
+        <div className="absolute inset-0 bg-grid-mesh opacity-70" />
+
+        {/* Ambient Primary Orb - Indigo/Violet */}
+        <div className="absolute -top-32 -left-32 w-[580px] h-[580px] rounded-full bg-gradient-to-br from-indigo-600/25 to-violet-600/15 blur-[120px] animate-ambient-slow pointer-events-none" />
+
+        {/* Ambient Secondary Orb - Emerald/Cyan */}
+        <div className="absolute top-[35%] -right-40 w-[620px] h-[620px] rounded-full bg-gradient-to-tl from-emerald-600/20 to-cyan-500/15 blur-[130px] animate-ambient-reverse pointer-events-none" />
+
+        {/* Ambient Accent Orb - Cyan/Sky */}
+        <div className="absolute top-20 right-[15%] w-[350px] h-[350px] rounded-full bg-cyan-500/10 blur-[100px] animate-ambient-slow pointer-events-none" />
+
+        {/* Ambient Tertiary Glow - Subtle breathing pulse */}
+        <div className="absolute bottom-10 left-[20%] w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-indigo-500/15 to-purple-500/10 blur-[110px] animate-mesh-pulse pointer-events-none" />
+      </div>
+
       {/* Header Sticky */}
       <HeaderBar onRefresh={fetchData} isLoading={loading} lastUpdated={lastUpdated} />
 
       {/* Main Content Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         {/* KPI Principal: Master Balance Hero */}
         <MasterBalanceHero
           netBalance={netBalance}
@@ -98,8 +117,8 @@ export default function Dashboard() {
           transactionCount={transactions.length}
         />
 
-        {/* Grid de 4 Métricas Secundarias */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Grid de 4 Métricas Secundarias (2x2 en mobile, 4 cols en desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
           <StatMetricCard
             title="Total Histórico"
             value={formatARS(metrics.totalGasto)}
@@ -142,6 +161,9 @@ export default function Dashboard() {
         {/* Visor de Cola Inteligente de Gemini */}
         <QueueViewer queueItems={queueItems} />
       </main>
+
+      {/* Cápsula Flotante Inferior de Navegación Mobile */}
+      <MobileBottomDock onRefresh={fetchData} isLoading={loading} />
     </div>
   );
 }

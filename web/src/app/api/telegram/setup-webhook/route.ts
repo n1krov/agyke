@@ -12,7 +12,16 @@ export async function GET() {
     const res = await fetch(`https://api.telegram.org/bot${token}/getWebhookInfo`);
     const data = await res.json();
 
-    return NextResponse.json(data);
+    const geminiKey = process.env.GEMINI_API_KEY;
+    return NextResponse.json({
+      webhook: data,
+      env: {
+        hasTelegramToken: Boolean(token),
+        hasGeminiKey: Boolean(geminiKey),
+        geminiKeyPrefix: geminiKey ? `${geminiKey.substring(0, 8)}...` : 'MISSING',
+        nodeEnv: process.env.NODE_ENV
+      }
+    });
   } catch (err: unknown) {
     console.error('[SetupWebhook GET] Error:', err);
     const message = err instanceof Error ? err.message : 'Error desconocido';

@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 03 de Octubre de 2026.
-* **Rama Activa:** `dev` (preparación de paso a producción en `master`).
+* **Fecha de corte:** 05 de Octubre de 2026.
+* **Rama Activa:** `feat/mobile-responsive-ui` (creada a partir de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** Sincronizado con PR #11 (`b829208`) + optimización de webhook serverless.
+* **Último Commit:** Sincronizado con `2976871` en `dev`.
 
 ---
 
@@ -39,6 +39,26 @@
 * **ADR-019 (Tablero Operativo de Tareas en JSON para el Agente de IA):** Se formalizó e implementó un tablero estructurado en [`docs/board.json`](./board.json) validado mediante esquema estricto [`docs/schemas/board.schema.json`](./schemas/board.schema.json), con visualizador CLI `npm run board` y reglas de sincronización mandatorias en [`GEMINI.md`](../GEMINI.md).
 * **ADR-020 (Actualización a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo):** Debido al retiro de `gemini-1.5-flash` en la API v1beta de Google, se actualizaron los servicios `receipt-parser.ts`, `audio-parser.ts`, `pdf-parser.ts` y `gemini.ts` a `gemini-3.6-flash`. Para blindar el sistema contra errores 404 (modelos discontinuados) o 503 (picos temporales de alta demanda), se implementó una cadena de fallback en cascada (`gemini-3.6-flash` -> `gemini-3.5-flash-lite` -> `gemini-flash-latest`), garantizando continuidad operativa en inferencias de comprobantes y texto sin interrupción de la interfaz.
 * **ADR-021 (Integración de Ingestión Multimodal en Telegram y Botón de Descarte):** Se canalizaron en `src/bot/handlers/assisted.ts` las 3 fuentes de comprobantes (`parseAudioMessage`, `parseReceiptImage`, `parsePdfDocument`) hacia el contrato `ExtractedExpenseDraft`. Se diseñó la tarjeta de previsualización en Telegram con transcripción literal, datos comerciales, monto formateado en ARS y resaltado de clasificación sugerida. Se incorporó el botón `[ ❌ Descartar Gasto ]` (`MULTI-18`) con handler dedicado en `callback.ts` para cancelar ítems de `agyke_queue` a estado `DISCARDED` sin impacto contable, y se limpiaron las rutas temporales del laboratorio para mantener el árbol de producción pulcro y libre de código de prueba.
+* **ADR-022 (Implementación de Interfaz Viva, Dinamismo de Fondo, Login Elevado y Donut Chart Interactivo):** Siguiendo `SPEC_LIVING_UI_MOTION_AND_LOGIN.md`, se implementó la Fase 7 completa (`UI-16` a `UI-20`):
+  1. **Atmósfera Viva:** Orbes dinámicos de luz con aceleración por hardware (`ambient-float-slow` 18s y `ambient-float-reverse` 22s), pulso central (`mesh-pulse-subtle` 10s) y patrón de micro-malla (`bg-grid-mesh`) montados en el Dashboard principal (`page.tsx`) y pantalla de autenticación (`/login`).
+  2. **Login Elevado:** Micro-animación de rechazo `shake-x` (400ms) ante clave errónea, borde de advertencia carmesí transitorio, isotipo con halo de respiración armónica (`animate-halo-breathe`), indicadores táctiles de longitud de PIN y botón de desbloqueo con efecto haz de luz diagonal (*shimmer*).
+  3. **Interactive Donut Chart:** Transformación de la tarta estática en `<AnalyticsSection />` a un centro de comando financiero interactivo con KPI central dinámico (total acumulado + conteo de transacciones en reposo mutando a clasificación activa, monto y porcentaje exacto en hover), terminaciones redondeadas (`cornerRadius={6}`, `paddingAngle={4}`), expansión de sector activo con `renderActiveShape` (Recharts) y leyenda interactiva bidireccional enriquecida con pastillas de porcentaje precalculado.
+  4. **Micro-Dinamismo:** Halo perimetral pulsante en `<MasterBalanceHero />` (esmeralda, carmesí o cian según balance neto), deslizamiento pulsante en flecha de dirección financiera y doble anillo radar (`animate-ping`) en el indicador de Webhook en `<HeaderBar />`.
+* **ADR-023 (Especificación Técnica de Adaptabilidad y Experiencia Mobile-First):** Se formalizó en [`docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md`](./ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md) la arquitectura mobile-first para smartphones (360px a 430px) organizada en la Fase 9 (`UI-25` a `UI-31`):
+  1. **Table-to-Card Feed Híbrido:** En pantallas `<sm`, sustitución completa del scroll horizontal de `TransactionsTable` por un feed de tarjetas de transacciones táctiles.
+  2. **Grilla 2x2 para Métricas:** Reducción del vertical sprawl mediante grilla simétrica de 2x2 para las métricas secundarias.
+  3. **Cápsula Flotante Inferior (`MobileBottomDock`):** Barra fija de acciones en la zona del pulgar (`Sync`, `Telegram`, `Lock`) con `pb-28`.
+  4. **Optimización de Login:** Altura dinámica con `100dvh` para evitar saltos con el teclado virtual e `inputMode="numeric"`.
+  5. **Touch Ergonomics y Safe Areas:** Utilidades `pb-safe`, `touch-action: manipulation` y `overflow-x: hidden`.
+
+* **ADR-024 (Implementación de Experiencia Mobile-First, Card Feed Híbrido y Dock Flotante Inferior):** Siguiendo `SPEC_MOBILE_RESPONSIVE_REDESIGN.md`, se ejecutó y validó la Fase 9 completa (`UI-25` a `UI-31`):
+  1. **Tokens y Safe Areas (`UI-25`):** Inclusión de `touch-action: manipulation`, utilidades `.pb-safe` y `.pt-safe`, y bloqueo estricto de desborde horizontal (`overflow-x: hidden`).
+  2. **Grilla 2x2 para Métricas (`UI-26`):** Reorganización de las 4 tarjetas secundarias en `grid-cols-2 lg:grid-cols-4` con padding compacto (`p-3.5 sm:p-5`) y tipografía tabular elástica.
+  3. **Table-to-Card Feed Híbrido (`UI-27`):** En `<sm`, `TransactionsTable` muta automáticamente a una lista de tarjetas táctiles de gastos (`block sm:hidden`), eliminando el scroll horizontal mientras mantiene la tabla completa de 6 columnas en desktop (`hidden sm:block`).
+  4. **Cápsula Flotante Inferior de Navegación (`UI-28`):** Montaje de `MobileBottomDock` (`fixed bottom-4 inset-x-4 sm:hidden z-40 pb-safe`) con botones táctiles de 44px para Actualizar saldo, acceso al bot de Telegram y Bloqueo de sesión. Separación de pantalla con `pb-28 sm:pb-20` en el contenedor principal.
+  5. **Touch Ergonomics en Analítica (`UI-29`):** Adaptabilidad proporcional en Donut Chart (`w-24 h-24 sm:w-28 sm:h-28`, innerRadius 58, outerRadius 78), intervalo elástico en eje X de `AreaChart` y filas de desglose con altura táctil mínima de 44px y soporte de tap directo.
+  6. **Login Mobile sin Saltos (`UI-30`):** Reemplazo de `min-h-screen` por `min-h-[100dvh]` y activación de teclado numérico nativo con `inputMode="numeric"` y `pattern="[0-9]*"`.
+  7. **Verificación Integral (`UI-31`):** Validación en viewports de 360px a 430px (iPhone SE, iPhone 14 Pro, Samsung Galaxy) con cero desborde horizontal.
 
 ---
 
@@ -54,18 +74,11 @@
 - [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN y SDD.
 - [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, `npm run board` - ADR-019).
 - [x] Actualización de Motor a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo (ADR-020).
-- [x] **Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021):**
-  - [x] Formalización de tipos canónicos `ExtractedExpenseDraft` en `src/types/multimodal.ts`.
-  - [x] Motor de Comprobantes e Imágenes (`src/services/multimodal/receipt-parser.ts` - `MULTI-10`).
-  - [x] Motor de Audio y Notas de Voz (`src/services/multimodal/audio-parser.ts` - `MULTI-07`).
-  - [x] Motor de Facturas PDF (`src/services/multimodal/pdf-parser.ts` - `MULTI-13`).
-  - [x] Canalización en `assistedFlowHandler` de notas de voz, fotos de tickets y facturas PDF (`MULTI-16`).
-  - [x] Tarjeta interactiva enriquecida con transcripción, datos comerciales y clasificación sugerida (`MULTI-17`).
-  - [x] Botón inline `[ ❌ Descartar Gasto ]` y handler de callback en `src/bot/handlers/callback.ts` (`MULTI-18`).
-  - [x] Cobertura automatizada integral en `src/tests/integration.test.ts` (Escenario 7 verificado).
-  - [x] Limpieza total de vistas temporales de laboratorio (`/lab`).
+- [x] Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021).
+- [x] Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022).
+- [x] Especificación e Implementación Mobile-First y Card Feed Híbrido (Fase 9 - ADR-023 y ADR-024).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Hacer el push de `dev`, abrir el Pull Request hacia `master`, desplegar en Vercel y verificar en Telegram la recepción de audios, fotos y PDFs con descarte interactivo en producción (Checklist de TASKS_PROD.md). Continuar luego con el sprint de Interfaz Viva (UI-16 a UI-20).
+Fase 9 concluida al 100%. El siguiente sprint operativo corresponde a las tareas de arnés de pruebas multimodal local en terminal (`MULTI-03` a `MULTI-06`), o revisión / merge de la rama `feat/mobile-responsive-ui` hacia `dev`.

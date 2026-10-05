@@ -26,17 +26,17 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
     maximumFractionDigits: 2,
   });
 
-  // Estilos condicionales según el estado
-  let statusGlow = 'bg-hero-glow-cyan border-cyan-500/30';
+  // Estilos condicionales según el estado con halos perimetrales pulsantes (UI-19)
+  let statusGlow = 'bg-hero-glow-cyan border-cyan-500/30 animate-pulse-hero-cyan';
   let badgeColor = 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300';
   let badgeText = 'Cuentas en Paz';
 
   if (isPositive) {
-    statusGlow = 'bg-hero-glow-emerald border-emerald-500/30';
+    statusGlow = 'bg-hero-glow-emerald border-emerald-500/30 animate-pulse-hero-emerald';
     badgeColor = 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300';
     badgeText = `${userB.name} debe a ${userA.name}`;
   } else if (isNegative) {
-    statusGlow = 'bg-hero-glow-rose border-rose-500/30';
+    statusGlow = 'bg-hero-glow-rose border-rose-500/30 animate-pulse-hero-rose';
     badgeColor = 'bg-rose-500/15 border-rose-500/30 text-rose-300';
     badgeText = `${userA.name} debe a ${userB.name}`;
   }
@@ -95,10 +95,18 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
             </span>
           </div>
 
-          {/* Flecha de dirección */}
+          {/* Flecha de dirección con pulso de flujo financiero */}
           <div className="flex flex-col items-center justify-center px-2">
-            <div className={`p-1.5 rounded-full ${isZero ? 'bg-cyan-500/20 text-cyan-400' : isPositive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-              <ArrowRight className={`w-4 h-4 ${isNegative ? 'rotate-180' : ''}`} />
+            <div
+              className={`p-1.5 rounded-full transition-all ${
+                isZero
+                  ? 'bg-cyan-500/20 text-cyan-400'
+                  : isPositive
+                  ? 'bg-emerald-500/20 text-emerald-400 animate-pulse shadow-sm shadow-emerald-500/20'
+                  : 'bg-rose-500/20 text-rose-400 animate-pulse shadow-sm shadow-rose-500/20'
+              }`}
+            >
+              <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${isNegative ? 'rotate-180' : ''}`} />
             </div>
             <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
               {isZero ? 'Paz' : 'Deuda'}

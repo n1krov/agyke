@@ -85,12 +85,27 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 bg-gradient-radial selection:bg-indigo-500/30 selection:text-white pb-20">
+    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-20">
+      {/* Atmosphere: Living Ambient Background Layer */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+        {/* Subtle Grounding Grid Pattern */}
+        <div className="absolute inset-0 bg-grid-mesh opacity-70" />
+
+        {/* Ambient Primary Orb - Indigo/Violet */}
+        <div className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-indigo-600/15 to-violet-600/10 blur-[100px] animate-ambient-slow" />
+
+        {/* Ambient Secondary Orb - Emerald/Cyan */}
+        <div className="absolute top-[35%] -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-tl from-emerald-600/10 to-cyan-500/10 blur-[110px] animate-ambient-reverse" />
+
+        {/* Ambient Tertiary Glow - Subtle breathing pulse */}
+        <div className="absolute bottom-10 left-[20%] w-[450px] h-[450px] rounded-full bg-indigo-500/10 blur-[90px] animate-mesh-pulse" />
+      </div>
+
       {/* Header Sticky */}
       <HeaderBar onRefresh={fetchData} isLoading={loading} lastUpdated={lastUpdated} />
 
       {/* Main Content Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         {/* KPI Principal: Master Balance Hero */}
         <MasterBalanceHero
           netBalance={netBalance}

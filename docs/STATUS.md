@@ -39,6 +39,11 @@
 * **ADR-019 (Tablero Operativo de Tareas en JSON para el Agente de IA):** Se formalizó e implementó un tablero estructurado en [`docs/board.json`](./board.json) validado mediante esquema estricto [`docs/schemas/board.schema.json`](./schemas/board.schema.json), con visualizador CLI `npm run board` y reglas de sincronización mandatorias en [`GEMINI.md`](../GEMINI.md).
 * **ADR-020 (Actualización a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo):** Debido al retiro de `gemini-1.5-flash` en la API v1beta de Google, se actualizaron los servicios `receipt-parser.ts`, `audio-parser.ts`, `pdf-parser.ts` y `gemini.ts` a `gemini-3.6-flash`. Para blindar el sistema contra errores 404 (modelos discontinuados) o 503 (picos temporales de alta demanda), se implementó una cadena de fallback en cascada (`gemini-3.6-flash` -> `gemini-3.5-flash-lite` -> `gemini-flash-latest`), garantizando continuidad operativa en inferencias de comprobantes y texto sin interrupción de la interfaz.
 * **ADR-021 (Integración de Ingestión Multimodal en Telegram y Botón de Descarte):** Se canalizaron en `src/bot/handlers/assisted.ts` las 3 fuentes de comprobantes (`parseAudioMessage`, `parseReceiptImage`, `parsePdfDocument`) hacia el contrato `ExtractedExpenseDraft`. Se diseñó la tarjeta de previsualización en Telegram con transcripción literal, datos comerciales, monto formateado en ARS y resaltado de clasificación sugerida. Se incorporó el botón `[ ❌ Descartar Gasto ]` (`MULTI-18`) con handler dedicado en `callback.ts` para cancelar ítems de `agyke_queue` a estado `DISCARDED` sin impacto contable, y se limpiaron las rutas temporales del laboratorio para mantener el árbol de producción pulcro y libre de código de prueba.
+* **ADR-022 (Implementación de Interfaz Viva, Dinamismo de Fondo, Login Elevado y Donut Chart Interactivo):** Siguiendo `SPEC_LIVING_UI_MOTION_AND_LOGIN.md`, se implementó la Fase 7 completa (`UI-16` a `UI-20`):
+  1. **Atmósfera Viva:** Orbes dinámicos de luz con aceleración por hardware (`ambient-float-slow` 18s y `ambient-float-reverse` 22s), pulso central (`mesh-pulse-subtle` 10s) y patrón de micro-malla (`bg-grid-mesh`) montados en el Dashboard principal (`page.tsx`) y pantalla de autenticación (`/login`).
+  2. **Login Elevado:** Micro-animación de rechazo `shake-x` (400ms) ante clave errónea, borde de advertencia carmesí transitorio, isotipo con halo de respiración armónica (`animate-halo-breathe`), indicadores táctiles de longitud de PIN y botón de desbloqueo con efecto haz de luz diagonal (*shimmer*).
+  3. **Interactive Donut Chart:** Transformación de la tarta estática en `<AnalyticsSection />` a un centro de comando financiero interactivo con KPI central dinámico (total acumulado + conteo de transacciones en reposo mutando a clasificación activa, monto y porcentaje exacto en hover), terminaciones redondeadas (`cornerRadius={6}`, `paddingAngle={4}`), expansión de sector activo con `renderActiveShape` (Recharts) y leyenda interactiva bidireccional enriquecida con pastillas de porcentaje precalculado.
+  4. **Micro-Dinamismo:** Halo perimetral pulsante en `<MasterBalanceHero />` (esmeralda, carmesí o cian según balance neto), deslizamiento pulsante en flecha de dirección financiera y doble anillo radar (`animate-ping`) en el indicador de Webhook en `<HeaderBar />`.
 
 ---
 
@@ -54,18 +59,15 @@
 - [x] Actualización Integral del `README.md` alineado a Next.js 16, Autenticación PIN y SDD.
 - [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, `npm run board` - ADR-019).
 - [x] Actualización de Motor a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo (ADR-020).
-- [x] **Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021):**
-  - [x] Formalización de tipos canónicos `ExtractedExpenseDraft` en `src/types/multimodal.ts`.
-  - [x] Motor de Comprobantes e Imágenes (`src/services/multimodal/receipt-parser.ts` - `MULTI-10`).
-  - [x] Motor de Audio y Notas de Voz (`src/services/multimodal/audio-parser.ts` - `MULTI-07`).
-  - [x] Motor de Facturas PDF (`src/services/multimodal/pdf-parser.ts` - `MULTI-13`).
-  - [x] Canalización en `assistedFlowHandler` de notas de voz, fotos de tickets y facturas PDF (`MULTI-16`).
-  - [x] Tarjeta interactiva enriquecida con transcripción, datos comerciales y clasificación sugerida (`MULTI-17`).
-  - [x] Botón inline `[ ❌ Descartar Gasto ]` y handler de callback en `src/bot/handlers/callback.ts` (`MULTI-18`).
-  - [x] Cobertura automatizada integral en `src/tests/integration.test.ts` (Escenario 7 verificado).
-  - [x] Limpieza total de vistas temporales de laboratorio (`/lab`).
+- [x] Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021).
+- [x] **Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022):**
+  - [x] Orbes Dinámicos y Animación de Fondo en `globals.css` (`UI-16`).
+  - [x] Rediseño de Login con Shake Animation, Shimmer y Halo en `/login` (`UI-17`).
+  - [x] Donut Chart Interactivo con KPI Dinámico Central y Leyenda Enriquecida en `AnalyticsSection.tsx` (`UI-18`).
+  - [x] Halos de Pulsación en Balance Hero y Radar en HeaderBar (`UI-19`).
+  - [x] Validación de Rendimiento a 60 FPS y Responsividad móvil/desktop (`UI-20`).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Hacer el push de `dev`, abrir el Pull Request hacia `master`, desplegar en Vercel y verificar en Telegram la recepción de audios, fotos y PDFs con descarte interactivo en producción (Checklist de TASKS_PROD.md). Continuar luego con el sprint de Interfaz Viva (UI-16 a UI-20).
+Realizar el commit de la Fase 7 en `dev`, probar el feedback visual en entorno local/producción, y coordinar el despliegue a `master` en Vercel junto con las pruebas de campo multimodales de Telegram.

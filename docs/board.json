@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-03T18:20:00-03:00",
-  "active_sprint": "Ingestión Multimodal Telegram (MULTI-16 a MULTI-18)",
+  "last_updated": "2026-10-05T09:40:00-03:00",
+  "active_sprint": "Fase 7 - Living UI, Atmósfera Dinámica y Donut Chart (UI-16 a UI-20)",
   "summary": {
     "total": 54,
-    "done": 41,
+    "done": 46,
     "in_progress": 0,
-    "pending": 9,
+    "pending": 4,
     "backlog": 4
   },
   "tasks": [
@@ -526,7 +526,7 @@
       "id": "UI-16",
       "title": "Orbes Dinámicos y Animación de Fondo en globals.css",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#2-atmósfera-viva-de-fondo-living-ambient-motion",
       "dependencies": ["UI-01"],
@@ -540,13 +540,13 @@
         "web/src/app/page.tsx",
         "web/src/app/login/page.tsx"
       ],
-      "completed_at": null
+      "completed_at": "2026-10-05T09:30:00Z"
     },
     {
       "id": "UI-17",
       "title": "Rediseño de Login con Shake Animation, Shimmer y Halo",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#3-rediseño-elevado-de-la-pantalla-de-login-login",
       "dependencies": ["UI-16", "AUTH-05"],
@@ -556,13 +556,13 @@
         "Efecto shimmer de luz en botón de desbloqueo e isotipo con halo de respiración"
       ],
       "files_to_touch": ["web/src/app/login/page.tsx", "web/src/app/globals.css"],
-      "completed_at": null
+      "completed_at": "2026-10-05T09:32:00Z"
     },
     {
       "id": "UI-18",
       "title": "Donut Chart Interactivo con KPI Dinámico Central",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#4-rediseño-radical-del-gráfico-de-tarta--donut-chart-analyticssection-",
       "dependencies": ["UI-12"],
@@ -573,13 +573,13 @@
         "Esquinas redondeadas cornerRadius={6} y espaciado paddingAngle={4}"
       ],
       "files_to_touch": ["web/src/components/AnalyticsSection.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-05T09:34:00Z"
     },
     {
       "id": "UI-19",
       "title": "Halos de Pulsación en Balance Hero y Radar en HeaderBar",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p2",
       "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#5-micro-dinamismo-en-componentes-del-dashboard",
       "dependencies": ["UI-06", "UI-07"],
@@ -591,13 +591,13 @@
         "web/src/components/MasterBalanceHero.tsx",
         "web/src/components/HeaderBar.tsx"
       ],
-      "completed_at": null
+      "completed_at": "2026-10-05T09:36:00Z"
     },
     {
       "id": "UI-20",
       "title": "Pruebas de Rendimiento a 60 FPS y Validación Responsive",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_LIVING_UI_MOTION_AND_LOGIN.md#6-checklist-de-implementación-sdd",
       "dependencies": ["UI-16", "UI-17", "UI-18", "UI-19"],
@@ -607,7 +607,7 @@
         "Build de producción exitoso (npm run build)"
       ],
       "files_to_touch": ["web/src/app/globals.css"],
-      "completed_at": null
+      "completed_at": "2026-10-05T09:38:00Z"
     },
     {
       "id": "UI-21",

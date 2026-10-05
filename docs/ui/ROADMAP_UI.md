@@ -36,14 +36,14 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 ---
 
 ### Fase 7: Interfaz Viva, Dinamismo de Fondo, Login Elevado y Gráfico de Tarta Interactivo (`SPEC_LIVING_UI_MOTION_AND_LOGIN.md`)
-- [ ] **Tarea UI-16:** Implementar orbes luminosos dinámicos multicapa y keyframes de deriva suave (`ambient-float-slow`, `ambient-float-reverse`) en `globals.css` y canvas principal.
-- [ ] **Tarea UI-17:** Rediseñar la pantalla `/login` con entrada animada, efecto de sacudida (`shake-x`) ante PIN incorrecto, haz de luz (*shimmer*) en botón de desbloqueo e isotipo con halo de respiración.
-- [ ] **Tarea UI-18:** Revolucionar el gráfico de tarta en `<AnalyticsSection />` a un **Donut Interactivo con KPI Central**:
+- [x] **Tarea UI-16:** Implementar orbes luminosos dinámicos multicapa y keyframes de deriva suave (`ambient-float-slow`, `ambient-float-reverse`) en `globals.css` y canvas principal.
+- [x] **Tarea UI-17:** Rediseñar la pantalla `/login` con entrada animada, efecto de sacudida (`shake-x`) ante PIN incorrecto, haz de luz (*shimmer*) en botón de desbloqueo e isotipo con halo de respiración.
+- [x] **Tarea UI-18:** Revolucionar el gráfico de tarta en `<AnalyticsSection />` a un **Donut Interactivo con KPI Central**:
   - Centro dinámico que exhibe el gasto total acumulado en reposo y muta a la clasificación activa con porcentaje en hover.
   - Expansión radial del segmento activo (`ActiveShape`).
   - Leyenda enriquecida con chips de porcentaje (`%`) calculados en tiempo real.
-- [ ] **Tarea UI-19:** Incorporar micro-animaciones en `<MasterBalanceHero />` (halo de respiración perimetral según saldo deudor/acreedor) y radar pulsante en `<HeaderBar />`.
-- [ ] **Tarea UI-20:** Pruebas de rendimiento y verificación visual (60 FPS, aceleración por hardware, cero saltos de layout).
+- [x] **Tarea UI-19:** Incorporar micro-animaciones en `<MasterBalanceHero />` (halo de respiración perimetral según saldo deudor/acreedor) y radar pulsante en `<HeaderBar />`.
+- [x] **Tarea UI-20:** Pruebas de rendimiento y verificación visual (60 FPS, aceleración por hardware, cero saltos de layout).
 
 ---
 

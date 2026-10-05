@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -9,13 +9,23 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
+  Sector,
 } from 'recharts';
 import { TrendingUp, PieChart as PieIcon } from 'lucide-react';
 import type { Transaction, ClassificationType } from '../types/database';
 
 interface AnalyticsSectionProps {
   transactions: Transaction[];
+}
+
+interface ActiveShapeProps {
+  cx?: number;
+  cy?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  startAngle?: number;
+  endAngle?: number;
+  fill?: string;
 }
 
 const PIE_COLORS: Record<ClassificationType, string> = {
@@ -32,7 +42,55 @@ const PIE_LABELS: Record<ClassificationType, string> = {
   '0': 'Personal',
 };
 
+const renderActiveShape = (props: unknown) => {
+  const shape = props as ActiveShapeProps;
+  const {
+    cx = 0,
+    cy = 0,
+    innerRadius = 0,
+    outerRadius = 0,
+    startAngle = 0,
+    endAngle = 0,
+    fill = '#818CF8',
+  } = shape;
+
+  return (
+    <g>
+      {/* Outer subtle glow ring */}
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={outerRadius + 3}
+        outerRadius={outerRadius + 6}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+        opacity={0.35}
+        cornerRadius={3}
+      />
+      {/* Expanded Main Sector */}
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius - 2}
+        outerRadius={outerRadius + 4}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+        cornerRadius={6}
+      />
+    </g>
+  );
+};
+
 export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions }) => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  // Total acumulado general
+  const totalSpent = useMemo(() => {
+    return transactions.reduce((acc, tx) => acc + Number(tx.amount), 0);
+  }, [transactions]);
+
   // Datos temporales para el AreaChart
   const timelineData = useMemo(() => {
     if (!transactions.length) return [];
@@ -53,7 +111,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
     });
   }, [transactions]);
 
-  // Datos para el DonutChart de clasificaciones
+  // Datos para el DonutChart de clasificaciones con porcentajes
   const pieData = useMemo(() => {
     const counts: Record<ClassificationType, number> = {
       '50': 0,
@@ -70,12 +128,19 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
 
     return (Object.keys(counts) as ClassificationType[])
       .filter((k) => counts[k] > 0)
-      .map((k) => ({
-        name: PIE_LABELS[k] || k,
-        value: counts[k],
-        color: PIE_COLORS[k] || '#818CF8',
-      }));
-  }, [transactions]);
+      .map((k) => {
+        const value = counts[k];
+        const percentage = totalSpent > 0 ? Math.round((value / totalSpent) * 100) : 0;
+        return {
+          name: PIE_LABELS[k] || k,
+          value,
+          color: PIE_COLORS[k] || '#818CF8',
+          percentage,
+        };
+      });
+  }, [transactions, totalSpent]);
+
+  const activeItem = activeIndex !== null && pieData[activeIndex] ? pieData[activeIndex] : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -146,7 +211,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
         </div>
       </div>
 
-      {/* Gráfico Donut de Clasificaciones (1 columna) */}
+      {/* Gráfico Donut de Clasificaciones con KPI Central Dinámico (1 columna) */}
       <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -156,52 +221,122 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
           <span className="text-xs text-slate-400">Distribución</span>
         </div>
 
-        <div className="h-64 w-full flex items-center justify-center">
-          {pieData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-xs text-slate-500">
-              Sin datos para distribuir
+        {pieData.length === 0 ? (
+          <div className="h-64 w-full flex items-center justify-center text-xs text-slate-500">
+            Sin datos para distribuir
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {/* Donut Container with Centered KPI */}
+            <div className="relative h-56 w-full flex items-center justify-center">
+              {/* Dynamic Center KPI Overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 select-none">
+                {activeItem ? (
+                  <div className="text-center px-4 animate-fade-in transition-all">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate max-w-[140px]">
+                      {activeItem.name}
+                    </span>
+                    <span className="block text-xl font-bold text-white tabular-nums tracking-tight">
+                      ${activeItem.value.toLocaleString('es-AR')}
+                    </span>
+                    <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      {activeItem.percentage}% del total
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-center px-4">
+                    <span className="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                      TOTAL GASTADO
+                    </span>
+                    <span className="block text-xl font-extrabold text-white tabular-nums tracking-tight">
+                      ${totalSpent.toLocaleString('es-AR')}
+                    </span>
+                    <span className="block text-[10px] text-slate-400 mt-0.5">
+                      {transactions.length} {transactions.length === 1 ? 'movimiento' : 'movimientos'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Recharts Pie with Active Shape */}
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={62}
+                    outerRadius={80}
+                    cornerRadius={6}
+                    paddingAngle={4}
+                    dataKey="value"
+                    activeIndex={activeIndex ?? undefined}
+                    activeShape={renderActiveShape}
+                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke="rgba(8, 11, 17, 0.7)"
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="45%"
-                  innerRadius={55}
-                  outerRadius={80}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const entry = payload[0];
-                      return (
-                        <div className="p-2.5 rounded-lg glass-panel border border-white/10 text-xs shadow-xl">
-                          <p className="font-semibold text-white">{entry.name}</p>
-                          <p className="text-indigo-300 font-bold tabular-nums">
-                            ${Number(entry.value).toLocaleString('es-AR')}
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Legend
-                  verticalAlign="bottom"
-                  align="center"
-                  wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+
+            {/* Enriched Interactive Legend with Calculated Percentages */}
+            <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/[0.06]">
+              {pieData.map((item, index) => {
+                const isHovered = activeIndex === index;
+                return (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                    className={`flex items-center justify-between p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                      isHovered
+                        ? 'bg-slate-800/80 border-indigo-500/40 shadow-sm shadow-indigo-500/15'
+                        : 'bg-slate-900/40 border-white/[0.04] hover:bg-slate-800/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: item.color,
+                          boxShadow: isHovered ? `0 0 8px ${item.color}` : 'none',
+                        }}
+                      />
+                      <div className="truncate">
+                        <span className="text-xs font-medium text-slate-200 block truncate">
+                          {item.name}
+                        </span>
+                        <span className="text-[11px] text-slate-400 tabular-nums">
+                          ${item.value >= 1000 ? `${(item.value / 1000).toFixed(1)}k` : item.value.toLocaleString('es-AR')}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 tabular-nums border"
+                      style={{
+                        backgroundColor: `${item.color}15`,
+                        borderColor: `${item.color}35`,
+                        color: item.color,
+                      }}
+                    >
+                      {item.percentage}%
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

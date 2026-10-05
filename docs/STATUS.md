@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 03 de Octubre de 2026.
-* **Rama Activa:** `dev` (preparación de paso a producción en `master`).
+* **Fecha de corte:** 05 de Octubre de 2026.
+* **Rama Activa:** `feat/mobile-responsive-ui` (creada a partir de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** Sincronizado con PR #11 (`b829208`) + optimización de webhook serverless.
+* **Último Commit:** Sincronizado con `2976871` en `dev`.
 
 ---
 
@@ -44,6 +44,12 @@
   2. **Login Elevado:** Micro-animación de rechazo `shake-x` (400ms) ante clave errónea, borde de advertencia carmesí transitorio, isotipo con halo de respiración armónica (`animate-halo-breathe`), indicadores táctiles de longitud de PIN y botón de desbloqueo con efecto haz de luz diagonal (*shimmer*).
   3. **Interactive Donut Chart:** Transformación de la tarta estática en `<AnalyticsSection />` a un centro de comando financiero interactivo con KPI central dinámico (total acumulado + conteo de transacciones en reposo mutando a clasificación activa, monto y porcentaje exacto en hover), terminaciones redondeadas (`cornerRadius={6}`, `paddingAngle={4}`), expansión de sector activo con `renderActiveShape` (Recharts) y leyenda interactiva bidireccional enriquecida con pastillas de porcentaje precalculado.
   4. **Micro-Dinamismo:** Halo perimetral pulsante en `<MasterBalanceHero />` (esmeralda, carmesí o cian según balance neto), deslizamiento pulsante en flecha de dirección financiera y doble anillo radar (`animate-ping`) en el indicador de Webhook en `<HeaderBar />`.
+* **ADR-023 (Especificación Técnica de Adaptabilidad y Experiencia Mobile-First):** Se formalizó en [`docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md`](./ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md) la arquitectura mobile-first para smartphones (360px a 430px) organizada en la Fase 9 (`UI-25` a `UI-31`):
+  1. **Table-to-Card Feed Híbrido:** En pantallas `<sm`, sustitución completa del scroll horizontal de `TransactionsTable` por un feed de tarjetas de transacciones táctiles.
+  2. **Grilla 2x2 para Métricas:** Reducción del vertical sprawl mediante grilla simétrica de 2x2 para las métricas secundarias.
+  3. **Cápsula Flotante Inferior (`MobileBottomDock`):** Barra fija de acciones en la zona del pulgar (`Sync`, `Telegram`, `Lock`) con `pb-28`.
+  4. **Optimización de Login:** Altura dinámica con `100dvh` para evitar saltos con el teclado virtual e `inputMode="numeric"`.
+  5. **Touch Ergonomics y Safe Areas:** Utilidades `pb-safe`, `touch-action: manipulation` y `overflow-x: hidden`.
 
 ---
 
@@ -60,14 +66,10 @@
 - [x] Implementación del Tablero Operativo de Tareas en JSON (`docs/board.json`, `docs/schemas/board.schema.json`, `npm run board` - ADR-019).
 - [x] Actualización de Motor a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo (ADR-020).
 - [x] Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021).
-- [x] **Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022):**
-  - [x] Orbes Dinámicos y Animación de Fondo en `globals.css` (`UI-16`).
-  - [x] Rediseño de Login con Shake Animation, Shimmer y Halo en `/login` (`UI-17`).
-  - [x] Donut Chart Interactivo con KPI Dinámico Central y Leyenda Enriquecida en `AnalyticsSection.tsx` (`UI-18`).
-  - [x] Halos de Pulsación en Balance Hero y Radar en HeaderBar (`UI-19`).
-  - [x] Validación de Rendimiento a 60 FPS y Responsividad móvil/desktop (`UI-20`).
+- [x] Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022).
+- [x] Especificación Técnica de Adaptabilidad y Experiencia Mobile-First (Fase 9 - ADR-023).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Realizar el commit de la Fase 7 en `dev`, probar el feedback visual en entorno local/producción, y coordinar el despliegue a `master` en Vercel junto con las pruebas de campo multimodales de Telegram.
+Activar la tarea `UI-25` en `docs/board.json` e implementar la suite de utilidades mobile, safe areas y `touch-action` en `globals.css`, seguido del rediseño dual de `TransactionsTable.tsx` (Card Feed para mobile) y el Dock flotante inferior (`UI-26` a `UI-31`).

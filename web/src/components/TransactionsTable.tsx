@@ -71,10 +71,10 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactio
                 <button
                   key={f.id}
                   onClick={() => setSelectedFilter(f.id)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap border ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border cursor-pointer ${
                     active
-                      ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
-                      : 'bg-slate-900/40 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                      ? 'bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-600/25 scale-[1.02]'
+                      : 'bg-slate-900/50 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/25 hover:bg-slate-800/50'
                   }`}
                 >
                   {f.label}
@@ -149,7 +149,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactio
                 return (
                   <tr
                     key={tx.id}
-                    className="hover:bg-white/[0.02] transition-colors group"
+                    className="hover:bg-slate-800/40 transition-colors duration-150 group cursor-default"
                   >
                     {/* Pagador */}
                     <td className="py-3.5 px-4 sm:px-6">

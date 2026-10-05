@@ -43,8 +43,14 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl glass-panel border p-6 sm:p-8 transition-all ${statusGlow}`}
+      className={`relative overflow-hidden rounded-2xl glass-panel border p-6 sm:p-8 transition-all ${statusGlow} before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/25 before:to-transparent`}
     >
+      {/* Internal Atmospheric Radial Accent */}
+      <div
+        className={`absolute -right-20 -bottom-20 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
+          isPositive ? 'bg-emerald-500/15' : isNegative ? 'bg-rose-500/15' : 'bg-cyan-500/15'
+        }`}
+      />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         {/* Lado Izquierdo: Cifra y Explicación */}
         <div className="space-y-3">

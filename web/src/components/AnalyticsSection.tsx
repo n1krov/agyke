@@ -122,7 +122,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
             </span>
           </div>
 
-          <div className="h-60 w-full">
+          <div className="h-52 sm:h-60 w-full">
             {timelineData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-slate-500">
                 Sin datos suficientes para graficar
@@ -141,6 +141,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
                     stroke="#64748B"
                     fontSize={11}
                     tickLine={false}
+                    interval="preserveStartEnd"
                     axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
                   />
                   <YAxis
@@ -185,21 +186,21 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
 
         {/* Tira de 3 Métricas Rápidas para Balance Visual con el Donut */}
         {timelineData.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 pt-4 border-t border-white/[0.06]">
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
-              <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Total Acumulado</span>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/[0.06]">
+            <div className="p-1.5 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
+              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Total</span>
               <span className="text-xs sm:text-sm font-bold text-white tabular-nums mt-0.5 block truncate">
                 ${totalSpent.toLocaleString('es-AR')}
               </span>
             </div>
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
-              <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Promedio / Gasto</span>
+            <div className="p-1.5 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
+              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Promedio</span>
               <span className="text-xs sm:text-sm font-bold text-indigo-300 tabular-nums mt-0.5 block truncate">
                 ${areaStats.avg.toLocaleString('es-AR')}
               </span>
             </div>
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
-              <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Mayor Registro</span>
+            <div className="p-1.5 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
+              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Mayor</span>
               <span className="text-xs sm:text-sm font-bold text-emerald-300 tabular-nums mt-0.5 block truncate">
                 ${areaStats.max.toLocaleString('es-AR')}
               </span>
@@ -238,43 +239,43 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
               <div className="relative h-48 w-full flex items-center justify-center my-1">
                 {/* Central Gauge Disk */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none">
-                  <div className="w-28 h-28 rounded-full bg-slate-900/85 border border-white/[0.08] shadow-2xl flex flex-col items-center justify-center p-2 text-center backdrop-blur-md transition-all duration-300">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-900/85 border border-white/[0.08] shadow-2xl flex flex-col items-center justify-center p-1.5 sm:p-2 text-center backdrop-blur-md transition-all duration-300">
                     {activeItem ? (
                       <div className="animate-fade-in transition-all">
                         <span
-                          className="block text-[10px] font-bold uppercase tracking-wider truncate max-w-[95px]"
+                          className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider truncate max-w-[80px] sm:max-w-[95px] mx-auto"
                           style={{ color: activeItem.color }}
                         >
                           {activeItem.name}
                         </span>
-                        <span className="block text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
+                        <span className="block text-base sm:text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
                           ${activeItem.value >= 100000
                             ? `${(activeItem.value / 1000).toFixed(0)}k`
                             : activeItem.value.toLocaleString('es-AR')}
                         </span>
                         <span
-                          className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold tabular-nums border"
+                          className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.2 rounded-full text-[8px] sm:text-[9px] font-bold tabular-nums border"
                           style={{
                             backgroundColor: `${activeItem.color}20`,
                             borderColor: `${activeItem.color}40`,
                             color: activeItem.color,
                           }}
                         >
-                          {activeItem.percentage}% del total
+                          {activeItem.percentage}%
                         </span>
                       </div>
                     ) : (
                       <div>
-                        <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                        <span className="block text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-400">
                           TOTAL
                         </span>
-                        <span className="block text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
+                        <span className="block text-base sm:text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
                           ${totalSpent >= 1000000
                             ? `${(totalSpent / 1000000).toFixed(2)}M`
                             : totalSpent.toLocaleString('es-AR')}
                         </span>
-                        <span className="block text-[10px] text-slate-400 font-medium mt-0.5">
-                          {transactions.length} {transactions.length === 1 ? 'movimiento' : 'movimientos'}
+                        <span className="block text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">
+                          {transactions.length} txs
                         </span>
                       </div>
                     )}
@@ -312,11 +313,12 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
                       data={pieData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={62}
-                      outerRadius={82}
+                      innerRadius={58}
+                      outerRadius={78}
                       cornerRadius={5}
                       paddingAngle={3}
                       dataKey="value"
+                      onClick={(_: unknown, index: number) => setActiveIndex((prev) => (prev === index ? null : index))}
                       onMouseEnter={(_: unknown, index: number) => setActiveIndex(index)}
                       onMouseLeave={() => setActiveIndex(null)}
                     >
@@ -349,9 +351,10 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
                   return (
                     <div
                       key={item.key}
+                      onClick={() => setActiveIndex((prev) => (prev === index ? null : index))}
                       onMouseEnter={() => setActiveIndex(index)}
                       onMouseLeave={() => setActiveIndex(null)}
-                      className={`p-2 sm:p-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      className={`min-h-[44px] flex flex-col justify-center p-2.5 rounded-xl border transition-all duration-200 cursor-pointer active:scale-[0.99] ${
                         isHovered
                           ? 'bg-slate-800/80 border-indigo-500/40 shadow-md shadow-indigo-500/10 -translate-y-0.5'
                           : 'bg-slate-900/40 border-white/[0.04] hover:bg-slate-800/40 hover:border-white/[0.08]'

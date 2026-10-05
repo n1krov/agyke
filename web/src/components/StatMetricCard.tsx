@@ -46,7 +46,7 @@ export const StatMetricCard: React.FC<StatMetricCardProps> = ({
 
   return (
     <div
-      className={`group relative overflow-hidden glass-panel rounded-2xl p-5 border border-white/[0.08] ${v.borderHover} hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-between gap-3 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent`}
+      className={`group relative overflow-hidden glass-panel rounded-2xl p-3.5 sm:p-5 border border-white/[0.08] ${v.borderHover} hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-between gap-2.5 sm:gap-3 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent`}
     >
       {/* Subtle corner ambient gradient glow on hover */}
       <div
@@ -54,22 +54,22 @@ export const StatMetricCard: React.FC<StatMetricCardProps> = ({
       />
 
       <div className="flex items-center justify-between gap-2 relative z-10">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-300 transition-colors">
+        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-300 transition-colors truncate">
           {title}
         </span>
         <div
-          className={`p-2.5 rounded-xl border border-white/5 shadow-sm ${v.iconBg} ${v.iconText} transition-all duration-300 group-hover:scale-110`}
+          className={`p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/5 shadow-sm ${v.iconBg} ${v.iconText} transition-all duration-300 group-hover:scale-110 shrink-0 [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5`}
         >
           {icon}
         </div>
       </div>
 
       <div className="relative z-10">
-        <div className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
+        <div className="text-lg sm:text-2xl md:text-3xl font-bold text-white tabular-nums tracking-tight truncate">
           {value}
         </div>
         {subValue && (
-          <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+          <div className="text-[10px] sm:text-xs text-slate-400 mt-1 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-600 group-hover:bg-slate-400 transition-colors shrink-0" />
             <span className="truncate">{subValue}</span>
           </div>

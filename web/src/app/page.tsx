@@ -9,6 +9,7 @@ import { StatMetricCard } from '../components/StatMetricCard';
 import { AnalyticsSection } from '../components/AnalyticsSection';
 import { TransactionsTable } from '../components/TransactionsTable';
 import { QueueViewer } from '../components/QueueViewer';
+import { MobileBottomDock } from '../components/MobileBottomDock';
 
 export default function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
@@ -85,7 +86,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-20">
+    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-28 sm:pb-20">
       {/* Atmosphere: Living Ambient Background Layer */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
         {/* Subtle Grounding Grid Pattern */}
@@ -116,8 +117,8 @@ export default function Dashboard() {
           transactionCount={transactions.length}
         />
 
-        {/* Grid de 4 Métricas Secundarias */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Grid de 4 Métricas Secundarias (2x2 en mobile, 4 cols en desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
           <StatMetricCard
             title="Total Histórico"
             value={formatARS(metrics.totalGasto)}
@@ -160,6 +161,9 @@ export default function Dashboard() {
         {/* Visor de Cola Inteligente de Gemini */}
         <QueueViewer queueItems={queueItems} />
       </main>
+
+      {/* Cápsula Flotante Inferior de Navegación Mobile */}
+      <MobileBottomDock onRefresh={fetchData} isLoading={loading} />
     </div>
   );
 }

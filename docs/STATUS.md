@@ -51,6 +51,15 @@
   4. **Optimización de Login:** Altura dinámica con `100dvh` para evitar saltos con el teclado virtual e `inputMode="numeric"`.
   5. **Touch Ergonomics y Safe Areas:** Utilidades `pb-safe`, `touch-action: manipulation` y `overflow-x: hidden`.
 
+* **ADR-024 (Implementación de Experiencia Mobile-First, Card Feed Híbrido y Dock Flotante Inferior):** Siguiendo `SPEC_MOBILE_RESPONSIVE_REDESIGN.md`, se ejecutó y validó la Fase 9 completa (`UI-25` a `UI-31`):
+  1. **Tokens y Safe Areas (`UI-25`):** Inclusión de `touch-action: manipulation`, utilidades `.pb-safe` y `.pt-safe`, y bloqueo estricto de desborde horizontal (`overflow-x: hidden`).
+  2. **Grilla 2x2 para Métricas (`UI-26`):** Reorganización de las 4 tarjetas secundarias en `grid-cols-2 lg:grid-cols-4` con padding compacto (`p-3.5 sm:p-5`) y tipografía tabular elástica.
+  3. **Table-to-Card Feed Híbrido (`UI-27`):** En `<sm`, `TransactionsTable` muta automáticamente a una lista de tarjetas táctiles de gastos (`block sm:hidden`), eliminando el scroll horizontal mientras mantiene la tabla completa de 6 columnas en desktop (`hidden sm:block`).
+  4. **Cápsula Flotante Inferior de Navegación (`UI-28`):** Montaje de `MobileBottomDock` (`fixed bottom-4 inset-x-4 sm:hidden z-40 pb-safe`) con botones táctiles de 44px para Actualizar saldo, acceso al bot de Telegram y Bloqueo de sesión. Separación de pantalla con `pb-28 sm:pb-20` en el contenedor principal.
+  5. **Touch Ergonomics en Analítica (`UI-29`):** Adaptabilidad proporcional en Donut Chart (`w-24 h-24 sm:w-28 sm:h-28`, innerRadius 58, outerRadius 78), intervalo elástico en eje X de `AreaChart` y filas de desglose con altura táctil mínima de 44px y soporte de tap directo.
+  6. **Login Mobile sin Saltos (`UI-30`):** Reemplazo de `min-h-screen` por `min-h-[100dvh]` y activación de teclado numérico nativo con `inputMode="numeric"` y `pattern="[0-9]*"`.
+  7. **Verificación Integral (`UI-31`):** Validación en viewports de 360px a 430px (iPhone SE, iPhone 14 Pro, Samsung Galaxy) con cero desborde horizontal.
+
 ---
 
 ## 4. Estado de Tareas (Roadmap)
@@ -67,9 +76,9 @@
 - [x] Actualización de Motor a Gemini 3.6 Flash y Cadena de Resiliencia Multimodelo (ADR-020).
 - [x] Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021).
 - [x] Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022).
-- [x] Especificación Técnica de Adaptabilidad y Experiencia Mobile-First (Fase 9 - ADR-023).
+- [x] Especificación e Implementación Mobile-First y Card Feed Híbrido (Fase 9 - ADR-023 y ADR-024).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Activar la tarea `UI-25` en `docs/board.json` e implementar la suite de utilidades mobile, safe areas y `touch-action` en `globals.css`, seguido del rediseño dual de `TransactionsTable.tsx` (Card Feed para mobile) y el Dock flotante inferior (`UI-26` a `UI-31`).
+Fase 9 concluida al 100%. El siguiente sprint operativo corresponde a las tareas de arnés de pruebas multimodal local en terminal (`MULTI-03` a `MULTI-06`), o revisión / merge de la rama `feat/mobile-responsive-ui` hacia `dev`.

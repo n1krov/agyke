@@ -5,9 +5,9 @@
   "active_sprint": "Fase 9 - Adaptabilidad y Experiencia Mobile-First (UI-25 a UI-31)",
   "summary": {
     "total": 61,
-    "done": 46,
+    "done": 53,
     "in_progress": 0,
-    "pending": 11,
+    "pending": 4,
     "backlog": 4
   },
   "tasks": [
@@ -677,7 +677,7 @@
       "id": "UI-25",
       "title": "Tokens Mobile, Safe Areas y touch-action en globals.css",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#4-guía-de-utilidades-y-ajustes-css-globalscss",
       "dependencies": ["UI-16"],
@@ -687,13 +687,13 @@
         "Prevenir desborde horizontal accidental con overflow-x: hidden estricto"
       ],
       "files_to_touch": ["web/src/app/globals.css"],
-      "completed_at": null
+      "completed_at": "2026-10-05T12:35:00Z"
     },
     {
       "id": "UI-26",
       "title": "Grilla 2x2 para Métricas Secundarias en Dashboard",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#c-métricas-secundarias-en-grilla-2x2-statmetriccardtsx",
       "dependencies": ["UI-25"],
@@ -703,13 +703,13 @@
         "Tipografía compacta legible sin desbordes numéricos"
       ],
       "files_to_touch": ["web/src/components/StatMetricCard.tsx", "web/src/app/page.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-05T12:45:00Z"
     },
     {
       "id": "UI-27",
       "title": "Rediseño Dual de TransactionsTable (Table vs Card Feed)",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p0",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#e-tabla-dual-responsiva-table-vs-transaction-card-feed-transactionstabletsx",
       "dependencies": ["UI-25"],
@@ -719,13 +719,13 @@
         "Búsqueda a ancho completo y chips de filtro con scroll horizontal táctil"
       ],
       "files_to_touch": ["web/src/components/TransactionsTable.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-05T12:55:00Z"
     },
     {
       "id": "UI-28",
       "title": "Cápsula Flotante Inferior de Navegación (MobileBottomDock)",
       "domain": "web",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#a-barra-de-navegación-y-dock-inferior-móvil-headerbartsx--mobilebottomdocktsx",
       "dependencies": ["UI-25"],
@@ -739,13 +739,13 @@
         "web/src/app/page.tsx",
         "web/src/components/HeaderBar.tsx"
       ],
-      "completed_at": null
+      "completed_at": "2026-10-05T13:05:00Z"
     },
     {
       "id": "UI-29",
       "title": "Adaptabilidad Táctil en AnalyticsSection y Donut Chart",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#d-sección-de-analítica-y-gráficos-analyticssectiontsx",
       "dependencies": ["UI-25"],
@@ -755,13 +755,13 @@
         "Intervalos de fecha dinámicos en AreaChart para evitar solapamiento en <380px"
       ],
       "files_to_touch": ["web/src/components/AnalyticsSection.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-05T13:15:00Z"
     },
     {
       "id": "UI-30",
       "title": "Optimización de Login Mobile con 100dvh e inputMode numeric",
       "domain": "web",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#f-pantalla-de-autenticación-móvil-login",
       "dependencies": ["UI-25"],
@@ -771,13 +771,13 @@
         "Ajustar padding de tarjeta a max-w-sm px-5 py-6 para smartphones"
       ],
       "files_to_touch": ["web/src/app/login/page.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-05T13:20:00Z"
     },
     {
       "id": "UI-31",
       "title": "Verificación Integral Mobile (iOS Safari / Android Chrome)",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md#5-plan-de-ejecución-sdd-fase-9-en-roadmap",
       "dependencies": ["UI-26", "UI-27", "UI-28", "UI-29", "UI-30"],
@@ -787,7 +787,7 @@
         "Build de producción exitoso (npm run build)"
       ],
       "files_to_touch": ["web/src/app/globals.css"],
-      "completed_at": null
+      "completed_at": "2026-10-05T13:30:00Z"
     },
     {
       "id": "MULTI-01",

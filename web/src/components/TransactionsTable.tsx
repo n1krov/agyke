@@ -52,19 +52,19 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactio
         {/* Search Bar & Chips */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Search Box */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative w-full sm:w-60">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Buscar gasto o pagador..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-60 pl-9 pr-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 sm:py-1.5 rounded-lg bg-slate-900/60 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
 
           {/* Classification Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 touch-pan-x">
             {FILTERS.map((f) => {
               const active = selectedFilter === f.id;
               return (
@@ -85,8 +85,106 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactio
         </div>
       </div>
 
-      {/* Table View */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card Feed View (block sm:hidden) */}
+      <div className="block sm:hidden">
+        {filtered.length === 0 ? (
+          <div className="py-10 px-4 text-center text-slate-400">
+            <Filter className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-slate-300">No se encontraron transacciones</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Intenta modificando los términos de búsqueda o limpiando los filtros.
+            </p>
+            {(searchTerm || selectedFilter !== 'ALL') && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedFilter('ALL');
+                }}
+                className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 cursor-pointer"
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="p-3 space-y-2.5">
+            {filtered.map((tx) => {
+              const userName = tx.users?.name || 'Usuario';
+              const formattedAmount = Number(tx.amount).toLocaleString('es-AR', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              });
+
+              const impact = Number(tx.debt_impact);
+              const formattedImpact = Math.abs(impact).toLocaleString('es-AR', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              });
+
+              const dateObj = new Date(tx.created_at);
+              const dateStr = dateObj.toLocaleDateString('es-AR', {
+                day: '2-digit',
+                month: 'short',
+              });
+              const timeStr = dateObj.toLocaleTimeString('es-AR', {
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+
+              return (
+                <div
+                  key={tx.id}
+                  className="p-3.5 rounded-xl bg-slate-900/50 border border-white/[0.06] hover:bg-slate-800/60 active:scale-[0.99] transition-all flex flex-col gap-2 shadow-sm"
+                >
+                  {/* Top row: Avatar + Pagador + Fecha */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <UserAvatar name={userName} size="sm" />
+                      <span className="text-xs font-semibold text-slate-200">{userName}</span>
+                    </div>
+                    <span className="text-[11px] text-slate-400 tabular-nums">
+                      {dateStr} · {timeStr}
+                    </span>
+                  </div>
+
+                  {/* Concept */}
+                  <div className="text-sm font-semibold text-slate-100 leading-snug">
+                    {tx.concept || 'Gasto sin descripción'}
+                  </div>
+
+                  {/* Bottom row: Classification Badge + Monto + Impacto */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/[0.04]">
+                    <BadgeClassification classification={tx.classification} />
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-white tabular-nums">
+                        $ {formattedAmount}
+                      </span>
+                      {impact > 0 && (
+                        <span className="inline-flex items-center text-[11px] font-semibold text-emerald-400 ml-1.5 tabular-nums">
+                          (+${formattedImpact})
+                        </span>
+                      )}
+                      {impact < 0 && (
+                        <span className="inline-flex items-center text-[11px] font-semibold text-rose-400 ml-1.5 tabular-nums">
+                          (-${formattedImpact})
+                        </span>
+                      )}
+                      {impact === 0 && (
+                        <span className="inline-flex items-center text-[11px] text-slate-500 ml-1.5 tabular-nums">
+                          ($0)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View (hidden sm:block) */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-white/[0.06] bg-slate-900/30 text-slate-400 uppercase tracking-wider font-semibold">

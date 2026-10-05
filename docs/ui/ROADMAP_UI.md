@@ -53,3 +53,14 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 - [ ] **Tarea UI-22 (Pendiente):** Creación de la vista dedicada a pantalla completa `/analytics` con layout 100vh / 100vw responsivo.
 - [ ] **Tarea UI-23 (Pendiente):** Integración de Screen Wake Lock API y Fullscreen API para modo Kiosk / Smart TV continuo.
 - [ ] **Tarea UI-24 (Pendiente):** Visualizaciones avanzadas: Treemap de categorías, Comparativa de volumen A vs B y Velocidad semanal de gasto.
+
+---
+
+### Fase 9: Adaptabilidad y Experiencia Mobile-First (`SPEC_MOBILE_RESPONSIVE_REDESIGN.md`)
+- [x] **Tarea UI-25 (MOB-01):** Configuración de utilidades mobile, safe areas y `touch-action: manipulation` en `globals.css`.
+- [x] **Tarea UI-26 (MOB-02):** Grilla 2x2 simétrica para métricas secundarias en smartphones (`StatMetricCard.tsx`, `page.tsx`).
+- [x] **Tarea UI-27 (MOB-03):** Rediseño dual de `TransactionsTable.tsx` (Table en desktop vs Transaction Card Feed en smartphones).
+- [x] **Tarea UI-28 (MOB-04):** Cápsula flotante inferior de navegación táctil en mobile (`MobileBottomDock.tsx`, `page.tsx`).
+- [x] **Tarea UI-29 (MOB-05):** Adaptabilidad táctil en `AnalyticsSection.tsx` (Donut móvil, targets táctiles de 44px en desglose y eje X elástico).
+- [x] **Tarea UI-30 (MOB-06):** Optimización de autenticación mobile con altura dinámica `100dvh` e `inputMode="numeric"` en `/login`.
+- [x] **Tarea UI-31 (MOB-07):** Verificación integral de responsividad y touch ergonomics en viewports de 360px a 430px.

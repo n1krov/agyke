@@ -55,7 +55,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white flex items-center justify-center p-4 sm:p-6">
       {/* Atmosphere: Living Ambient Background Layer */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
         <div className="absolute inset-0 bg-grid-mesh opacity-80" />
@@ -66,7 +66,7 @@ export default function LoginPage() {
 
       {/* Main Glass Card with Shake Feedback */}
       <div
-        className={`w-full max-w-md glass-panel rounded-2xl p-6 sm:p-8 border shadow-2xl relative z-10 backdrop-blur-2xl transition-all duration-300 ${
+        className={`w-full max-w-sm sm:max-w-md glass-panel rounded-2xl p-5 sm:p-8 border shadow-2xl relative z-10 backdrop-blur-2xl transition-all duration-300 ${
           shake ? 'animate-shake border-rose-500/50 shadow-rose-500/20' : 'border-white/[0.08]'
         }`}
       >
@@ -116,6 +116,8 @@ export default function LoginPage() {
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type={showPassword ? 'text' : 'password'}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={pin}
                 onChange={(e) => {
                   setPin(e.target.value);

@@ -23,8 +23,10 @@
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
 | **Autenticación Ligera PIN (`/login`)** |  Listo | 5 tests unitarios | Tokens HMAC-SHA256, cookies httpOnly y middleware Next.js. |
-| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 54 tareas, verificado con `npm run board`. |
+| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 59 tareas completadas (88.1%), verificado con `npm run board`. |
 | **Ingestión Multimodal Bot (`src/bot/`)** |  Listo | 13 tests (unit + int) | Canalización de Notas de Voz, Comprobantes e Imágenes y Facturas PDF en Telegram. |
+| **Centro de Analítica (`/analytics`)** |  Listo | 4 gráficos Recharts | Cortes mensuales (?month=YYYY-MM), variación MoM, paridad A vs B y Command Center. |
+| **Muro Agyke (`/muro`)** |  Listo | Auditoría Gemini | Desacoplado del Dashboard, filtros de estado/origen y micro-pill interactiva en Header. |
 | **Calidad y CI (`.github/workflows/ci.yml`)** |  Listo | 46/46 tests OK | Typecheck estricto (0 errores) y linter limpio (0 warnings). |
 | **Build y Despliegue en Vercel** |  Listo | Validado con ADR-005 a ADR-008 | Compilación Webpack explícita (`--webpack`) y módulos compartidos en Next.js 16. |
 
@@ -44,27 +46,14 @@
   2. **Login Elevado:** Micro-animación de rechazo `shake-x` (400ms) ante clave errónea, borde de advertencia carmesí transitorio, isotipo con halo de respiración armónica (`animate-halo-breathe`), indicadores táctiles de longitud de PIN y botón de desbloqueo con efecto haz de luz diagonal (*shimmer*).
   3. **Interactive Donut Chart:** Transformación de la tarta estática en `<AnalyticsSection />` a un centro de comando financiero interactivo con KPI central dinámico (total acumulado + conteo de transacciones en reposo mutando a clasificación activa, monto y porcentaje exacto en hover), terminaciones redondeadas (`cornerRadius={6}`, `paddingAngle={4}`), expansión de sector activo con `renderActiveShape` (Recharts) y leyenda interactiva bidireccional enriquecida con pastillas de porcentaje precalculado.
   4. **Micro-Dinamismo:** Halo perimetral pulsante en `<MasterBalanceHero />` (esmeralda, carmesí o cian según balance neto), deslizamiento pulsante en flecha de dirección financiera y doble anillo radar (`animate-ping`) en el indicador de Webhook en `<HeaderBar />`.
-* **ADR-023 (Especificación Técnica de Adaptabilidad y Experiencia Mobile-First):** Se formalizó en [`docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md`](./ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md) la arquitectura mobile-first para smartphones (360px a 430px) organizada en la Fase 9 (`UI-25` a `UI-31`):
-  1. **Table-to-Card Feed Híbrido:** En pantallas `<sm`, sustitución completa del scroll horizontal de `TransactionsTable` por un feed de tarjetas de transacciones táctiles.
-  2. **Grilla 2x2 para Métricas:** Reducción del vertical sprawl mediante grilla simétrica de 2x2 para las métricas secundarias.
-  3. **Cápsula Flotante Inferior (`MobileBottomDock`):** Barra fija de acciones en la zona del pulgar (`Sync`, `Telegram`, `Lock`) con `pb-28`.
-  4. **Optimización de Login:** Altura dinámica con `100dvh` para evitar saltos con el teclado virtual e `inputMode="numeric"`.
-  5. **Touch Ergonomics y Safe Areas:** Utilidades `pb-safe`, `touch-action: manipulation` y `overflow-x: hidden`.
-
-* **ADR-024 (Implementación de Experiencia Mobile-First, Card Feed Híbrido y Dock Flotante Inferior):** Siguiendo `SPEC_MOBILE_RESPONSIVE_REDESIGN.md`, se ejecutó y validó la Fase 9 completa (`UI-25` a `UI-31`):
-  1. **Tokens y Safe Areas (`UI-25`):** Inclusión de `touch-action: manipulation`, utilidades `.pb-safe` y `.pt-safe`, y bloqueo estricto de desborde horizontal (`overflow-x: hidden`).
-  2. **Grilla 2x2 para Métricas (`UI-26`):** Reorganización de las 4 tarjetas secundarias en `grid-cols-2 lg:grid-cols-4` con padding compacto (`p-3.5 sm:p-5`) y tipografía tabular elástica.
-  3. **Table-to-Card Feed Híbrido (`UI-27`):** En `<sm`, `TransactionsTable` muta automáticamente a una lista de tarjetas táctiles de gastos (`block sm:hidden`), eliminando el scroll horizontal mientras mantiene la tabla completa de 6 columnas en desktop (`hidden sm:block`).
-  4. **Cápsula Flotante Inferior de Navegación (`UI-28`):** Montaje de `MobileBottomDock` (`fixed bottom-4 inset-x-4 sm:hidden z-40 pb-safe`) con botones táctiles de 44px para Actualizar saldo, acceso al bot de Telegram y Bloqueo de sesión. Separación de pantalla con `pb-28 sm:pb-20` en el contenedor principal.
-  5. **Touch Ergonomics en Analítica (`UI-29`):** Adaptabilidad proporcional en Donut Chart (`w-24 h-24 sm:w-28 sm:h-28`, innerRadius 58, outerRadius 78), intervalo elástico en eje X de `AreaChart` y filas de desglose con altura táctil mínima de 44px y soporte de tap directo.
-  6. **Login Mobile sin Saltos (`UI-30`):** Reemplazo de `min-h-screen` por `min-h-[100dvh]` y activación de teclado numérico nativo con `inputMode="numeric"` y `pattern="[0-9]*"`.
-  7. **Verificación Integral (`UI-31`):** Validación en viewports de 360px a 430px (iPhone SE, iPhone 14 Pro, Samsung Galaxy) con cero desborde horizontal.
-
-* **ADR-025 (Especificación de Analítica Mensual, Command Center y Desacople del Muro Agyke):** Se formalizó en [`docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md`](./ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md) la arquitectura de la Fase 10 (`UI-32` a `UI-37`):
-  1. **Endpoint de Cortes Mensuales (`UI-32`):** `GET /api/analytics?month=YYYY-MM` con filtros por rango de fechas, cálculo de variación porcentual MoM, desglose comparativo de aportes A vs B, evolución diaria y velocidad por día de semana.
-  2. **Página Dedicada `/analytics` (`UI-33` a `UI-35`):** Vista de Command Center panorámica para desktop y adaptada a mobile, con selector interactivo de meses y suite de 4 gráficos Recharts.
-  3. **Página Dedicada `/muro` (`UI-36`):** Desacople de `<QueueViewer />` del pie del Dashboard principal hacia una pantalla exclusiva de auditoría, integrando un micro-badge de alerta en la cabecera.
-  4. **Navegación Unificada (`UI-37`):** Integración de enlaces entre Inicio, Analítica y Muro en `HeaderBar` y `MobileBottomDock`.
+* **ADR-023 (Especificación Técnica de Adaptabilidad y Experiencia Mobile-First):** Se formalizó en [`docs/ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md`](./ui/SPEC_MOBILE_RESPONSIVE_REDESIGN.md) la arquitectura mobile-first para smartphones (360px a 430px) organizada en la Fase 9 (`UI-25` a `UI-31`).
+* **ADR-024 (Implementación de Experiencia Mobile-First, Card Feed Híbrido y Dock Flotante Inferior):** Siguiendo `SPEC_MOBILE_RESPONSIVE_REDESIGN.md`, se ejecutó y validó la Fase 9 completa (`UI-25` a `UI-31`): tokens mobile, grilla 2x2 para métricas secundarias, feed de tarjetas híbrido, cápsula flotante inferior de navegación, adaptación de gráficos y login sin saltos por teclado con `100dvh`.
+* **ADR-025 (Especificación de Analítica Mensual, Command Center y Desacople del Muro Agyke):** Se formalizó en [`docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md`](./ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md) la arquitectura de la Fase 10 (`UI-32` a `UI-37`).
+* **ADR-026 (Implementación de Analítica Mensual con Cortes Temporales, Command Center Panorámico, Muro Dedicado y Navegación Global Unificada):** Siguiendo `SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md`, se ejecutó y validó la Fase 10 completa (`UI-32` a `UI-37`):
+  1. **Endpoint de Cortes Mensuales (`UI-32`):** Implementación de `GET /api/analytics?month=YYYY-MM` con filtrado estricto por fechas UTC, variación porcentual MoM frente al mes previo, paridad de desembolso Usuario A vs B, serie diaria acumulada (días 1 al 31) e intensidad de gasto por día de la semana.
+  2. **Página Dedicada `/analytics` y Recharts Suite (`UI-33`, `UI-34`, `UI-35`):** Creación del Command Center con selector de períodos navegable `[ ‹ ] Mes [ › ]`, dropdown de historial, botón a mes actual y fullscreen. 4 KPIs monumentales de impacto financiero y 4 gráficos Recharts (AreaChart acumulado, BarChart head-to-head, Donut interactivo de clasificación con gauge central y BarChart de intensidad semanal), además del Top 5 de mayores gastos del mes.
+  3. **Página Dedicada `/muro` y Desacople del Dashboard (`UI-36`):** Desincorporación de `<QueueViewer />` del pie de `page.tsx` para una experiencia limpia en `/`. Creación de `/muro` con vista completa de auditoría de `agyke_queue` de Gemini, métricas de cola (Total, Pendientes, Procesados, Descartados), filtros por estado y por origen (Audio, Foto/Ticket, Texto libre) y banner de guía hacia Telegram.
+  4. **Navegación Global Unificada (`UI-37`):** Integración de navegación por pills en `HeaderBar.tsx` (`Inicio`, `Analítica`, `Muro`) con micro-pill pulsante ante ítems pendientes, y dock móvil táctil en `MobileBottomDock.tsx` con soporte de safe areas y estilos Obsidian Slate activos.
 
 ---
 
@@ -84,8 +73,9 @@
 - [x] Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022).
 - [x] Especificación e Implementación Mobile-First y Card Feed Híbrido (Fase 9 - ADR-023 y ADR-024).
 - [x] Especificación de Analítica Mensual, Command Center y Desacople del Muro (Fase 10 - ADR-025).
+- [x] Implementación de Analítica Mensual, Command Center, Muro Dedicado y Navegación Global (Fase 10 - ADR-026).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Activar la tarea `UI-32` (`GET /api/analytics`) en `docs/board.json` para implementar las consultas por rango mensual y agregaciones financieras, seguido de la página `/analytics` (`UI-33`) y la migración del Muro (`UI-36`).
+Realizar commit atómico de la implementación completa de la Fase 10 (`UI-32` a `UI-37`) en la rama `feat/analytics-monthly-and-muro`, y continuar con la verificación o integración hacia `dev`.

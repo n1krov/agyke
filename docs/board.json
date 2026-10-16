@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-16T08:35:00-03:00",
-  "active_sprint": "Fase 10 - Analítica Mensual, Command Center y Desacople del Muro (UI-32 a UI-37)",
+  "last_updated": "2026-10-16T10:00:00-03:00",
+  "active_sprint": "Fase 10 - Analítica Mensual, Command Center y Desacople del Muro (UI-32 a UI-37) - COMPLETADO",
   "summary": {
     "total": 67,
-    "done": 53,
+    "done": 59,
     "in_progress": 0,
-    "pending": 10,
+    "pending": 4,
     "backlog": 4
   },
   "tasks": [
@@ -793,7 +793,7 @@
       "id": "UI-32",
       "title": "Endpoint GET /api/analytics con Cortes Mensuales y Agregaciones",
       "domain": "web",
-      "status": "pending",
+      "status": "done",
       "priority": "p0",
       "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#a-módulo-backend-endpoint-de-analítica-con-cortes-mensuales-apianalytics",
       "dependencies": ["UI-31"],
@@ -806,13 +806,13 @@
         "web/src/app/api/analytics/route.ts",
         "web/src/types/database.ts"
       ],
-      "completed_at": null
+      "completed_at": "2026-10-16T08:45:00Z"
     },
     {
       "id": "UI-33",
       "title": "Página Dedicada /analytics con Selector Mensual y Command Center",
       "domain": "web",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#b-módulo-frontend-página-dedicada-analytics",
       "dependencies": ["UI-32"],
@@ -822,13 +822,13 @@
         "Renderizado de 4 KPIs monumentales (Total mes, MoM %, Paridad A vs B, Deuda del período)"
       ],
       "files_to_touch": ["web/src/app/analytics/page.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-16T09:10:00Z"
     },
     {
       "id": "UI-34",
       "title": "Suite de Gráficos Mensuales Recharts para Analytics",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#2-vista-web--desktop-command-center-panorámico",
       "dependencies": ["UI-33"],
@@ -839,13 +839,13 @@
         "BarChart de intensidad de gasto por día de la semana (Lun a Dom)"
       ],
       "files_to_touch": ["web/src/app/analytics/page.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-16T09:25:00Z"
     },
     {
       "id": "UI-35",
       "title": "Adaptabilidad Mobile-First para /analytics",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#3-vista-mobile-sm",
       "dependencies": ["UI-34"],
@@ -855,13 +855,13 @@
         "Gráficos apilados verticalmente con cero scroll horizontal en 360px-430px"
       ],
       "files_to_touch": ["web/src/app/analytics/page.tsx"],
-      "completed_at": null
+      "completed_at": "2026-10-16T09:35:00Z"
     },
     {
       "id": "UI-36",
       "title": "Página Dedicada /muro y Desacople del Dashboard Principal",
       "domain": "web",
-      "status": "pending",
+      "status": "done",
       "priority": "p0",
       "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#c-módulo-frontend-página-dedicada-muro-y-desacople-del-dashboard",
       "dependencies": ["UI-31"],
@@ -875,13 +875,13 @@
         "web/src/app/page.tsx",
         "web/src/components/HeaderBar.tsx"
       ],
-      "completed_at": null
+      "completed_at": "2026-10-16T09:50:00Z"
     },
     {
       "id": "UI-37",
       "title": "Sincronización de Navegación Global (HeaderBar y MobileBottomDock)",
       "domain": "ui_ux",
-      "status": "pending",
+      "status": "done",
       "priority": "p1",
       "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#4-enlaces-de-navegación-global-header--mobile-dock",
       "dependencies": ["UI-33", "UI-36"],
@@ -894,7 +894,7 @@
         "web/src/components/HeaderBar.tsx",
         "web/src/components/MobileBottomDock.tsx"
       ],
-      "completed_at": null
+      "completed_at": "2026-10-16T10:00:00Z"
     },
     {
       "id": "MULTI-01",

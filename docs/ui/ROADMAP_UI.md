@@ -64,3 +64,14 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 - [x] **Tarea UI-29 (MOB-05):** Adaptabilidad táctil en `AnalyticsSection.tsx` (Donut móvil, targets táctiles de 44px en desglose y eje X elástico).
 - [x] **Tarea UI-30 (MOB-06):** Optimización de autenticación mobile con altura dinámica `100dvh` e `inputMode="numeric"` en `/login`.
 - [x] **Tarea UI-31 (MOB-07):** Verificación integral de responsividad y touch ergonomics en viewports de 360px a 430px.
+
+---
+
+### Fase 10: Analítica Mensual, Command Center y Desacople del Muro (`SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md`)
+- [ ] **Tarea UI-32:** Endpoint `GET /api/analytics` con Cortes Mensuales y Agregaciones (`web/src/app/api/analytics/route.ts`).
+- [ ] **Tarea UI-33:** Página Dedicada `/analytics` con Selector Mensual y Command Center (`web/src/app/analytics/page.tsx`).
+- [ ] **Tarea UI-34:** Suite de Gráficos Mensuales Recharts para Analytics (AreaChart diario, BarChart A vs B, Donut del mes, Intensidad semanal).
+- [ ] **Tarea UI-35:** Adaptabilidad Mobile-First para `/analytics` (KPIs 2x2, navegación táctil).
+- [ ] **Tarea UI-36:** Página Dedicada `/muro` y Desacople del Dashboard Principal (`web/src/app/muro/page.tsx`, `web/src/app/page.tsx`).
+- [ ] **Tarea UI-37:** Sincronización de Navegación Global (HeaderBar y MobileBottomDock con badges interactivos).
+

@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-05T11:45:00-03:00",
-  "active_sprint": "Fase 9 - Adaptabilidad y Experiencia Mobile-First (UI-25 a UI-31)",
+  "last_updated": "2026-10-16T08:35:00-03:00",
+  "active_sprint": "Fase 10 - Analítica Mensual, Command Center y Desacople del Muro (UI-32 a UI-37)",
   "summary": {
-    "total": 61,
+    "total": 67,
     "done": 53,
     "in_progress": 0,
-    "pending": 4,
+    "pending": 10,
     "backlog": 4
   },
   "tasks": [
@@ -788,6 +788,113 @@
       ],
       "files_to_touch": ["web/src/app/globals.css"],
       "completed_at": "2026-10-05T13:30:00Z"
+    },
+    {
+      "id": "UI-32",
+      "title": "Endpoint GET /api/analytics con Cortes Mensuales y Agregaciones",
+      "domain": "web",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#a-módulo-backend-endpoint-de-analítica-con-cortes-mensuales-apianalytics",
+      "dependencies": ["UI-31"],
+      "acceptance_criteria": [
+        "Implementar GET /api/analytics con soporte de parámetro ?month=YYYY-MM",
+        "Filtrar transacciones por rango mensual estricto startDate y endDate",
+        "Calcular agregaciones MoM (% vs mes previo), aporte A vs B, evolución diaria e intensidad semanal"
+      ],
+      "files_to_touch": [
+        "web/src/app/api/analytics/route.ts",
+        "web/src/types/database.ts"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-33",
+      "title": "Página Dedicada /analytics con Selector Mensual y Command Center",
+      "domain": "web",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#b-módulo-frontend-página-dedicada-analytics",
+      "dependencies": ["UI-32"],
+      "acceptance_criteria": [
+        "Crear ruta web/src/app/analytics/page.tsx con layout panorámico 100% viewport",
+        "Selector navegable de meses [ ‹ ] Mes [ › ] y botón de retorno a Mes Actual",
+        "Renderizado de 4 KPIs monumentales (Total mes, MoM %, Paridad A vs B, Deuda del período)"
+      ],
+      "files_to_touch": ["web/src/app/analytics/page.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-34",
+      "title": "Suite de Gráficos Mensuales Recharts para Analytics",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#2-vista-web--desktop-command-center-panorámico",
+      "dependencies": ["UI-33"],
+      "acceptance_criteria": [
+        "AreaChart de evolución acumulada diaria (días 1 al 31 del mes)",
+        "BarChart comparativo Head-to-Head de aportes Usuario A vs B",
+        "DonutChart de clasificación con KPI central dinámico del mes",
+        "BarChart de intensidad de gasto por día de la semana (Lun a Dom)"
+      ],
+      "files_to_touch": ["web/src/app/analytics/page.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-35",
+      "title": "Adaptabilidad Mobile-First para /analytics",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#3-vista-mobile-sm",
+      "dependencies": ["UI-34"],
+      "acceptance_criteria": [
+        "Grilla 2x2 compacta de KPIs en smartphones sin desbordes",
+        "Selector de meses con controles táctiles de 44px",
+        "Gráficos apilados verticalmente con cero scroll horizontal en 360px-430px"
+      ],
+      "files_to_touch": ["web/src/app/analytics/page.tsx"],
+      "completed_at": null
+    },
+    {
+      "id": "UI-36",
+      "title": "Página Dedicada /muro y Desacople del Dashboard Principal",
+      "domain": "web",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#c-módulo-frontend-página-dedicada-muro-y-desacople-del-dashboard",
+      "dependencies": ["UI-31"],
+      "acceptance_criteria": [
+        "Crear ruta dedicada web/src/app/muro/page.tsx albergando QueueViewer",
+        "Remover QueueViewer del pie de página de web/src/app/page.tsx",
+        "Integrar micro-pill interactiva en HeaderBar que alerte si hay ítems pendientes en el Muro"
+      ],
+      "files_to_touch": [
+        "web/src/app/muro/page.tsx",
+        "web/src/app/page.tsx",
+        "web/src/components/HeaderBar.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-37",
+      "title": "Sincronización de Navegación Global (HeaderBar y MobileBottomDock)",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#4-enlaces-de-navegación-global-header--mobile-dock",
+      "dependencies": ["UI-33", "UI-36"],
+      "acceptance_criteria": [
+        "HeaderBar con enlaces fluidos entre Dashboard (/), Analítica (/analytics) y Muro (/muro)",
+        "MobileBottomDock actualizado con navegación táctil para las 3 pantallas y Telegram",
+        "Estados activos resaltados con estilo Obsidian Slate"
+      ],
+      "files_to_touch": [
+        "web/src/components/HeaderBar.tsx",
+        "web/src/components/MobileBottomDock.tsx"
+      ],
+      "completed_at": null
     },
     {
       "id": "MULTI-01",

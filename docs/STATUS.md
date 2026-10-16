@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 05 de Octubre de 2026.
-* **Rama Activa:** `feat/mobile-responsive-ui` (creada a partir de `dev`).
+* **Fecha de corte:** 16 de Octubre de 2026.
+* **Rama Activa:** `feat/analytics-monthly-and-muro` (creada a partir de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** Sincronizado con `2976871` en `dev`.
+* **Último Commit:** Sincronizado con `2098a91` (PR #15 y #16) en `dev`.
 
 ---
 
@@ -60,6 +60,12 @@
   6. **Login Mobile sin Saltos (`UI-30`):** Reemplazo de `min-h-screen` por `min-h-[100dvh]` y activación de teclado numérico nativo con `inputMode="numeric"` y `pattern="[0-9]*"`.
   7. **Verificación Integral (`UI-31`):** Validación en viewports de 360px a 430px (iPhone SE, iPhone 14 Pro, Samsung Galaxy) con cero desborde horizontal.
 
+* **ADR-025 (Especificación de Analítica Mensual, Command Center y Desacople del Muro Agyke):** Se formalizó en [`docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md`](./ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md) la arquitectura de la Fase 10 (`UI-32` a `UI-37`):
+  1. **Endpoint de Cortes Mensuales (`UI-32`):** `GET /api/analytics?month=YYYY-MM` con filtros por rango de fechas, cálculo de variación porcentual MoM, desglose comparativo de aportes A vs B, evolución diaria y velocidad por día de semana.
+  2. **Página Dedicada `/analytics` (`UI-33` a `UI-35`):** Vista de Command Center panorámica para desktop y adaptada a mobile, con selector interactivo de meses y suite de 4 gráficos Recharts.
+  3. **Página Dedicada `/muro` (`UI-36`):** Desacople de `<QueueViewer />` del pie del Dashboard principal hacia una pantalla exclusiva de auditoría, integrando un micro-badge de alerta en la cabecera.
+  4. **Navegación Unificada (`UI-37`):** Integración de enlaces entre Inicio, Analítica y Muro en `HeaderBar` y `MobileBottomDock`.
+
 ---
 
 ## 4. Estado de Tareas (Roadmap)
@@ -77,8 +83,9 @@
 - [x] Ingestión Multimodal Telegram Completa (Fase 6 - ADR-021).
 - [x] Living UI, Atmósfera Dinámica, Login Elevado y Donut Chart Interactivo (Fase 7 - ADR-022).
 - [x] Especificación e Implementación Mobile-First y Card Feed Híbrido (Fase 9 - ADR-023 y ADR-024).
+- [x] Especificación de Analítica Mensual, Command Center y Desacople del Muro (Fase 10 - ADR-025).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Fase 9 concluida al 100%. El siguiente sprint operativo corresponde a las tareas de arnés de pruebas multimodal local en terminal (`MULTI-03` a `MULTI-06`), o revisión / merge de la rama `feat/mobile-responsive-ui` hacia `dev`.
+Activar la tarea `UI-32` (`GET /api/analytics`) en `docs/board.json` para implementar las consultas por rango mensual y agregaciones financieras, seguido de la página `/analytics` (`UI-33`) y la migración del Muro (`UI-36`).

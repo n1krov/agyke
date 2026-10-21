@@ -17,10 +17,8 @@ import {
   Sparkles,
   Layers,
   Bot,
-  AlertCircle,
-  RefreshCw,
 } from 'lucide-react';
-import type { AgykeItem, User } from '../../types/database';
+import type { AgykeItem } from '../../types/database';
 import { HeaderBar } from '../../components/HeaderBar';
 import { MobileBottomDock } from '../../components/MobileBottomDock';
 import { UserAvatar } from '../../components/UserAvatar';
@@ -30,7 +28,6 @@ type SourceFilter = 'ALL' | 'audio' | 'image' | 'text';
 
 export default function MuroPage() {
   const [queueItems, setQueueItems] = useState<AgykeItem[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -44,7 +41,6 @@ export default function MuroPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.queueItems) setQueueItems(data.queueItems);
-      if (data.users) setUsers(data.users);
       setLastUpdated(new Date());
     } catch (err) {
       console.error('Error cargando ítems de agyke_queue:', err);
@@ -54,8 +50,27 @@ export default function MuroPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let ignore = false;
+    async function initMuro() {
+      try {
+        const res = await fetch('/api/dashboard');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (ignore) return;
+        if (data.queueItems) setQueueItems(data.queueItems);
+        setLastUpdated(new Date());
+      } catch (err) {
+        console.error('Error cargando datos del Muro:', err);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    initMuro();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // Contadores y Métricas del Muro
   const metrics = useMemo(() => {

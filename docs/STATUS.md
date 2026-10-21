@@ -5,7 +5,7 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 16 de Octubre de 2026.
+* **Fecha de corte:** 21 de Octubre de 2026.
 * **Rama Activa:** `feat/analytics-monthly-and-muro` (creada a partir de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
 * **Último Commit:** Sincronizado con `2098a91` (PR #15 y #16) en `dev`.
@@ -23,7 +23,7 @@
 | **Serverless Webhook (`web/.../webhook`)** |  Listo | Compila en Next.js | Desacoplado de `bot.start()`, compatible con Vercel Serverless. |
 | **Dashboard Frontend (`web/.../page.tsx`)** |  Listo | 0 errores ESLint | Tablas de transacciones, filtros, métricas de balance y gráficos Recharts. |
 | **Autenticación Ligera PIN (`/login`)** |  Listo | 5 tests unitarios | Tokens HMAC-SHA256, cookies httpOnly y middleware Next.js. |
-| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 59 tareas completadas (88.1%), verificado con `npm run board`. |
+| **Tablero de Agente (`docs/board.json`)** |  Listo | Schema 2020-12 | Tablero JSON de 60 tareas completadas (88.2%), verificado con `npm run board`. |
 | **Ingestión Multimodal Bot (`src/bot/`)** |  Listo | 13 tests (unit + int) | Canalización de Notas de Voz, Comprobantes e Imágenes y Facturas PDF en Telegram. |
 | **Centro de Analítica (`/analytics`)** |  Listo | 4 gráficos Recharts | Cortes mensuales (?month=YYYY-MM), variación MoM, paridad A vs B y Command Center. |
 | **Muro Agyke (`/muro`)** |  Listo | Auditoría Gemini | Desacoplado del Dashboard, filtros de estado/origen y micro-pill interactiva en Header. |
@@ -54,6 +54,9 @@
   2. **Página Dedicada `/analytics` y Recharts Suite (`UI-33`, `UI-34`, `UI-35`):** Creación del Command Center con selector de períodos navegable `[ ‹ ] Mes [ › ]`, dropdown de historial, botón a mes actual y fullscreen. 4 KPIs monumentales de impacto financiero y 4 gráficos Recharts (AreaChart acumulado, BarChart head-to-head, Donut interactivo de clasificación con gauge central y BarChart de intensidad semanal), además del Top 5 de mayores gastos del mes.
   3. **Página Dedicada `/muro` y Desacople del Dashboard (`UI-36`):** Desincorporación de `<QueueViewer />` del pie de `page.tsx` para una experiencia limpia en `/`. Creación de `/muro` con vista completa de auditoría de `agyke_queue` de Gemini, métricas de cola (Total, Pendientes, Procesados, Descartados), filtros por estado y por origen (Audio, Foto/Ticket, Texto libre) y banner de guía hacia Telegram.
   4. **Navegación Global Unificada (`UI-37`):** Integración de navegación por pills en `HeaderBar.tsx` (`Inicio`, `Analítica`, `Muro`) con micro-pill pulsante ante ítems pendientes, y dock móvil táctil en `MobileBottomDock.tsx` con soporte de safe areas y estilos Obsidian Slate activos.
+* **ADR-027 (Resolución de Reglas ESLint 9 / React 19 y Prevención de Cascading Renders en Hooks):** Para cumplir con el estándar de CI de cero advertencias y cero errores en Next.js 16 / React 19 (`react-hooks/set-state-in-effect`), se realizaron los siguientes ajustes arquitecturales:
+  1. **Desacople de setState Síncrono en Efectos:** Se reemplazó la invocación directa de `fetchAnalytics()` y `fetchData()` dentro del cuerpo de `useEffect` en `/analytics` y `/muro`. Se implementaron runners asíncronos desacoplados (`initAnalytics` e `initMuro`) con bandera booleana `ignore` de descarte para evitar llamadas a `setLoading(true)` síncronas durante el ciclo de montaje y proteger contra condiciones de carrera al desmontar componentes.
+  2. **Limpieza de Símbolos Huérfanos:** Se eliminó la constante `PIE_COLORS` no utilizada en `web/src/app/analytics/page.tsx` y los imports no utilizados `AlertCircle`, `RefreshCw` y `User` junto con el estado huérfano `users` en `web/src/app/muro/page.tsx`.
 
 ---
 

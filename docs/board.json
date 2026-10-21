@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-16T10:00:00-03:00",
-  "active_sprint": "Fase 10 - Analítica Mensual, Command Center y Desacople del Muro (UI-32 a UI-37) - COMPLETADO",
+  "last_updated": "2026-10-21T10:35:00-03:00",
+  "active_sprint": "Fase 10 - Analítica Mensual, Command Center y Desacople del Muro (UI-32 a UI-38)",
   "summary": {
-    "total": 67,
-    "done": 59,
+    "total": 68,
+    "done": 60,
     "in_progress": 0,
     "pending": 4,
     "backlog": 4
@@ -895,6 +895,28 @@
         "web/src/components/MobileBottomDock.tsx"
       ],
       "completed_at": "2026-10-16T10:00:00Z"
+    },
+    {
+      "id": "UI-38",
+      "title": "Corrección de Reglas ESLint y Hooks en /analytics y /muro",
+      "domain": "web",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_MONTHLY_AND_QUEUE_SEPARATION.md#4-enlaces-de-navegación-global-header--mobile-dock",
+      "dependencies": ["UI-33", "UI-36"],
+      "acceptance_criteria": [
+        "Eliminar constante PIE_COLORS no utilizada en web/src/app/analytics/page.tsx",
+        "Desacoplar llamada síncrona setState en useEffect en web/src/app/analytics/page.tsx",
+        "Limpiar imports no utilizados AlertCircle y RefreshCw en web/src/app/muro/page.tsx",
+        "Eliminar estado reactivo users no utilizado en web/src/app/muro/page.tsx",
+        "Desacoplar llamada síncrona setState en useEffect en web/src/app/muro/page.tsx",
+        "Garantizar 0 errores y 0 warnings en npm run lint --prefix web"
+      ],
+      "files_to_touch": [
+        "web/src/app/analytics/page.tsx",
+        "web/src/app/muro/page.tsx"
+      ],
+      "completed_at": "2026-10-21T10:45:00Z"
     },
     {
       "id": "MULTI-01",

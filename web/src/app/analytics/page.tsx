@@ -40,13 +40,6 @@ import { BadgeClassification } from '../../components/BadgeClassification';
 import { UserAvatar } from '../../components/UserAvatar';
 import { MobileBottomDock } from '../../components/MobileBottomDock';
 
-const PIE_COLORS: Record<ClassificationType, string> = {
-  '50': '#818CF8', // Indigo
-  '100': '#34D399', // Emerald
-  '-100': '#FB7185', // Rose
-  '0': '#94A3B8', // Slate
-};
-
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsMonthPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -71,8 +64,29 @@ export default function AnalyticsPage() {
   }, []);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    let ignore = false;
+    async function initAnalytics() {
+      try {
+        const res = await fetch('/api/analytics');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload: AnalyticsMonthPayload = await res.json();
+        if (ignore) return;
+        setData(payload);
+        setSelectedMonth(payload.selectedMonth);
+      } catch (err) {
+        console.error('Error fetching analytics:', err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    initAnalytics();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {

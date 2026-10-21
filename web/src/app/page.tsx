@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
+import Link from 'next/link';
 import { DollarSign, CreditCard, TrendingUp, Clock } from 'lucide-react';
 import type { Transaction, User, AgykeItem } from '../types/database';
 import { HeaderBar } from '../components/HeaderBar';
@@ -8,7 +9,6 @@ import { MasterBalanceHero } from '../components/MasterBalanceHero';
 import { StatMetricCard } from '../components/StatMetricCard';
 import { AnalyticsSection } from '../components/AnalyticsSection';
 import { TransactionsTable } from '../components/TransactionsTable';
-import { QueueViewer } from '../components/QueueViewer';
 import { MobileBottomDock } from '../components/MobileBottomDock';
 
 export default function Dashboard() {
@@ -106,7 +106,12 @@ export default function Dashboard() {
       </div>
 
       {/* Header Sticky */}
-      <HeaderBar onRefresh={fetchData} isLoading={loading} lastUpdated={lastUpdated} />
+      <HeaderBar
+        onRefresh={fetchData}
+        isLoading={loading}
+        lastUpdated={lastUpdated}
+        pendingQueueCount={metrics.pendingQueueCount}
+      />
 
       {/* Main Content Container */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
@@ -143,13 +148,15 @@ export default function Dashboard() {
             variant="emerald"
           />
 
-          <StatMetricCard
-            title="Pendientes Muro"
-            value={metrics.pendingQueueCount.toString()}
-            subValue="Audios y fotos por clasificar"
-            icon={<Clock className="w-5 h-5" />}
-            variant="amber"
-          />
+          <Link href="/muro" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <StatMetricCard
+              title="Pendientes Muro"
+              value={metrics.pendingQueueCount.toString()}
+              subValue="Ver cola y auditoría →"
+              icon={<Clock className="w-5 h-5" />}
+              variant="amber"
+            />
+          </Link>
         </div>
 
         {/* Sección de Analítica y Gráficos */}
@@ -157,13 +164,14 @@ export default function Dashboard() {
 
         {/* Tabla Interactiva de Transacciones */}
         <TransactionsTable transactions={transactions} />
-
-        {/* Visor de Cola Inteligente de Gemini */}
-        <QueueViewer queueItems={queueItems} />
       </main>
 
       {/* Cápsula Flotante Inferior de Navegación Mobile */}
-      <MobileBottomDock onRefresh={fetchData} isLoading={loading} />
+      <MobileBottomDock
+        onRefresh={fetchData}
+        isLoading={loading}
+        pendingQueueCount={metrics.pendingQueueCount}
+      />
     </div>
   );
 }

@@ -42,3 +42,57 @@ export interface Balance {
   user_a?: User;
   user_b?: User;
 }
+
+export interface AnalyticsKPIs {
+  totalGastoMes: number;
+  totalGastoMesAnterior: number;
+  variacionPorcentual: number | null;
+  transaccionesCount: number;
+  deudaGeneradaMes: number;
+  aporteUserA: { id: string; name: string; total: number; percentage: number };
+  aporteUserB: { id: string; name: string; total: number; percentage: number };
+}
+
+export interface AnalyticsDailyTimeline {
+  day: number;
+  date: string;
+  monto: number;
+  acumulado: number;
+  count: number;
+}
+
+export interface AnalyticsClassificationItem {
+  key: ClassificationType;
+  name: string;
+  value: number;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export interface AnalyticsDayOfWeekItem {
+  dayName: string;
+  total: number;
+  count: number;
+}
+
+export interface AnalyticsTopExpense {
+  id: string;
+  concept: string;
+  amount: number;
+  userName: string;
+  date: string;
+  classification: ClassificationType;
+}
+
+export interface AnalyticsMonthPayload {
+  selectedMonth: string;
+  monthLabel: string;
+  availableMonths: string[];
+  kpis: AnalyticsKPIs;
+  dailyTimeline: AnalyticsDailyTimeline[];
+  classificationBreakdown: AnalyticsClassificationItem[];
+  dayOfWeekIntensity: AnalyticsDayOfWeekItem[];
+  topExpenses: AnalyticsTopExpense[];
+}
+

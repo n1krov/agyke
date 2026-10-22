@@ -1,27 +1,24 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useSyncExternalStore } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export type Theme = 'light' | 'dark';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>('dark');
-  const [mounted, setMounted] = useState<boolean>(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const isDark = document.documentElement.classList.contains('dark');
-    setTheme(isDark ? 'dark' : 'light');
-
-    const handleThemeChange = () => {
-      const currentDark = document.documentElement.classList.contains('dark');
-      setTheme(currentDark ? 'dark' : 'light');
-    };
-
-    window.addEventListener('agyke-theme-change', handleThemeChange);
-    return () => window.removeEventListener('agyke-theme-change', handleThemeChange);
-  }, []);
+  const theme = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener('agyke-theme-change', onStoreChange);
+      return () => window.removeEventListener('agyke-theme-change', onStoreChange);
+    },
+    () => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
+    () => 'dark'
+  );
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const toggleTheme = () => {
     const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
@@ -35,7 +32,6 @@ export function useTheme() {
     } catch {
       // Ignore localStorage access issues
     }
-    setTheme(nextTheme);
     window.dispatchEvent(new Event('agyke-theme-change'));
   };
 

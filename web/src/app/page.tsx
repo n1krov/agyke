@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { DollarSign, CreditCard, TrendingUp, Clock } from 'lucide-react';
 import type { Transaction, User, AgykeItem } from '../types/database';
 import { HeaderBar } from '../components/HeaderBar';
 import { MasterBalanceHero } from '../components/MasterBalanceHero';
@@ -86,25 +85,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-28 sm:pb-20">
-      {/* Atmosphere: Living Ambient Background Layer */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-        {/* Subtle Grounding Grid Pattern */}
-        <div className="absolute inset-0 bg-grid-mesh opacity-70" />
-
-        {/* Ambient Primary Orb - Indigo/Violet */}
-        <div className="absolute -top-32 -left-32 w-[580px] h-[580px] rounded-full bg-gradient-to-br from-indigo-600/25 to-violet-600/15 blur-[120px] animate-ambient-slow pointer-events-none" />
-
-        {/* Ambient Secondary Orb - Emerald/Cyan */}
-        <div className="absolute top-[35%] -right-40 w-[620px] h-[620px] rounded-full bg-gradient-to-tl from-emerald-600/20 to-cyan-500/15 blur-[130px] animate-ambient-reverse pointer-events-none" />
-
-        {/* Ambient Accent Orb - Cyan/Sky */}
-        <div className="absolute top-20 right-[15%] w-[350px] h-[350px] rounded-full bg-cyan-500/10 blur-[100px] animate-ambient-slow pointer-events-none" />
-
-        {/* Ambient Tertiary Glow - Subtle breathing pulse */}
-        <div className="absolute bottom-10 left-[20%] w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-indigo-500/15 to-purple-500/10 blur-[110px] animate-mesh-pulse pointer-events-none" />
-      </div>
-
+    <div className="min-h-screen bg-[var(--canvas)] text-[var(--text-primary)] relative selection:bg-neutral-800 selection:text-white dark:selection:bg-neutral-200 dark:selection:text-neutral-900 pb-28 sm:pb-20 transition-colors">
       {/* Header Sticky */}
       <HeaderBar
         onRefresh={fetchData}
@@ -114,7 +95,7 @@ export default function Dashboard() {
       />
 
       {/* Main Content Container */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         {/* KPI Principal: Master Balance Hero */}
         <MasterBalanceHero
           netBalance={netBalance}
@@ -123,38 +104,41 @@ export default function Dashboard() {
         />
 
         {/* Grid de 4 Métricas Secundarias (2x2 en mobile, 4 cols en desktop) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           <StatMetricCard
             title="Total Histórico"
             value={formatARS(metrics.totalGasto)}
             subValue={`${transactions.length} transacciones registradas`}
-            icon={<DollarSign className="w-5 h-5" />}
-            variant="cyan"
           />
 
           <StatMetricCard
             title="Compartido 50/50"
             value={formatARS(metrics.total50)}
             subValue="Dividido en partes iguales"
-            icon={<CreditCard className="w-5 h-5" />}
-            variant="indigo"
           />
 
           <StatMetricCard
             title="Favores 100%"
             value={formatARS(metrics.total100)}
             subValue="Cubierto 100% para el otro"
-            icon={<TrendingUp className="w-5 h-5" />}
-            variant="emerald"
           />
 
-          <Link href="/muro" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <Link href="/muro" className="block transition-transform hover:scale-[1.01] active:scale-[0.99]">
             <StatMetricCard
               title="Pendientes Muro"
               value={metrics.pendingQueueCount.toString()}
               subValue="Ver cola y auditoría →"
-              icon={<Clock className="w-5 h-5" />}
-              variant="amber"
+              badge={
+                metrics.pendingQueueCount > 0 ? (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    {metrics.pendingQueueCount} PENDIENTES
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono text-[var(--text-muted)] border border-[var(--border-hairline)] bg-[var(--surface-subtle)]">
+                    AL DÍA
+                  </span>
+                )
+              }
             />
           </Link>
         </div>

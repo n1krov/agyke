@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, TrendingUp, Inbox, Send, RefreshCw } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface MobileBottomDockProps {
   onRefresh?: () => void;
@@ -45,7 +46,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       aria-label="Navegación móvil inferior"
       className="fixed bottom-3 inset-x-3 sm:hidden z-40 pb-safe pointer-events-auto"
     >
-      <div className="glass-panel bg-slate-900/95 backdrop-blur-2xl border border-white/15 shadow-2xl shadow-black/80 rounded-2xl px-2 py-1.5 flex items-center justify-between max-w-md mx-auto">
+      <div className="bg-[var(--surface)]/95 backdrop-blur-xl border border-[var(--border-hairline)] shadow-xl shadow-black/10 dark:shadow-black/50 rounded-2xl px-2 py-1 flex items-center justify-between max-w-md mx-auto transition-colors">
         {/* Navigation Tabs */}
         <div className="flex items-center justify-around flex-1">
           {navItems.map((item) => {
@@ -54,23 +55,23 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center justify-center min-h-[44px] min-w-[54px] px-2 py-1 rounded-xl transition-all active:scale-95 ${
+                className={`relative flex flex-col items-center justify-center min-h-[44px] min-w-[52px] px-2 py-1 rounded-xl transition-all active:scale-95 ${
                   item.isActive
-                    ? 'text-indigo-400 font-semibold'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-[var(--text-primary)] font-semibold'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 <div className="relative">
-                  <Icon className={`w-5 h-5 ${item.isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
+                  <Icon className="w-4 h-4" strokeWidth={item.isActive ? 2 : 1.5} />
                   {item.badge !== null && item.badge !== undefined && (
-                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold bg-amber-400 text-slate-950 flex items-center justify-center animate-pulse shadow-sm shadow-amber-400/50">
+                    <span className="absolute -top-1.5 -right-2 min-w-[15px] h-3.5 px-1 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 flex items-center justify-center">
                       {item.badge}
                     </span>
                   )}
                 </div>
                 <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
                 {item.isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-0.5" />
+                  <span className="w-1 h-1 rounded-full bg-[var(--text-primary)] mt-0.5" />
                 )}
               </Link>
             );
@@ -78,18 +79,20 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
         </div>
 
         {/* Separador vertical */}
-        <div className="h-6 w-px bg-white/10 mx-1" />
+        <div className="h-5 w-px bg-[var(--border-hairline)] mx-1" />
 
-        {/* Action Controls: Refresh & Telegram */}
-        <div className="flex items-center gap-1">
+        {/* Action Controls: Theme Switcher, Refresh & Telegram */}
+        <div className="flex items-center gap-0.5">
+          <ThemeToggle variant="compact" />
+
           {onRefresh && (
             <button
               onClick={onRefresh}
               disabled={isLoading}
-              className="flex flex-col items-center justify-center min-h-[44px] min-w-[42px] px-1 text-slate-400 hover:text-white active:scale-95 transition-all disabled:opacity-40 cursor-pointer"
+              className="flex flex-col items-center justify-center min-h-[44px] min-w-[38px] px-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all disabled:opacity-40 cursor-pointer"
               title="Actualizar datos"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-400' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--text-primary)]' : ''}`} strokeWidth={1.5} />
               <span className="text-[9px] tracking-tight mt-0.5">Sync</span>
             </button>
           )}
@@ -98,11 +101,11 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
             href="https://t.me/AgykeBot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-3 py-2 min-h-[42px] rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold text-xs shadow-md shadow-indigo-600/35 border border-indigo-400/30 active:scale-95 transition-all"
-            title="Abrir Telegram Bot"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[38px] px-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all"
+            title="Abrir Telegram"
           >
-            <Send className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Bot</span>
+            <Send className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span className="text-[9px] tracking-tight mt-0.5">Bot</span>
           </a>
         </div>
       </div>

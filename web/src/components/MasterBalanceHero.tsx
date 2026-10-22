@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { UserAvatar } from './UserAvatar';
 import type { User } from '../types/database';
 
@@ -26,114 +26,103 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
     maximumFractionDigits: 2,
   });
 
-  // Estilos condicionales según el estado con halos perimetrales pulsantes (UI-19)
-  let statusGlow = 'bg-hero-glow-cyan border-cyan-500/30 animate-pulse-hero-cyan';
-  let badgeColor = 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300';
+  // Estilos y badges semánticos sobrios
+  let badgeClasses = 'bg-[var(--surface-subtle)] border-[var(--border-hairline)] text-[var(--text-secondary)]';
   let badgeText = 'Cuentas en Paz';
+  let accentBorder = 'border-l-[var(--border-hairline)]';
 
   if (isPositive) {
-    statusGlow = 'bg-hero-glow-emerald border-emerald-500/30 animate-pulse-hero-emerald';
-    badgeColor = 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300';
+    badgeClasses = 'bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-400';
     badgeText = `${userB.name} debe a ${userA.name}`;
+    accentBorder = 'border-l-emerald-600 dark:border-l-emerald-500';
   } else if (isNegative) {
-    statusGlow = 'bg-hero-glow-rose border-rose-500/30 animate-pulse-hero-rose';
-    badgeColor = 'bg-rose-500/15 border-rose-500/30 text-rose-300';
+    badgeClasses = 'bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-400';
     badgeText = `${userA.name} debe a ${userB.name}`;
+    accentBorder = 'border-l-rose-600 dark:border-l-rose-500';
   }
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl glass-panel border p-4 sm:p-8 transition-all ${statusGlow} before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/25 before:to-transparent`}
+      className={`relative rounded-2xl hairline-card border-l-4 ${accentBorder} p-5 sm:p-8 transition-colors`}
     >
-      {/* Internal Atmospheric Radial Accent */}
-      <div
-        className={`absolute -right-20 -bottom-20 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
-          isPositive ? 'bg-emerald-500/15' : isNegative ? 'bg-rose-500/15' : 'bg-cyan-500/15'
-        }`}
-      />
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
-        {/* Lado Izquierdo: Cifra y Explicación */}
-        <div className="space-y-2 sm:space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* Lado Izquierdo: Cifra y Explicación Editorial */}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-[var(--text-muted)] select-none">
               Balance Neto Consolidado
             </span>
-            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-medium border ${badgeColor}`}>
-              {isZero ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border ${badgeClasses}`}>
+              {isZero ? <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={1.75} /> : <span className="w-1.5 h-1.5 rounded-full bg-current" />}
               {badgeText}
             </span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white tabular-nums">
+            <span className="text-4xl sm:text-6xl font-semibold tracking-tight font-mono text-[var(--text-primary)] tabular-nums">
               $ {formattedAbs}
             </span>
-            <span className="text-xs sm:text-sm font-medium text-slate-400">ARS</span>
+            <span className="text-xs sm:text-sm font-mono text-[var(--text-muted)]">ARS</span>
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-300">
-            {isZero && '⚖️ Ambos usuarios están al día. No existen deudas pendientes entre las cuentas.'}
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl">
+            {isZero && 'Ambos usuarios están al día. No existen deudas pendientes entre las cuentas.'}
             {isPositive && (
               <>
-                <strong className="text-emerald-400 font-semibold">{userB.name}</strong> le debe a{' '}
-                <strong className="text-white font-semibold">{userA.name}</strong> exactamente{' '}
-                <span className="text-emerald-300 font-medium tabular-nums">${formattedAbs}</span>.
+                <strong className="text-[var(--text-primary)] font-semibold">{userB.name}</strong> debe transferirle a{' '}
+                <strong className="text-[var(--text-primary)] font-semibold">{userA.name}</strong> la suma exacta de{' '}
+                <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">${formattedAbs}</span> para saldar la diferencia acumulada.
               </>
             )}
             {isNegative && (
               <>
-                <strong className="text-rose-400 font-semibold">{userA.name}</strong> le debe a{' '}
-                <strong className="text-white font-semibold">{userB.name}</strong> exactamente{' '}
-                <span className="text-rose-300 font-medium tabular-nums">${formattedAbs}</span>.
+                <strong className="text-[var(--text-primary)] font-semibold">{userA.name}</strong> debe transferirle a{' '}
+                <strong className="text-[var(--text-primary)] font-semibold">{userB.name}</strong> la suma exacta de{' '}
+                <span className="font-mono font-semibold text-rose-600 dark:text-rose-400">${formattedAbs}</span> para saldar la diferencia acumulada.
               </>
             )}
           </p>
         </div>
 
         {/* Lado Derecho: Flujo Visual de Cuentas */}
-        <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl bg-slate-900/50 border border-white/5 w-full sm:w-auto">
-          {/* Acreedor / Deudor Usuario A */}
+        <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-5 p-3.5 sm:p-4 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] w-full sm:w-auto">
+          {/* Usuario A */}
           <div className="flex flex-col items-center gap-1.5 text-center min-w-[70px]">
             <UserAvatar name={userA.name} size="md" />
-            <span className="text-xs font-medium text-slate-200 truncate max-w-[85px]">{userA.name}</span>
-            <span className={`text-[10px] font-semibold tabular-nums ${isPositive ? 'text-emerald-400' : isNegative ? 'text-rose-400' : 'text-slate-400'}`}>
+            <span className="text-xs font-medium text-[var(--text-primary)] truncate max-w-[85px]">{userA.name}</span>
+            <span className={`text-[11px] font-mono font-semibold tabular-nums ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-muted)]'}`}>
               {isPositive ? `+$${formattedAbs}` : isNegative ? `-$${formattedAbs}` : '$0'}
             </span>
           </div>
 
-          {/* Flecha de dirección con pulso de flujo financiero */}
-          <div className="flex flex-col items-center justify-center px-2">
-            <div
-              className={`p-1.5 rounded-full transition-all ${
-                isZero
-                  ? 'bg-cyan-500/20 text-cyan-400'
-                  : isPositive
-                  ? 'bg-emerald-500/20 text-emerald-400 animate-pulse shadow-sm shadow-emerald-500/20'
-                  : 'bg-rose-500/20 text-rose-400 animate-pulse shadow-sm shadow-rose-500/20'
-              }`}
-            >
-              <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${isNegative ? 'rotate-180' : ''}`} />
+          {/* Flecha de Dirección Financiera */}
+          <div className="flex flex-col items-center px-2">
+            <span className="text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)] mb-1">
+              {isZero ? 'Paridad' : 'Deuda'}
+            </span>
+            <div className="w-8 h-8 rounded-full border border-[var(--border-hairline)] bg-[var(--surface)] flex items-center justify-center">
+              {isPositive ? (
+                <ArrowRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
+              ) : isNegative ? (
+                <ArrowRight className="w-4 h-4 text-rose-600 dark:text-rose-400 rotate-180" strokeWidth={2} />
+              ) : (
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-muted)]" />
+              )}
             </div>
-            <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
-              {isZero ? 'Paz' : 'Deuda'}
+            <span className="text-[9px] font-mono text-[var(--text-muted)] mt-1">
+              {transactionCount} txs
             </span>
           </div>
 
-          {/* Acreedor / Deudor Usuario B */}
+          {/* Usuario B */}
           <div className="flex flex-col items-center gap-1.5 text-center min-w-[70px]">
             <UserAvatar name={userB.name} size="md" />
-            <span className="text-xs font-medium text-slate-200 truncate max-w-[85px]">{userB.name}</span>
-            <span className={`text-[10px] font-semibold tabular-nums ${isPositive ? 'text-rose-400' : isNegative ? 'text-emerald-400' : 'text-slate-400'}`}>
+            <span className="text-xs font-medium text-[var(--text-primary)] truncate max-w-[85px]">{userB.name}</span>
+            <span className={`text-[11px] font-mono font-semibold tabular-nums ${isPositive ? 'text-rose-600 dark:text-rose-400' : isNegative ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-muted)]'}`}>
               {isPositive ? `-$${formattedAbs}` : isNegative ? `+$${formattedAbs}` : '$0'}
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Footer Info */}
-      <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
-        <span>Impacto acumulado de <strong className="text-slate-200">{transactionCount}</strong> transacciones</span>
-        <span className="hidden sm:inline">Calculado bajo el algoritmo Agyke 50/100/-100</span>
       </div>
     </div>
   );

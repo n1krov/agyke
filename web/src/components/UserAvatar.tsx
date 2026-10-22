@@ -7,12 +7,10 @@ interface UserAvatarProps {
 }
 
 const COLOR_PALETTES = [
-  { bg: 'bg-indigo-600/30', border: 'border-indigo-500/40', text: 'text-indigo-200' },
-  { bg: 'bg-emerald-600/30', border: 'border-emerald-500/40', text: 'text-emerald-200' },
-  { bg: 'bg-cyan-600/30', border: 'border-cyan-500/40', text: 'text-cyan-200' },
-  { bg: 'bg-amber-600/30', border: 'border-amber-500/40', text: 'text-amber-200' },
-  { bg: 'bg-rose-600/30', border: 'border-rose-500/40', text: 'text-rose-200' },
-  { bg: 'bg-purple-600/30', border: 'border-purple-500/40', text: 'text-purple-200' },
+  { bg: 'bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900', border: 'border-neutral-700 dark:border-neutral-300' },
+  { bg: 'bg-slate-800 text-slate-100 dark:bg-slate-200 dark:text-slate-900', border: 'border-slate-700 dark:border-slate-300' },
+  { bg: 'bg-zinc-800 text-zinc-100 dark:bg-zinc-200 dark:text-zinc-900', border: 'border-zinc-700 dark:border-zinc-300' },
+  { bg: 'bg-stone-800 text-stone-100 dark:bg-stone-200 dark:text-stone-900', border: 'border-stone-700 dark:border-stone-300' },
 ];
 
 function getInitials(name: string): string {
@@ -32,9 +30,9 @@ function getColor(name: string) {
 }
 
 const SIZES = {
-  sm: 'w-7 h-7 text-xs',
-  md: 'w-9 h-9 text-sm',
-  lg: 'w-12 h-12 text-base font-semibold',
+  sm: 'w-7 h-7 text-xs font-mono',
+  md: 'w-8 h-8 text-xs font-mono font-medium',
+  lg: 'w-11 h-11 text-sm font-mono font-semibold',
 };
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({ name, size = 'md', className = '' }) => {
@@ -45,7 +43,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ name, size = 'md', class
   return (
     <div
       title={name}
-      className={`inline-flex items-center justify-center rounded-full border font-medium select-none shadow-sm ${sizeClasses} ${color.bg} ${color.border} ${color.text} ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg border select-none shadow-sm transition-colors ${sizeClasses} ${color.bg} ${color.border} ${className}`}
     >
       {initials}
     </div>

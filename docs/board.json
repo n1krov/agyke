@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-21T10:35:00-03:00",
-  "active_sprint": "Fase 10 - Analítica Mensual, Command Center y Desacople del Muro (UI-32 a UI-38)",
+  "last_updated": "2026-10-22T10:15:00-03:00",
+  "active_sprint": "Fase 11 - Rediseño Editorial Financial Craft, Dual Theme y Purga IA Dev (UI-39 a UI-46)",
   "summary": {
-    "total": 68,
+    "total": 76,
     "done": 60,
     "in_progress": 0,
-    "pending": 4,
+    "pending": 12,
     "backlog": 4
   },
   "tasks": [
@@ -917,6 +917,157 @@
         "web/src/app/muro/page.tsx"
       ],
       "completed_at": "2026-10-21T10:45:00Z"
+    },
+    {
+      "id": "UI-39",
+      "title": "Sistema de Tokens Dual Theme y Limpieza de Anti-Patterns en globals.css",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#3-especificación-de-la-paleta-y-tokens-de-diseño",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Definir variables CSS semánticas para :root (Claro) y .dark (Oscuro) en web/src/app/globals.css",
+        "Eliminar animaciones de orbes flotantes, bg-grid-mesh y gradientes estridentes",
+        "Establecer superficies con bordes hairline y elevaciones sobrias"
+      ],
+      "files_to_touch": [
+        "web/src/app/globals.css"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-40",
+      "title": "Motor de Temas, Script Anti-FOUC y Componente ThemeToggle",
+      "domain": "web",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#4-arquitectura-del-dual-theme-engine-claro--oscuro",
+      "dependencies": ["UI-39"],
+      "acceptance_criteria": [
+        "Inyectar script bloqueante anti-FOUC en web/src/app/layout.tsx",
+        "Crear hook useTheme o componente ThemeToggle interactivo con persistencia en localStorage",
+        "Alternancia fluida entre tema claro y oscuro sin recarga de página"
+      ],
+      "files_to_touch": [
+        "web/src/app/layout.tsx",
+        "web/src/components/ThemeToggle.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-41",
+      "title": "Rediseño Editorial de HeaderBar y MobileBottomDock",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#53-headerbar-y-mobilebottomdock",
+      "dependencies": ["UI-40"],
+      "acceptance_criteria": [
+        "Integrar ThemeToggle en HeaderBar y MobileBottomDock",
+        "Reemplazar radar fosforescente de webhook por punto semántico sutil de 6px",
+        "Navegación por pastillas con alto contraste y bordes de precisión"
+      ],
+      "files_to_touch": [
+        "web/src/components/HeaderBar.tsx",
+        "web/src/components/MobileBottomDock.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-42",
+      "title": "Rediseño Editorial de MasterBalanceHero y StatMetricCard",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#51-masterbalancehero--52-statmetriccard",
+      "dependencies": ["UI-39"],
+      "acceptance_criteria": [
+        "Erradicar cajas de iconos en colores pastel de StatMetricCard",
+        "Implementar tipografía monumental con Geist Mono y tabular-nums",
+        "Rediseño sobrio de MasterBalanceHero con alta densidad y micro-etiquetas de autor"
+      ],
+      "files_to_touch": [
+        "web/src/components/MasterBalanceHero.tsx",
+        "web/src/components/StatMetricCard.tsx",
+        "web/src/app/page.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-43",
+      "title": "Adaptación de Recharts y Analítica a Paleta Dual Theme",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#54-gráficos-recharts-en-analyticssectiontsx-y-analytics",
+      "dependencies": ["UI-39", "UI-40"],
+      "acceptance_criteria": [
+        "Reconfigurar colores de CartesianGrid, ejes y series Recharts según el tema activo",
+        "Rediseñar tooltips con fondo sólido y bordes hairline sin brillos violetas",
+        "Ajustar Donut interactivo con paleta sobria desaturada"
+      ],
+      "files_to_touch": [
+        "web/src/components/AnalyticsSection.tsx",
+        "web/src/app/analytics/page.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-44",
+      "title": "Rediseño Editorial de TransactionsTable y Muro",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#55-transactionstable-y-muro",
+      "dependencies": ["UI-39"],
+      "acceptance_criteria": [
+        "Líneas de separación hairline nítidas y hovers sutiles en tablas",
+        "Chips de clasificación (50, 100, -100, 0) monocromáticos de trazo fino",
+        "Adaptación de filtros y búsqueda al estilo editorial"
+      ],
+      "files_to_touch": [
+        "web/src/components/TransactionsTable.tsx",
+        "web/src/components/BadgeClassification.tsx",
+        "web/src/app/muro/page.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-45",
+      "title": "Rediseño Editorial de Pantalla de Autenticación /login",
+      "domain": "ui_ux",
+      "status": "pending",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#56-pantalla-de-autenticación-login",
+      "dependencies": ["UI-39", "UI-40"],
+      "acceptance_criteria": [
+        "Eliminar orbes animados y fondos espaciales en /login",
+        "Tarjeta monolítica de PIN con estética limpia y micro-interacciones táctiles",
+        "Soporte perfecto en modo claro y modo oscuro con 100dvh"
+      ],
+      "files_to_touch": [
+        "web/src/app/login/page.tsx"
+      ],
+      "completed_at": null
+    },
+    {
+      "id": "UI-46",
+      "title": "Auditoría Visual, Accesibilidad de Contraste y Cero Regresiones CI",
+      "domain": "devops",
+      "status": "pending",
+      "priority": "p2",
+      "spec_reference": "docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md#7-criterios-de-aceptación-innegociables",
+      "dependencies": ["UI-41", "UI-42", "UI-43", "UI-44", "UI-45"],
+      "acceptance_criteria": [
+        "Verificar contraste de textos WCAG AA/AAA en ambos temas",
+        "Garantizar cero saltos de layout (CLS) y ausencia de parpadeo (FOUC)",
+        "Validar npm test, npm run typecheck, npm run lint y npm run build"
+      ],
+      "files_to_touch": [
+        "docs/STATUS.md"
+      ],
+      "completed_at": null
     },
     {
       "id": "MULTI-01",

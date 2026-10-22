@@ -21,24 +21,18 @@ import {
   ChevronRight,
   TrendingUp,
   TrendingDown,
-  DollarSign,
-  Activity,
   ArrowLeft,
   Maximize2,
   Minimize2,
-  Scale,
-  Receipt,
-  Users,
-  PieChart as PieIcon,
-  Clock,
-  Sparkles,
   LayoutDashboard,
   Inbox,
+  Sparkles,
 } from 'lucide-react';
 import type { AnalyticsMonthPayload, ClassificationType } from '../../types/database';
 import { BadgeClassification } from '../../components/BadgeClassification';
 import { UserAvatar } from '../../components/UserAvatar';
 import { MobileBottomDock } from '../../components/MobileBottomDock';
+import { ThemeToggle, useTheme } from '../../components/ThemeToggle';
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsMonthPayload | null>(null);
@@ -46,6 +40,9 @@ export default function AnalyticsPage() {
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [activeDonutIndex, setActiveDonutIndex] = useState<number | null>(null);
+
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const fetchAnalytics = useCallback(async (month?: string) => {
     setLoading(true);
@@ -105,7 +102,6 @@ export default function AnalyticsPage() {
       const prevMonth = data.availableMonths[currentIndex + 1];
       fetchAnalytics(prevMonth);
     } else {
-      // Calcular mes cronológico anterior si no está en availableMonths
       const [y, m] = selectedMonth.split('-').map(Number);
       const prevDate = new Date(Date.UTC(y, m - 2, 1));
       const prevStr = `${prevDate.getUTCFullYear()}-${String(prevDate.getUTCMonth() + 1).padStart(2, '0')}`;
@@ -120,7 +116,6 @@ export default function AnalyticsPage() {
       const nextMonth = data.availableMonths[currentIndex - 1];
       fetchAnalytics(nextMonth);
     } else {
-      // Mes cronológico siguiente
       const [y, m] = selectedMonth.split('-').map(Number);
       const nextDate = new Date(Date.UTC(y, m, 1));
       const nextStr = `${nextDate.getUTCFullYear()}-${String(nextDate.getUTCMonth() + 1).padStart(2, '0')}`;
@@ -132,7 +127,6 @@ export default function AnalyticsPage() {
     return `$ ${val.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
-  // Comparativa de aportes A vs B para BarChart
   const comparisonData = useMemo(() => {
     if (!data) return [];
     return [
@@ -140,16 +134,16 @@ export default function AnalyticsPage() {
         name: data.kpis.aporteUserA.name,
         total: data.kpis.aporteUserA.total,
         percentage: data.kpis.aporteUserA.percentage,
-        color: '#818CF8',
+        color: isDark ? '#93C5FD' : '#2563EB',
       },
       {
         name: data.kpis.aporteUserB.name,
         total: data.kpis.aporteUserB.total,
         percentage: data.kpis.aporteUserB.percentage,
-        color: '#34D399',
+        color: isDark ? '#6EE7B7' : '#059669',
       },
     ];
-  }, [data]);
+  }, [data, isDark]);
 
   const activeDonutItem =
     activeDonutIndex !== null && data?.classificationBreakdown[activeDonutIndex]
@@ -157,225 +151,199 @@ export default function AnalyticsPage() {
       : null;
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-24 sm:pb-16">
-      {/* Living Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-        <div className="absolute inset-0 bg-grid-mesh opacity-70" />
-        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-indigo-600/20 to-purple-600/10 blur-[130px] animate-ambient-slow" />
-        <div className="absolute top-[40%] -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-tl from-emerald-600/15 to-cyan-500/10 blur-[140px] animate-ambient-reverse" />
-        <div className="absolute bottom-10 left-[25%] w-[450px] h-[450px] rounded-full bg-cyan-500/10 blur-[110px] animate-mesh-pulse" />
-      </div>
-
+    <div className="min-h-screen bg-[var(--canvas)] text-[var(--text-primary)] relative selection:bg-neutral-800 selection:text-white dark:selection:bg-neutral-200 dark:selection:text-neutral-900 pb-24 sm:pb-16 transition-colors">
       {/* Header Bar */}
-      <header className="sticky top-0 z-30 w-full glass-panel border-b border-white/[0.08] backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Left: Brand + Link to Dashboard */}
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 w-full border-b border-[var(--border-hairline)] bg-[var(--surface)]/90 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-15 flex items-center justify-between gap-4">
+          {/* Left: Brand + Navigation */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/"
-              className="p-2 rounded-xl glass-panel-interactive border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white transition-all inline-flex items-center gap-1.5 text-xs font-semibold"
-              title="Volver al Dashboard principal"
+              className="p-1.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] hover:bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1.5 text-xs font-mono"
+              title="Volver al Inicio"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Dashboard</span>
+              <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <span className="hidden sm:inline">Inicio</span>
             </Link>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-indigo-400/30">
-                <Activity className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">Centro de Analítica</h1>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hidden sm:inline-block">
-                    Mensual
-                  </span>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold text-[var(--text-primary)] font-mono tracking-tight">
+                Analítica
+              </span>
+              <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)] hidden sm:inline-block">
+                Mensual
+              </span>
             </div>
 
             {/* Desktop Navigation Tabs */}
-            <nav aria-label="Navegación principal" className="hidden lg:flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-white/10 backdrop-blur-md ml-2">
+            <nav aria-label="Navegación principal" className="hidden lg:flex items-center gap-1 p-0.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-subtle)] ml-2">
               <Link
                 href="/"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                <LayoutDashboard className="w-3.5 h-3.5" />
+                <LayoutDashboard className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Inicio</span>
               </Link>
               <Link
                 href="/analytics"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-md shadow-indigo-600/30 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono font-semibold bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] shadow-sm"
               >
-                <TrendingUp className="w-3.5 h-3.5" />
+                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Analítica</span>
               </Link>
               <Link
                 href="/muro"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                <Inbox className="w-3.5 h-3.5" />
+                <Inbox className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Muro</span>
               </Link>
             </nav>
           </div>
 
-          {/* Right: Month Selector + Fullscreen */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right: Month Selector + Theme + Fullscreen */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Month Navigator Controls */}
-            <div className="flex items-center glass-panel bg-slate-900/60 rounded-xl border border-white/10 p-1">
+            <div className="flex items-center rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] p-0.5">
               <button
                 onClick={handlePrevMonth}
                 disabled={loading}
-                className="p-1.5 sm:px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer disabled:opacity-40"
+                className="p-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer disabled:opacity-40"
                 title="Mes anterior"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" strokeWidth={1.75} />
               </button>
 
-              <div className="px-2.5 sm:px-3 text-xs font-bold text-white tracking-tight flex items-center gap-1.5 whitespace-nowrap min-w-[110px] justify-center">
-                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="px-2.5 text-xs font-mono font-semibold text-[var(--text-primary)] tracking-tight flex items-center gap-1.5 whitespace-nowrap min-w-[100px] justify-center">
+                <Calendar className="w-3 h-3 text-[var(--text-muted)]" strokeWidth={1.75} />
                 <span>{data?.monthLabel || 'Cargando...'}</span>
               </div>
 
               <button
                 onClick={handleNextMonth}
                 disabled={loading}
-                className="p-1.5 sm:px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer disabled:opacity-40"
+                className="p-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer disabled:opacity-40"
                 title="Mes siguiente"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.75} />
               </button>
             </div>
 
-            {/* Selector Desplegable Rápido (Desktop) */}
+            {/* Dropdown de Meses Disponibles */}
             {data && data.availableMonths.length > 0 && (
               <select
                 value={selectedMonth}
                 onChange={(e) => fetchAnalytics(e.target.value)}
-                className="hidden md:block py-1.5 px-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                className="hidden md:block py-1 px-2 rounded-lg bg-[var(--surface)] border border-[var(--border-hairline)] text-xs font-mono text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 {data.availableMonths.map((m) => (
-                  <option key={m} value={m} className="bg-slate-900 text-white">
+                  <option key={m} value={m} className="bg-[var(--surface)] text-[var(--text-primary)]">
                     {m}
                   </option>
                 ))}
               </select>
             )}
 
-            {/* Botón Fullscreen */}
+            <ThemeToggle variant="pill" />
+
+            {/* Fullscreen Button */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-xl glass-panel-interactive border border-white/10 hover:border-indigo-500/40 text-slate-400 hover:text-white transition-all cursor-pointer hidden sm:inline-flex"
-              title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa (Command Center)'}
+              className="p-1.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] hover:bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer hidden sm:inline-flex"
+              title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
             >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" strokeWidth={1.75} /> : <Maximize2 className="w-3.5 h-3.5" strokeWidth={1.75} />}
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
         {loading && !data ? (
-          <div className="h-96 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <div className="w-8 h-8 rounded-full border-2 border-indigo-400/20 border-t-indigo-400 animate-spin" />
-            <p className="text-xs font-medium">Analizando transacciones del período...</p>
+          <div className="h-96 flex flex-col items-center justify-center gap-3 text-[var(--text-muted)] font-mono">
+            <div className="w-6 h-6 rounded-full border-2 border-[var(--text-muted)] border-t-[var(--text-primary)] animate-spin" />
+            <p className="text-xs">Consolidando métricas del período...</p>
           </div>
         ) : data ? (
           <>
             {/* KPI Strip: 4 Cifras Monumentales del Mes */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
               {/* KPI 1: Gasto Total Mes */}
-              <div className="glass-panel rounded-2xl p-3.5 sm:p-5 border border-white/[0.08] flex flex-col justify-between gap-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Gasto del Mes
-                  </span>
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-indigo-500/15 text-indigo-400">
-                    <DollarSign className="w-4 h-4" />
-                  </div>
-                </div>
+              <div className="hairline-card rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-2.5 transition-colors">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  Gasto del Mes
+                </span>
 
                 <div>
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-white tabular-nums tracking-tight truncate">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-semibold font-mono text-[var(--text-primary)] tabular-nums tracking-tight truncate">
                     {formatARS(data.kpis.totalGastoMes)}
                   </div>
 
                   {data.kpis.variacionPorcentual !== null && (
-                    <div className="text-[10px] sm:text-xs mt-1 flex items-center gap-1.5">
+                    <div className="text-xs font-mono mt-1 flex items-center gap-1.5">
                       {data.kpis.variacionPorcentual > 0 ? (
-                        <span className="inline-flex items-center text-rose-400 font-semibold tabular-nums">
-                          <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
+                        <span className="inline-flex items-center text-rose-600 dark:text-rose-400 font-semibold tabular-nums">
+                          <TrendingUp className="w-3 h-3 mr-0.5" strokeWidth={2} />
                           +{data.kpis.variacionPorcentual}%
                         </span>
                       ) : data.kpis.variacionPorcentual < 0 ? (
-                        <span className="inline-flex items-center text-emerald-400 font-semibold tabular-nums">
-                          <TrendingDown className="w-3.5 h-3.5 mr-0.5" />
+                        <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
+                          <TrendingDown className="w-3 h-3 mr-0.5" strokeWidth={2} />
                           {data.kpis.variacionPorcentual}%
                         </span>
                       ) : (
-                        <span className="text-slate-400">0%</span>
+                        <span className="text-[var(--text-muted)]">0%</span>
                       )}
-                      <span className="text-slate-500 truncate">vs mes anterior</span>
+                      <span className="text-[var(--text-muted)] truncate">vs mes anterior</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* KPI 2: Paridad de Desembolso A vs B */}
-              <div className="glass-panel rounded-2xl p-3.5 sm:p-5 border border-white/[0.08] flex flex-col justify-between gap-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Paridad de Aporte
-                  </span>
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-500/15 text-emerald-400">
-                    <Users className="w-4 h-4" />
-                  </div>
-                </div>
+              <div className="hairline-card rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-2.5 transition-colors">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  Paridad de Aporte
+                </span>
 
                 <div>
-                  <div className="flex items-baseline justify-between text-xs sm:text-sm font-semibold text-white mb-1.5">
+                  <div className="flex items-baseline justify-between text-xs font-mono font-medium text-[var(--text-primary)] mb-1.5">
                     <span className="truncate">{data.kpis.aporteUserA.name}: {data.kpis.aporteUserA.percentage}%</span>
                     <span className="truncate">{data.kpis.aporteUserB.name}: {data.kpis.aporteUserB.percentage}%</span>
                   </div>
 
                   {/* Micro Barra Bicolor */}
-                  <div className="w-full h-2 rounded-full bg-slate-800 flex overflow-hidden">
+                  <div className="w-full h-2 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-hairline)] flex overflow-hidden">
                     <div
-                      className="h-full bg-indigo-500 transition-all duration-500"
+                      className="h-full bg-blue-500 transition-all duration-500"
                       style={{ width: `${data.kpis.aporteUserA.percentage}%` }}
                       title={`${data.kpis.aporteUserA.name}: ${formatARS(data.kpis.aporteUserA.total)}`}
                     />
                     <div
-                      className="h-full bg-emerald-400 transition-all duration-500"
+                      className="h-full bg-emerald-500 transition-all duration-500"
                       style={{ width: `${data.kpis.aporteUserB.percentage}%` }}
                       title={`${data.kpis.aporteUserB.name}: ${formatARS(data.kpis.aporteUserB.total)}`}
                     />
                   </div>
 
-                  <span className="text-[10px] text-slate-500 mt-1 block truncate">
+                  <span className="text-[10px] font-mono text-[var(--text-muted)] mt-1.5 block truncate">
                     Desembolso real compartido
                   </span>
                 </div>
               </div>
 
               {/* KPI 3: Deuda Neta del Período */}
-              <div className="glass-panel rounded-2xl p-3.5 sm:p-5 border border-white/[0.08] flex flex-col justify-between gap-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Deuda del Período
-                  </span>
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-cyan-500/15 text-cyan-400">
-                    <Scale className="w-4 h-4" />
-                  </div>
-                </div>
+              <div className="hairline-card rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-2.5 transition-colors">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  Deuda del Período
+                </span>
 
                 <div>
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-white tabular-nums tracking-tight truncate">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-semibold font-mono text-[var(--text-primary)] tabular-nums tracking-tight truncate">
                     {formatARS(Math.abs(data.kpis.deudaGeneradaMes))}
                   </div>
-                  <span className="text-[10px] sm:text-xs text-slate-400 mt-1 block truncate">
+                  <span className="text-xs font-mono text-[var(--text-secondary)] mt-1 block truncate">
                     {data.kpis.deudaGeneradaMes > 0
                       ? `A favor de ${data.kpis.aporteUserA.name}`
                       : data.kpis.deudaGeneradaMes < 0
@@ -386,23 +354,18 @@ export default function AnalyticsPage() {
               </div>
 
               {/* KPI 4: Operaciones y Promedio */}
-              <div className="glass-panel rounded-2xl p-3.5 sm:p-5 border border-white/[0.08] flex flex-col justify-between gap-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Operaciones
-                  </span>
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-amber-500/15 text-amber-400">
-                    <Receipt className="w-4 h-4" />
-                  </div>
-                </div>
+              <div className="hairline-card rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-2.5 transition-colors">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+                  Operaciones
+                </span>
 
                 <div>
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-white tabular-nums tracking-tight truncate">
+                  <div className="text-xl sm:text-2xl md:text-3xl font-semibold font-mono text-[var(--text-primary)] tabular-nums tracking-tight truncate">
                     {data.kpis.transaccionesCount}
                   </div>
-                  <span className="text-[10px] sm:text-xs text-slate-400 mt-1 block truncate">
-                    Promedio:{' '}
-                    <strong className="text-slate-200">
+                  <span className="text-xs font-mono text-[var(--text-muted)] mt-1 block truncate">
+                    Ticket promedio:{' '}
+                    <strong className="text-[var(--text-primary)] font-medium">
                       {formatARS(
                         data.kpis.transaccionesCount > 0
                           ? Math.round(data.kpis.totalGastoMes / data.kpis.transaccionesCount)
@@ -417,16 +380,13 @@ export default function AnalyticsPage() {
             {/* Grilla Principal de Gráficos (Command Center 2x2) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
               {/* Gráfico 1: Evolución Diaria Acumulada */}
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
+              <div className="hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400">
-                      <TrendingUp className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white">Evolución Acumulada Diaria</h2>
-                      <p className="text-[11px] text-slate-400">Ritmo de consumo a lo largo de {data.monthLabel}</p>
-                    </div>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                      Evolución Acumulada Diaria
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">Ritmo de consumo a lo largo de {data.monthLabel}</p>
                   </div>
                 </div>
 
@@ -434,25 +394,27 @@ export default function AnalyticsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data.dailyTimeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="monthAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366F1" stopOpacity={0.45} />
-                          <stop offset="95%" stopColor="#6366F1" stopOpacity={0.0} />
+                        <linearGradient id="monthDailyAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={isDark ? '#F3F4F6' : '#0F172A'} stopOpacity={isDark ? 0.15 : 0.08} />
+                          <stop offset="95%" stopColor={isDark ? '#F3F4F6' : '#0F172A'} stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
                       <XAxis
                         dataKey="day"
-                        stroke="#64748B"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
                         fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
                         tickLine={false}
                         interval="preserveStartEnd"
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                         tickFormatter={(d) => `d${d}`}
                       />
                       <YAxis
-                        stroke="#64748B"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
                         fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                         tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
                       />
                       <Tooltip
@@ -460,18 +422,18 @@ export default function AnalyticsPage() {
                           if (active && payload && payload.length) {
                             const p = payload[0].payload;
                             return (
-                              <div className="p-3 rounded-xl glass-panel border border-indigo-500/30 text-xs shadow-xl space-y-1 backdrop-blur-xl">
-                                <p className="font-semibold text-white">{p.date}</p>
-                                <p className="text-slate-300">
+                              <div className="p-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-md space-y-1 font-mono">
+                                <p className="font-semibold text-[var(--text-primary)]">{p.date}</p>
+                                <p className="text-[var(--text-secondary)]">
                                   Día:{' '}
-                                  <span className="text-indigo-300 font-bold tabular-nums">
+                                  <span className="font-bold text-[var(--text-primary)] tabular-nums">
                                     {formatARS(p.monto)}
                                   </span>{' '}
                                   ({p.count} txs)
                                 </p>
-                                <p className="text-slate-400">
+                                <p className="text-[var(--text-muted)]">
                                   Acumulado:{' '}
-                                  <span className="text-white font-bold tabular-nums">
+                                  <span className="font-bold text-[var(--text-primary)] tabular-nums">
                                     {formatARS(p.acumulado)}
                                   </span>
                                 </p>
@@ -484,10 +446,10 @@ export default function AnalyticsPage() {
                       <Area
                         type="monotone"
                         dataKey="acumulado"
-                        stroke="#818CF8"
-                        strokeWidth={2.5}
+                        stroke={isDark ? '#F3F4F6' : '#0F172A'}
+                        strokeWidth={2}
                         fillOpacity={1}
-                        fill="url(#monthAreaGradient)"
+                        fill="url(#monthDailyAreaGradient)"
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -495,16 +457,13 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Gráfico 2: Paridad de Aportes Head-to-Head */}
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
+              <div className="hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400">
-                      <Users className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white">Comparativa Head-to-Head</h2>
-                      <p className="text-[11px] text-slate-400">Aporte total por usuario en {data.monthLabel}</p>
-                    </div>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                      Comparativa de Aporte
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">Volumen neto aportado en {data.monthLabel}</p>
                   </div>
                 </div>
 
@@ -513,16 +472,18 @@ export default function AnalyticsPage() {
                     <BarChart data={comparisonData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
                       <XAxis
                         dataKey="name"
-                        stroke="#64748B"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
                         fontSize={12}
+                        fontFamily="var(--font-geist-mono), monospace"
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                       />
                       <YAxis
-                        stroke="#64748B"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
                         fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                         tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
                       />
                       <Tooltip
@@ -530,12 +491,12 @@ export default function AnalyticsPage() {
                           if (active && payload && payload.length) {
                             const p = payload[0].payload;
                             return (
-                              <div className="p-3 rounded-xl glass-panel border border-emerald-500/30 text-xs shadow-xl backdrop-blur-xl">
-                                <p className="font-semibold text-white">{p.name}</p>
-                                <p className="text-emerald-300 font-bold tabular-nums text-sm mt-0.5">
+                              <div className="p-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-md font-mono">
+                                <p className="font-semibold text-[var(--text-primary)]">{p.name}</p>
+                                <p className="font-bold tabular-nums text-sm mt-0.5 text-[var(--text-primary)]">
                                   {formatARS(p.total)}
                                 </p>
-                                <p className="text-slate-400 text-[11px]">
+                                <p className="text-[var(--text-muted)] text-[11px] mt-0.5">
                                   Representa el {p.percentage}% del total
                                 </p>
                               </div>
@@ -544,7 +505,7 @@ export default function AnalyticsPage() {
                           return null;
                         }}
                       />
-                      <Bar dataKey="total" radius={[8, 8, 0, 0]}>
+                      <Bar dataKey="total" radius={[6, 6, 0, 0]}>
                         {comparisonData.map((entry, index) => (
                           <Cell key={`bar-${index}`} fill={entry.color} />
                         ))}
@@ -555,53 +516,40 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Gráfico 3: Donut de Clasificaciones del Mes */}
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
+              <div className="hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400">
-                      <PieIcon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white">Por Clasificación</h2>
-                      <p className="text-[11px] text-slate-400">Distribución porcentual en {data.monthLabel}</p>
-                    </div>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                      Por Clasificación
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">Distribución contable en {data.monthLabel}</p>
                   </div>
                 </div>
 
-                <div className="relative h-48 w-full flex items-center justify-center my-1">
-                  {/* Central Gauge Disk */}
+                <div className="relative h-44 w-full flex items-center justify-center my-1">
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-900/85 border border-white/[0.08] shadow-2xl flex flex-col items-center justify-center p-1.5 text-center backdrop-blur-md transition-all duration-300">
+                    <div className="flex flex-col items-center justify-center text-center font-mono">
                       {activeDonutItem ? (
                         <div>
-                          <span
-                            className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider truncate max-w-[80px] sm:max-w-[95px] mx-auto"
-                            style={{ color: activeDonutItem.color }}
-                          >
+                          <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-primary)]">
                             {activeDonutItem.name}
                           </span>
-                          <span className="block text-base sm:text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
+                          <span className="block text-base sm:text-lg font-bold text-[var(--text-primary)] tabular-nums">
                             {formatARS(activeDonutItem.value)}
                           </span>
-                          <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded-full text-[8px] sm:text-[9px] font-bold tabular-nums border"
-                            style={{
-                              backgroundColor: `${activeDonutItem.color}20`,
-                              borderColor: `${activeDonutItem.color}40`,
-                              color: activeDonutItem.color,
-                            }}
-                          >
+                          <span className="text-[10px] text-[var(--text-muted)]">
                             {activeDonutItem.percentage}%
                           </span>
                         </div>
                       ) : (
                         <div>
-                          <span className="block text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          <span className="block text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                             TOTAL MES
                           </span>
-                          <span className="block text-base sm:text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
+                          <span className="block text-base sm:text-lg font-bold text-[var(--text-primary)] tabular-nums">
                             {formatARS(data.kpis.totalGastoMes)}
                           </span>
-                          <span className="block text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">
+                          <span className="block text-[10px] text-[var(--text-muted)]">
                             {data.kpis.transaccionesCount} txs
                           </span>
                         </div>
@@ -615,9 +563,8 @@ export default function AnalyticsPage() {
                         data={data.classificationBreakdown}
                         cx="50%"
                         cy="50%"
-                        innerRadius={58}
-                        outerRadius={78}
-                        cornerRadius={5}
+                        innerRadius={54}
+                        outerRadius={72}
                         paddingAngle={3}
                         dataKey="value"
                         onClick={(_: unknown, index: number) =>
@@ -632,14 +579,9 @@ export default function AnalyticsPage() {
                             <Cell
                               key={`cell-${index}`}
                               fill={entry.color}
-                              stroke={isHovered ? '#FFFFFF' : '#080B11'}
-                              strokeWidth={isHovered ? 2.5 : 1.5}
-                              opacity={activeDonutIndex !== null && !isHovered ? 0.35 : 1}
-                              style={{
-                                filter: isHovered ? `drop-shadow(0 0 10px ${entry.color})` : undefined,
-                                cursor: 'pointer',
-                                transition: 'all 0.25s ease',
-                              }}
+                              stroke="var(--surface)"
+                              strokeWidth={2}
+                              className="transition-opacity hover:opacity-80"
                             />
                           );
                         })}
@@ -649,7 +591,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Desglose List */}
-                <div className="space-y-1.5 mt-2 pt-2 border-t border-white/[0.06]">
+                <div className="space-y-1 mt-2 pt-2 border-t border-[var(--border-hairline)]">
                   {data.classificationBreakdown.map((item, index) => {
                     const isHovered = activeDonutIndex === index;
                     return (
@@ -658,25 +600,19 @@ export default function AnalyticsPage() {
                         onClick={() => setActiveDonutIndex((prev) => (prev === index ? null : index))}
                         onMouseEnter={() => setActiveDonutIndex(index)}
                         onMouseLeave={() => setActiveDonutIndex(null)}
-                        className={`min-h-[40px] flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer ${
+                        className={`min-h-[36px] flex items-center justify-between p-1.5 rounded-lg border transition-all cursor-pointer font-mono text-xs ${
                           isHovered
-                            ? 'bg-slate-800/80 border-indigo-500/40'
-                            : 'bg-slate-900/40 border-white/[0.04]'
+                            ? 'bg-[var(--surface-subtle)] border-[var(--border-hover)]'
+                            : 'border-transparent hover:bg-[var(--surface-subtle)]/50'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-xs font-semibold text-slate-200">{item.name}</span>
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                          <span className="text-[var(--text-secondary)] font-medium">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white tabular-nums">{formatARS(item.value)}</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
-                            style={{
-                              backgroundColor: `${item.color}15`,
-                              borderColor: `${item.color}35`,
-                              color: item.color,
-                            }}
-                          >
+                          <span className="font-semibold text-[var(--text-primary)] tabular-nums">{formatARS(item.value)}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)]">
                             {item.percentage}%
                           </span>
                         </div>
@@ -687,16 +623,13 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Gráfico 4: Intensidad por Día de la Semana */}
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
+              <div className="hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white">Velocidad por Día de la Semana</h2>
-                      <p className="text-[11px] text-slate-400">Patrón de consumo semanal en {data.monthLabel}</p>
-                    </div>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                      Intensidad Semanal
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">Gasto agrupado por día de la semana</p>
                   </div>
                 </div>
 
@@ -705,17 +638,19 @@ export default function AnalyticsPage() {
                     <BarChart data={data.dayOfWeekIntensity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <XAxis
                         dataKey="dayName"
-                        stroke="#64748B"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
                         fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                         tickFormatter={(name) => name.slice(0, 3)}
                       />
                       <YAxis
-                        stroke="#64748B"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
                         fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
                         tickLine={false}
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                         tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
                       />
                       <Tooltip
@@ -723,12 +658,12 @@ export default function AnalyticsPage() {
                           if (active && payload && payload.length) {
                             const p = payload[0].payload;
                             return (
-                              <div className="p-3 rounded-xl glass-panel border border-cyan-500/30 text-xs shadow-xl backdrop-blur-xl">
-                                <p className="font-semibold text-white">{p.dayName}</p>
-                                <p className="text-cyan-300 font-bold tabular-nums text-sm mt-0.5">
+                              <div className="p-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-md font-mono">
+                                <p className="font-semibold text-[var(--text-primary)]">{p.dayName}</p>
+                                <p className="font-bold tabular-nums text-sm mt-0.5 text-[var(--text-primary)]">
                                   {formatARS(p.total)}
                                 </p>
-                                <p className="text-slate-400 text-[11px]">
+                                <p className="text-[var(--text-muted)] text-[11px] mt-0.5">
                                   {p.count} compras en este día
                                 </p>
                               </div>
@@ -737,7 +672,7 @@ export default function AnalyticsPage() {
                           return null;
                         }}
                       />
-                      <Bar dataKey="total" fill="#06B6D4" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="total" fill={isDark ? '#60A5FA' : '#3B82F6'} radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -746,30 +681,27 @@ export default function AnalyticsPage() {
 
             {/* Top 5 Gastos del Mes */}
             {data.topExpenses.length > 0 && (
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08]">
+              <div className="hairline-card rounded-2xl p-5 sm:p-6 transition-colors">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-amber-500/15 text-amber-400">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white">Mayores Gastos del Mes</h2>
-                      <p className="text-[11px] text-slate-400">Top 5 compras más significativas de {data.monthLabel}</p>
-                    </div>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                      Mayores Gastos del Mes
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">Top 5 transacciones de mayor volumen en {data.monthLabel}</p>
                   </div>
                 </div>
 
-                <div className="divide-y divide-white/[0.04]">
+                <div className="divide-y divide-[var(--border-hairline)]">
                   {data.topExpenses.map((tx, idx) => (
-                    <div key={tx.id} className="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0">
+                    <div key={tx.id} className="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0 hover:bg-[var(--surface-subtle)]/40 transition-colors px-2 rounded-lg">
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 text-xs font-bold flex items-center justify-center shrink-0">
-                          #{idx + 1}
+                        <span className="w-5 h-5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)] font-mono text-[11px] font-semibold flex items-center justify-center shrink-0">
+                          {idx + 1}
                         </span>
                         <UserAvatar name={tx.userName} size="sm" />
                         <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-semibold text-white truncate">{tx.concept}</p>
-                          <p className="text-[10px] text-slate-400">
+                          <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)] truncate">{tx.concept}</p>
+                          <p className="text-[10px] font-mono text-[var(--text-muted)]">
                             {tx.userName} · {tx.date}
                           </p>
                         </div>
@@ -777,7 +709,7 @@ export default function AnalyticsPage() {
 
                       <div className="flex items-center gap-3 shrink-0">
                         <BadgeClassification classification={tx.classification as ClassificationType} />
-                        <span className="text-xs sm:text-sm font-bold text-white tabular-nums">
+                        <span className="text-xs sm:text-sm font-semibold font-mono text-[var(--text-primary)] tabular-nums">
                           {formatARS(tx.amount)}
                         </span>
                       </div>

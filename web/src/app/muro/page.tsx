@@ -15,7 +15,6 @@ import {
   Search,
   Send,
   Sparkles,
-  Layers,
   Bot,
 } from 'lucide-react';
 import type { AgykeItem } from '../../types/database';
@@ -99,30 +98,31 @@ export default function MuroPage() {
       if (statusFilter !== 'ALL' && item.status !== statusFilter) {
         return false;
       }
-      // Filtro de Tipo de Origen
+
+      // Filtro de Origen
       if (sourceFilter !== 'ALL' && item.source_type !== sourceFilter) {
         return false;
       }
-      // Búsqueda textual
-      if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase().trim();
-        const conceptMatch = item.concept ? item.concept.toLowerCase().includes(query) : false;
-        const amountMatch = item.amount ? item.amount.toString().includes(query) : false;
-        const userMatch = item.users?.name ? item.users.name.toLowerCase().includes(query) : false;
-        if (!conceptMatch && !amountMatch && !userMatch) {
-          return false;
-        }
+
+      // Filtro de Texto
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesConcept = (item.concept || '').toLowerCase().includes(q);
+        const matchesAmount = (item.amount || '').toString().includes(q);
+        const matchesUser = (item.users?.name || '').toLowerCase().includes(q);
+        return matchesConcept || matchesAmount || matchesUser;
       }
+
       return true;
     });
   }, [queueItems, statusFilter, sourceFilter, searchQuery]);
 
   const formatARS = (val: number) => {
-    return `$ ${val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `$ ${val.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
+  const formatDate = (isoStr: string) => {
+    const d = new Date(isoStr);
     return d.toLocaleDateString('es-AR', {
       day: '2-digit',
       month: 'short',
@@ -132,15 +132,7 @@ export default function MuroPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B11] text-slate-100 relative overflow-hidden selection:bg-indigo-500/30 selection:text-white pb-28 sm:pb-20">
-      {/* Living Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-        <div className="absolute inset-0 bg-grid-mesh opacity-70" />
-        <div className="absolute -top-32 -left-32 w-[580px] h-[580px] rounded-full bg-gradient-to-br from-indigo-600/20 to-purple-600/15 blur-[125px] animate-ambient-slow" />
-        <div className="absolute top-[35%] -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-tl from-emerald-600/15 to-cyan-500/15 blur-[135px] animate-ambient-reverse" />
-        <div className="absolute bottom-10 left-[20%] w-[460px] h-[460px] rounded-full bg-gradient-to-tr from-amber-500/10 to-indigo-500/10 blur-[115px] animate-mesh-pulse" />
-      </div>
-
+    <div className="min-h-screen bg-[var(--canvas)] text-[var(--text-primary)] relative selection:bg-neutral-800 selection:text-white dark:selection:bg-neutral-200 dark:selection:text-neutral-900 pb-28 sm:pb-20 transition-colors">
       {/* Global Header */}
       <HeaderBar
         onRefresh={fetchData}
@@ -150,32 +142,29 @@ export default function MuroPage() {
       />
 
       {/* Main Container */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
         {/* Navigation Breadcrumb / Header Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="p-2 rounded-xl glass-panel-interactive border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white transition-all inline-flex items-center gap-1.5 text-xs font-semibold"
-              title="Volver al Dashboard"
+              className="p-1.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] hover:bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1.5 text-xs font-mono"
+              title="Volver al Inicio"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Dashboard</span>
+              <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <span className="hidden sm:inline">Inicio</span>
             </Link>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-400/30">
-                <Layers className="w-5 h-5 text-white" />
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base sm:text-lg font-semibold font-mono tracking-tight text-[var(--text-primary)]">
+                  Muro de Ingestión
+                </h1>
+                <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)]">
+                  Gemini Pipeline
+                </span>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Muro Agyke</h1>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    Pipeline Gemini
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400">Auditoría de comprobantes, audios y tickets procesados</p>
-              </div>
+              <p className="text-xs text-[var(--text-muted)]">Auditoría de comprobantes, audios y tickets procesados</p>
             </div>
           </div>
 
@@ -185,25 +174,23 @@ export default function MuroPage() {
               href="https://t.me/AgykeBot"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 border border-indigo-400/30 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="px-3 py-1.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] hover:bg-[var(--surface-subtle)] text-[var(--text-primary)] text-xs font-mono font-medium inline-flex items-center gap-1.5 transition-colors"
             >
-              <Bot className="w-3.5 h-3.5" />
+              <Bot className="w-3.5 h-3.5" strokeWidth={1.75} />
               <span>Clasificar en Telegram</span>
             </a>
           </div>
         </div>
 
         {/* Banner Informativo / Instrucción */}
-        <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-indigo-500/20 bg-indigo-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="hairline-card rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors">
           <div className="flex items-start sm:items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 shrink-0 mt-0.5 sm:mt-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
+            <Sparkles className="w-4 h-4 text-[var(--text-secondary)] shrink-0 mt-0.5 sm:mt-0" strokeWidth={1.75} />
             <div>
-              <p className="text-xs sm:text-sm font-medium text-slate-200">
-                Extracción automática impulsada por <span className="text-indigo-300 font-semibold">Gemini 1.5 Flash</span>
+              <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)]">
+                Extracción automática con modelo <span className="font-mono font-semibold">Gemini Flash</span>
               </p>
-              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 leading-relaxed">
                 Los mensajes de voz y fotos enviados al bot son analizados en tiempo real y quedan registrados aquí. Para impactar en el saldo neto, deben confirmarse con los botones de clasificación (50, 100, -100, 0) directamente en Telegram.
               </p>
             </div>
@@ -211,25 +198,25 @@ export default function MuroPage() {
         </div>
 
         {/* 4 KPI Cards de la Cola */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {/* Total Registrados */}
-          <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-white/[0.08]">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-1.5">
+          <div className="hairline-card rounded-xl p-4 sm:p-5 transition-colors">
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-[11px] font-mono uppercase tracking-wider mb-1.5">
               <span>Total en Cola</span>
-              <Inbox className="w-4 h-4 text-slate-400" />
+              <Inbox className="w-3.5 h-3.5" strokeWidth={1.75} />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-white tabular-nums">{metrics.total}</div>
-            <p className="text-[10px] text-slate-400 mt-1">Historial completo en agyke_queue</p>
+            <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--text-primary)] tabular-nums">{metrics.total}</div>
+            <p className="text-[11px] text-[var(--text-muted)] mt-1 font-mono">Historial en agyke_queue</p>
           </div>
 
           {/* Pendientes de Auditoría */}
-          <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/[0.03]">
-            <div className="flex items-center justify-between text-amber-300 text-xs mb-1.5">
-              <span className="font-medium">Pendientes</span>
-              <Clock className="w-4 h-4 text-amber-400" />
+          <div className="hairline-card rounded-xl p-4 sm:p-5 transition-colors">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider mb-1.5 text-amber-700 dark:text-amber-400">
+              <span className="font-semibold">Pendientes</span>
+              <Clock className="w-3.5 h-3.5" strokeWidth={1.75} />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-amber-300 tabular-nums">{metrics.pending}</div>
-            <p className="text-[10px] text-amber-400/80 mt-1">
+            <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--text-primary)] tabular-nums">{metrics.pending}</div>
+            <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80 mt-1 font-mono">
               {metrics.totalPendingAmount > 0
                 ? `${formatARS(metrics.totalPendingAmount)} por imputar`
                 : 'Sin saldo pendiente'}
@@ -237,33 +224,33 @@ export default function MuroPage() {
           </div>
 
           {/* Procesados */}
-          <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-emerald-500/30 bg-emerald-500/[0.03]">
-            <div className="flex items-center justify-between text-emerald-300 text-xs mb-1.5">
-              <span className="font-medium">Procesados</span>
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
+          <div className="hairline-card rounded-xl p-4 sm:p-5 transition-colors">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider mb-1.5 text-emerald-700 dark:text-emerald-400">
+              <span className="font-semibold">Procesados</span>
+              <CheckCircle className="w-3.5 h-3.5" strokeWidth={1.75} />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-emerald-300 tabular-nums">{metrics.processed}</div>
-            <p className="text-[10px] text-emerald-400/80 mt-1">Convertidos en transacciones</p>
+            <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--text-primary)] tabular-nums">{metrics.processed}</div>
+            <p className="text-[11px] text-[var(--text-muted)] mt-1 font-mono">Convertidos en transacciones</p>
           </div>
 
           {/* Descartados */}
-          <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-rose-500/30 bg-rose-500/[0.03]">
-            <div className="flex items-center justify-between text-rose-300 text-xs mb-1.5">
-              <span className="font-medium">Descartados</span>
-              <XCircle className="w-4 h-4 text-rose-400" />
+          <div className="hairline-card rounded-xl p-4 sm:p-5 transition-colors">
+            <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider mb-1.5 text-rose-700 dark:text-rose-400">
+              <span className="font-semibold">Descartados</span>
+              <XCircle className="w-3.5 h-3.5" strokeWidth={1.75} />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-rose-300 tabular-nums">{metrics.discarded}</div>
-            <p className="text-[10px] text-rose-400/80 mt-1">Rechazados por el usuario</p>
+            <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--text-primary)] tabular-nums">{metrics.discarded}</div>
+            <p className="text-[11px] text-[var(--text-muted)] mt-1 font-mono">Rechazados por usuario</p>
           </div>
         </div>
 
         {/* Filtros de Estado, Tipo y Buscador */}
-        <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-white/[0.08] space-y-4">
+        <div className="hairline-card rounded-xl p-4 sm:p-5 space-y-3.5 transition-colors">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             {/* Tabs de Estado */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-              <span className="text-xs text-slate-400 mr-1 flex items-center gap-1 shrink-0">
-                <Filter className="w-3.5 h-3.5" /> Estado:
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none font-mono text-xs">
+              <span className="text-[var(--text-muted)] mr-1 flex items-center gap-1 shrink-0 text-[11px] uppercase tracking-wider">
+                <Filter className="w-3 h-3" strokeWidth={1.75} /> Estado:
               </span>
               {(['ALL', 'PENDING', 'PROCESSED', 'DISCARDED'] as StatusFilter[]).map((st) => {
                 const labels: Record<StatusFilter, string> = {
@@ -277,10 +264,10 @@ export default function MuroPage() {
                   <button
                     key={st}
                     onClick={() => setStatusFilter(st)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-md text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                       isActive
-                        ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                        : 'bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800 border border-white/5'
+                        ? 'bg-[var(--brand-accent)] text-[var(--canvas)] font-semibold shadow-sm'
+                        : 'bg-[var(--surface-subtle)] border border-[var(--border-hairline)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     {labels[st]}
@@ -290,26 +277,26 @@ export default function MuroPage() {
             </div>
 
             {/* Input de Búsqueda */}
-            <div className="relative w-full md:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="relative w-full md:w-60">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} />
               <input
                 type="text"
                 placeholder="Buscar concepto o monto..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[var(--surface-subtle)] border border-[var(--border-hairline)] text-xs font-mono text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
               />
             </div>
           </div>
 
           {/* Sub-filtro por Tipo de Origen */}
-          <div className="flex items-center gap-2 pt-2 border-t border-white/5 overflow-x-auto pb-1 md:pb-0">
-            <span className="text-[11px] text-slate-400 shrink-0">Tipo de entrada:</span>
+          <div className="flex items-center gap-2 pt-2.5 border-t border-[var(--border-hairline)] overflow-x-auto pb-1 md:pb-0">
+            <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider shrink-0">Entrada:</span>
             {(
               [
                 { id: 'ALL', label: 'Todos' },
-                { id: 'audio', label: 'Voz / Audios', icon: Mic },
-                { id: 'image', label: 'Tickets / Fotos', icon: ImageIcon },
+                { id: 'audio', label: 'Voz / Audio', icon: Mic },
+                { id: 'image', label: 'Ticket / Foto', icon: ImageIcon },
                 { id: 'text', label: 'Texto libre', icon: FileText },
               ] as { id: SourceFilter; label: string; icon?: React.ComponentType<{ className?: string }> }[]
             ).map((src) => {
@@ -319,13 +306,13 @@ export default function MuroPage() {
                 <button
                   key={src.id}
                   onClick={() => setSourceFilter(src.id)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-slate-200 text-slate-950 font-semibold'
-                      : 'bg-slate-900/40 text-slate-400 hover:text-white hover:bg-white/5 border border-white/5'
+                      ? 'bg-[var(--surface-subtle)] border border-[var(--border-hover)] text-[var(--text-primary)] font-semibold'
+                      : 'border border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]/50'
                   }`}
                 >
-                  {Icon && <Icon className="w-3.5 h-3.5" />}
+                  {Icon && <Icon className="w-3 h-3" />}
                   <span>{src.label}</span>
                 </button>
               );
@@ -335,19 +322,19 @@ export default function MuroPage() {
 
         {/* Grid de Ítems del Muro */}
         {loading && queueItems.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <div className="w-8 h-8 rounded-full border-2 border-indigo-400/20 border-t-indigo-400 animate-spin" />
-            <p className="text-xs">Cargando ítems del Muro...</p>
+          <div className="h-64 flex flex-col items-center justify-center gap-3 text-[var(--text-muted)] font-mono">
+            <div className="w-6 h-6 rounded-full border-2 border-[var(--text-muted)] border-t-[var(--text-primary)] animate-spin" />
+            <p className="text-xs">Cargando registros del Muro...</p>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="glass-panel rounded-2xl p-8 sm:p-12 border border-white/[0.08] text-center flex flex-col items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center border border-white/10 text-slate-500">
-              <Inbox className="w-6 h-6" />
+          <div className="hairline-card rounded-2xl p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-3">
+            <div className="w-10 h-10 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] flex items-center justify-center text-[var(--text-muted)]">
+              <Inbox className="w-5 h-5" strokeWidth={1.5} />
             </div>
-            <h3 className="text-base font-semibold text-white">No se encontraron ítems</h3>
-            <p className="text-xs text-slate-400 max-w-sm">
+            <h3 className="text-sm font-mono font-semibold text-[var(--text-primary)]">No se encontraron registros</h3>
+            <p className="text-xs text-[var(--text-muted)] max-w-sm">
               {searchQuery || statusFilter !== 'ALL' || sourceFilter !== 'ALL'
-                ? 'No hay registros que coincidan con los filtros aplicados. Prueba limpiando la búsqueda.'
+                ? 'No hay registros que coincidan con los filtros aplicados.'
                 : 'Aún no se han enviado audios ni comprobantes al bot de Telegram.'}
             </p>
             {(searchQuery || statusFilter !== 'ALL' || sourceFilter !== 'ALL') && (
@@ -357,7 +344,7 @@ export default function MuroPage() {
                   setSourceFilter('ALL');
                   setSearchQuery('');
                 }}
-                className="mt-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition-colors cursor-pointer"
+                className="mt-2 px-3 py-1.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-subtle)] hover:bg-[var(--surface)] text-xs font-mono font-medium text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 Limpiar Filtros
               </button>
@@ -374,57 +361,49 @@ export default function MuroPage() {
               return (
                 <div
                   key={item.id}
-                  className={`glass-panel rounded-2xl p-4 sm:p-5 border transition-all duration-200 flex flex-col justify-between gap-3 ${
+                  className={`hairline-card rounded-xl p-4 sm:p-5 transition-all flex flex-col justify-between gap-3 ${
                     isPending
-                      ? 'border-amber-500/30 bg-amber-500/[0.02] hover:border-amber-500/50 shadow-sm shadow-amber-500/5'
+                      ? 'border-l-4 border-l-amber-500'
                       : isProcessed
-                      ? 'border-white/[0.08] hover:border-emerald-500/30'
-                      : 'border-white/[0.06] opacity-75 hover:opacity-100 hover:border-rose-500/30'
+                      ? 'border-l-4 border-l-emerald-500'
+                      : 'border-l-4 border-l-rose-500 opacity-80'
                   }`}
                 >
                   {/* Top Row: Source Icon + Status Badge */}
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2">
-                        <div
-                          className={`p-2 rounded-xl border ${
-                            item.source_type === 'audio'
-                              ? 'bg-violet-500/15 border-violet-500/30 text-violet-300'
-                              : item.source_type === 'image'
-                              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                              : 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
-                          }`}
-                        >
-                          {item.source_type === 'audio' && <Mic className="w-4 h-4" />}
-                          {item.source_type === 'image' && <ImageIcon className="w-4 h-4" />}
-                          {item.source_type === 'text' && <FileText className="w-4 h-4" />}
+                        <div className="p-1.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-secondary)]">
+                          {item.source_type === 'audio' && <Mic className="w-3.5 h-3.5" strokeWidth={1.75} />}
+                          {item.source_type === 'image' && <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.75} />}
+                          {item.source_type === 'text' && <FileText className="w-3.5 h-3.5" strokeWidth={1.75} />}
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
                             {item.source_type === 'audio'
                               ? 'Nota de Voz'
                               : item.source_type === 'image'
                               ? 'Comprobante / Foto'
-                              : 'Mensaje de Texto'}
+                              : 'Texto'}
                           </span>
-                          <span className="text-[10px] text-slate-500">{formatDate(item.created_at)}</span>
+                          <span className="text-[10px] font-mono text-[var(--text-muted)]">{formatDate(item.created_at)}</span>
                         </div>
                       </div>
 
                       {/* Status Badge */}
                       {isPending && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 animate-pulse">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                           <Clock className="w-3 h-3" /> Pendiente
                         </span>
                       )}
                       {isProcessed && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
                           <CheckCircle className="w-3 h-3" /> Procesado
                         </span>
                       )}
                       {isDiscarded && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30">
                           <XCircle className="w-3 h-3" /> Descartado
                         </span>
                       )}
@@ -432,24 +411,24 @@ export default function MuroPage() {
 
                     {/* Main Amount & Concept */}
                     <div className="space-y-1">
-                      <div className="text-xl sm:text-2xl font-bold text-white tracking-tight tabular-nums">
+                      <div className="text-xl sm:text-2xl font-semibold font-mono text-[var(--text-primary)] tracking-tight tabular-nums">
                         {formatARS(amountNumber)}
                       </div>
-                      <p className="text-xs sm:text-sm font-medium text-slate-300 line-clamp-2">
+                      <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] line-clamp-2">
                         {item.concept || 'Gasto no especificado'}
                       </p>
                     </div>
                   </div>
 
                   {/* Bottom Row: User Details + Action info */}
-                  <div className="pt-3 border-t border-white/5 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="pt-3 border-t border-[var(--border-hairline)] space-y-2">
+                    <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <UserAvatar name={item.users?.name || 'Usuario'} size="sm" />
-                        <span className="font-medium text-slate-300">{item.users?.name || 'Desconocido'}</span>
+                        <span className="font-medium text-[var(--text-primary)]">{item.users?.name || 'Desconocido'}</span>
                       </div>
                       {item.telegram_message_id && (
-                        <span className="text-[10px] text-slate-500 font-mono">
+                        <span className="text-[10px] text-[var(--text-muted)] font-mono">
                           msg #{item.telegram_message_id}
                         </span>
                       )}
@@ -457,18 +436,18 @@ export default function MuroPage() {
 
                     {/* Pending Prompt CTA */}
                     {isPending && (
-                      <div className="mt-2 pt-2 border-t border-amber-500/15 flex items-center justify-between gap-2">
-                        <span className="text-[10px] text-amber-300/90 font-medium">
-                          Presiona 50/100/-100/0 en el bot
+                      <div className="mt-2 pt-2 border-t border-[var(--border-hairline)] flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                          Botones 50/100/-100/0 en Telegram
                         </span>
                         <a
                           href="https://t.me/AgykeBot"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-200 text-[10px] font-semibold inline-flex items-center gap-1 transition-colors"
+                          className="px-2 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] hover:bg-[var(--surface)] text-[var(--text-primary)] text-[10px] font-mono font-medium inline-flex items-center gap-1 transition-colors"
                         >
                           <Send className="w-2.5 h-2.5" />
-                          <span>Abrir Chat</span>
+                          <span>Chat</span>
                         </a>
                       </div>
                     )}

@@ -6,9 +6,9 @@
 
 ## 1. Identificación y Estado de Git
 * **Fecha de corte:** 22 de Octubre de 2026.
-* **Rama Activa:** `feat/editorial-design-and-dual-theme` (creada a partir de `dev`).
+* **Rama Activa:** `dev`.
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** `612ba90` (Fase 11 - Rediseño Editorial y Dual Theme).
+* **Último Commit:** `ddef06f` (PR #20 y fix de hook ThemeToggle).
 
 ---
 
@@ -62,6 +62,9 @@
   2. **Filosofía Editorial Financial Craft:** Inspirada en Linear, Stripe Press y Vercel Design System, basada en tipografía de alta jerarquía (`Geist Sans` y `Geist Mono` tabular), micro-bordes hairline de 1px y elevaciones limpias.
   3. **Sistema Dual Theme Nativo (Claro / Oscuro):** Implementación de variables semánticas CSS en `globals.css` para `:root` y `.dark`, persistencia de tema en `localStorage`, script inline en `<head>` para blindaje estricto Anti-FOUC (sin destellos al recargar) y componente `ThemeToggle` integrado en `HeaderBar` y `MobileBottomDock`.
   4. **Iconografía con Criterio de Autor:** Supresión de icon-spam en tarjetas métricas (`StatMetricCard`), reservando íconos exclusivamente para acciones funcionales e interactivas con trazo estilizado.
+* **ADR-029 (Sincronización Estricta de Lockfile CI y Hook useSyncExternalStore en ThemeToggle):** Para asegurar la ejecución en verde del pipeline de CI (`.github/workflows/ci.yml`), se realizaron las siguientes correcciones arquitecturales:
+  1. **Prevención de Cascading Renders en ThemeToggle:** Se reemplazó el `useEffect` con `setMounted(true)` por `useSyncExternalStore` nativo de React 19, permitiendo suscripción segura a eventos de tema (`window.addEventListener('agyke-theme-change')`) y SSR sin descalibrar el render inicial. Se eliminó además el parámetro huérfano `index` en `AnalyticsSection.tsx`.
+  2. **Sincronización de Lockfile contra package.json:** Se corrigió la discrepancia en `package-lock.json` que contenía versiones incompatibles (`@types/node@26.1.1`, `typescript@7.0.2`, `undici-types@8.3.0`), realineándolas estrictamente con `package.json` (`@types/node@^22.10.0`, `typescript@^5.7.2`, `tsx@^4.19.2`), garantizando que `npm ci` ejecute sin error `EUSAGE`.
 
 ---
 

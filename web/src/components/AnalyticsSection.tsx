@@ -285,7 +285,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
                       onMouseLeave={() => setActiveIndex(null)}
                       cursor="pointer"
                     >
-                      {pieData.map((entry, index) => (
+                      {pieData.map((entry) => (
                         <Cell
                           key={`cell-${entry.key}`}
                           fill={entry.color}

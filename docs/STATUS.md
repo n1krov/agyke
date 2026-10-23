@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 22 de Octubre de 2026.
-* **Rama Activa:** `dev`.
+* **Fecha de corte:** 23 de Octubre de 2026.
+* **Rama Activa:** `feat/analytics-fidelity-and-interaction-chart` (creada a partir de `dev`).
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** `ddef06f` (PR #20 y fix de hook ThemeToggle).
+* **Último Commit:** `1a2d7a3` (fix(ci): fix package-lock integrity sha512 checksums and synchronize tsx version).
 
 ---
 
@@ -65,6 +65,10 @@
 * **ADR-029 (Sincronización Estricta de Lockfile CI, Hashes de Integridad SHA-512 y useSyncExternalStore):** Para asegurar la ejecución en verde del pipeline de CI (`.github/workflows/ci.yml`), se realizaron las siguientes correcciones arquitecturales:
   1. **Prevención de Cascading Renders en ThemeToggle:** Se reemplazó el `useEffect` con `setMounted(true)` por `useSyncExternalStore` nativo de React 19, permitiendo suscripción segura a eventos de tema (`window.addEventListener('agyke-theme-change')`) y SSR sin descalibrar el render inicial. Se eliminó además el parámetro huérfano `index` en `AnalyticsSection.tsx`.
   2. **Sincronización de Lockfile y Checksums de Integridad:** Se corrigió la discrepancia en `package-lock.json` y `package.json`, realineando estrictamente `tsx` (`^4.23.1`), `typescript` (`^5.7.2`), `@types/node` (`^22.10.0`) y `undici-types` (`~6.20.0`) con sus checksums SHA-512 canónicos del registro de npm, erradicando los errores `EINTEGRITY` y `EUSAGE` durante el paso `npm ci`.
+* **ADR-030 (Especificación de Fidelidad en Gráficos de Analítica, Desembolso Crudo Cara a Cara y Línea Temporal de Interacción):** Se formalizó en [`docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md`](./ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md):
+  1. **Clarificación Conceptual del Cara a Cara:** Se redefine la métrica para responder estrictamente *"Quién puso más plata este mes en gastos compartidos (50/50)"*, comparando montos en crudo sin fórmulas de deuda ni distorsiones de gastos personales (`0`) o favores (`-100`).
+  2. **Nuevo Gráfico de Interacción Temporal (LineChart de 2 Líneas):** Se modela una serie temporal continua a lo largo del mes (días 1 al último día) que mide la actividad de carga y volumen total de dinero registrado en Agyke por cada usuario, abarcando todas las categorías para analizar la dinámica de uso con el bot.
+  3. **Auditoría Integral de Gráficos:** Revisión y rotulado inequívoco de la velocidad de gasto acumulada, donut de clasificaciones, intensidad por día de la semana y top 5 compras.
 
 ---
 
@@ -87,16 +91,19 @@
 - [x] Implementación de Analítica Mensual, Command Center, Muro Dedicado y Navegación Global (Fase 10 - ADR-026).
 - [x] Corrección de Reglas ESLint y Hooks en /analytics y /muro (UI-38 - ADR-027).
 - [x] Especificación de Rediseño Editorial "Financial Craft", Dual Theme y Purga IA Dev (Fase 11 - ADR-028 en `docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md`).
-- [x] Implementación Completa de Rediseño Editorial y Dual Theme (UI-39 a UI-46):
-  1. Tokens CSS semánticos para Modo Claro y Modo Oscuro en `globals.css` (cero orbes, cero mallas, cero gradientes radiales fluorescentes).
-  2. Motor de temas con script Anti-FOUC bloqueante en `layout.tsx` y componente interactivo `ThemeToggle.tsx`.
-  3. Rediseño editorial de `HeaderBar.tsx` y `MobileBottomDock.tsx` con monograma arquitectural y micro-indicador de webhook sobrio.
-  4. Rediseño editorial de `MasterBalanceHero.tsx` y `StatMetricCard.tsx` (cero icon-spam en cajas de color, tipografía monumental tabular).
-  5. Gráficos Recharts reactivos al tema en `AnalyticsSection.tsx` y `/analytics`.
-  6. Tablas y cards en `TransactionsTable.tsx` y `/muro` con micro-bordes hairline y chips sobrios.
-  7. Pantalla de PIN en `/login` limpia y monolítica.
+- [x] Implementación Completa de Rediseño Editorial y Dual Theme (UI-39 a UI-46).
+- [x] Sincronización Estricta de Lockfile CI y Hashes SHA-512 Oficiales (ADR-029).
+- [x] Especificación Técnica de Fidelidad Analítica, Desembolso Crudo y Gráfico Temporal de Interacción (UI-47 - ADR-030).
+- [x] Enriquecimiento del Endpoint Backend `/api/analytics` con `headToHead` y `interactionTimeline` (UI-48).
+- [x] Rediseño del Cuadro Cara a Cara (Head-to-Head en Crudo con Veredicto 50/50) (UI-49).
+- [x] Implementación del Gráfico de Líneas Temporal Comparativo de Interacción (2 Líneas Recharts) (UI-50).
+- [x] Auditoría de Etiquetas, Tooltips y Consistencia Numérica en todos los Gráficos de `/analytics` (UI-51).
+
+### Pendientes del Roadmap
+- [ ] Tareas Multimodales restantes (`MULTI-03` a `MULTI-06`: Timeouts, fixtures y script CLI).
+- [ ] Backlog Arquitectural pospuesto (`UI-21` a `UI-24`).
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Realizar commit atómico de la Fase 11 (`UI-39` a `UI-46`) en la rama `feat/editorial-design-and-dual-theme`, y presentar al usuario para su revisión visual.
+Realizar commit atómico de la Fase 12 (`UI-47` a `UI-51`) en la rama activa `feat/analytics-fidelity-and-interaction-chart`, y dejar listo para que el usuario pueda pushear y validar en CI o fusionar a `dev`.

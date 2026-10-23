@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-22T11:15:00-03:00",
-  "active_sprint": "Fase 11 - Rediseño Editorial Financial Craft, Dual Theme y Purga IA Dev (UI-39 a UI-46)",
+  "last_updated": "2026-10-23T15:16:00-03:00",
+  "active_sprint": "Fase 12 - Fidelidad de Gráficos de Analítica, Cara a Cara Crudo y Línea Temporal de Interacción (UI-47 a UI-51)",
   "summary": {
-    "total": 76,
-    "done": 68,
+    "total": 81,
+    "done": 73,
     "in_progress": 0,
     "pending": 4,
     "backlog": 4
@@ -1068,6 +1068,101 @@
         "docs/STATUS.md"
       ],
       "completed_at": "2026-10-22T11:15:00Z"
+    },
+    {
+      "id": "UI-47",
+      "title": "Especificación Técnica de Fidelidad Analítica y Gráfico Temporal de Interacción",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md",
+      "dependencies": ["UI-46"],
+      "acceptance_criteria": [
+        "Formalizar definición matemática de desembolso crudo 50/50 para Cara a Cara",
+        "Modelar serie temporal de interacción por usuario sin filtro de clasificación",
+        "Especificar componentes Recharts y contratos TypeScript"
+      ],
+      "files_to_touch": [
+        "docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md",
+        "docs/ui/ROADMAP_UI.md"
+      ],
+      "completed_at": "2026-10-23T14:38:00Z"
+    },
+    {
+      "id": "UI-48",
+      "title": "Enriquecimiento del Endpoint Backend /api/analytics",
+      "domain": "web",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md#2-especificación-matemática-y-de-datos-backend-apianalytics",
+      "dependencies": ["UI-47"],
+      "acceptance_criteria": [
+        "Calcular desembolso en crudo exclusivamente sobre gastos 50/50 para User A y User B",
+        "Generar headToHead con rawPaid, percentage, difference y leaderName",
+        "Generar interactionTimeline diaria (1..daysInMonth) con acumulados y conteos por usuario para todas las clasificaciones",
+        "Extender interfaces en web/src/types/database.ts"
+      ],
+      "files_to_touch": [
+        "web/src/types/database.ts",
+        "web/src/app/api/analytics/route.ts"
+      ],
+      "completed_at": "2026-10-23T15:05:00Z"
+    },
+    {
+      "id": "UI-49",
+      "title": "Rediseño del Cuadro Cara a Cara (Head-to-Head en Crudo)",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md#4-especificación-visual-y-de-componentes-websrcappanalyticspagetsx",
+      "dependencies": ["UI-48"],
+      "acceptance_criteria": [
+        "Título y subtítulo explícitos: 'Cara a Cara: Quién puso más plata (Gastos Compartidos 50/50)'",
+        "Banner con veredicto directo: 'Este mes [Usuario] puso más plata: +$[Diff]'",
+        "BarChart Recharts con montos en crudo, tooltips y porcentajes exactos"
+      ],
+      "files_to_touch": [
+        "web/src/app/analytics/page.tsx"
+      ],
+      "completed_at": "2026-10-23T15:07:00Z"
+    },
+    {
+      "id": "UI-50",
+      "title": "Gráfico de Líneas Temporal Comparativo de Interacción con Agyke",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md#4-especificación-visual-y-de-componentes-websrcappanalyticspagetsx",
+      "dependencies": ["UI-48"],
+      "acceptance_criteria": [
+        "Implementar LineChart con 2 líneas independientes (User A y User B) para días 1..31",
+        "Mapear acumulado de dinero total cargado sin importar clasificación",
+        "Tooltip multilínea detallando monto diario, monto acumulado y conteo de interacciones",
+        "Leyenda con mini pills indicando total final al corte de mes"
+      ],
+      "files_to_touch": [
+        "web/src/app/analytics/page.tsx"
+      ],
+      "completed_at": "2026-10-23T15:07:00Z"
+    },
+    {
+      "id": "UI-51",
+      "title": "Auditoría de Etiquetas, Tooltips y Consistencia Numérica en /analytics",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p2",
+      "spec_reference": "docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md#4-especificación-visual-y-de-componentes-websrcappanalyticspagetsx",
+      "dependencies": ["UI-49", "UI-50"],
+      "acceptance_criteria": [
+        "Verificar que cada gráfico exprese con exactitud qué universo de datos representa",
+        "Comprobar responsividad en mobile y desktop",
+        "Validar typecheck estricto, linter y tests automatizados"
+      ],
+      "files_to_touch": [
+        "web/src/app/analytics/page.tsx",
+        "docs/STATUS.md"
+      ],
+      "completed_at": "2026-10-23T15:08:00Z"
     },
     {
       "id": "MULTI-01",

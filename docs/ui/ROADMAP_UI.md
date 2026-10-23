@@ -87,3 +87,13 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 - [x] **Tarea UI-45:** Rediseño Editorial de `/login` (tarjeta de PIN limpia y monolítica).
 - [x] **Tarea UI-46:** Verificación Visual Integral, Contrast Ratio (WCAG AA/AAA) y Cero Regresiones de CI.
 
+---
+
+### Fase 12: Fidelidad de Gráficos de Analítica, Desembolso Crudo Cara a Cara y Línea Temporal de Interacción (`SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md`)
+- [x] **Tarea UI-47:** Especificación Técnica de Fidelidad Analítica y Gráfico Temporal de Interacción (`docs/ui/SPEC_ANALYTICS_CHARTS_AUDIT_AND_TEMPORAL_INTERACTION.md`).
+- [x] **Tarea UI-48:** Enriquecimiento del Endpoint Backend `/api/analytics` (Cálculo de Desembolso Crudo 50/50 y Serie Temporal Diaria por Usuario).
+- [x] **Tarea UI-49:** Rediseño del Cuadro Cara a Cara (Head-to-Head: Quién puso más plata en crudo, veredicto visual y diferencia directa en pesos).
+- [x] **Tarea UI-50:** Implementación del Gráfico de Líneas Temporal Comparativo de Interacción con Agyke (2 Líneas Recharts en el mes).
+- [x] **Tarea UI-51:** Auditoría de Etiquetas, Tooltips y Consistencia Numérica en todos los Gráficos de `/analytics`.
+
+

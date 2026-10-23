@@ -7,6 +7,8 @@ import {
   Area,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -27,8 +29,10 @@ import {
   LayoutDashboard,
   Inbox,
   Sparkles,
+  Trophy,
+  Activity,
 } from 'lucide-react';
-import type { AnalyticsMonthPayload, ClassificationType } from '../../types/database';
+import type { AnalyticsMonthPayload, ClassificationType, AnalyticsInteractionTimelineItem } from '../../types/database';
 import { BadgeClassification } from '../../components/BadgeClassification';
 import { UserAvatar } from '../../components/UserAvatar';
 import { MobileBottomDock } from '../../components/MobileBottomDock';
@@ -127,20 +131,44 @@ export default function AnalyticsPage() {
     return `$ ${val.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
-  const comparisonData = useMemo(() => {
+  const headToHeadData = useMemo(() => {
     if (!data) return [];
+    if (data.headToHead) {
+      return [
+        {
+          name: data.headToHead.userA.name,
+          rawPaid: data.headToHead.userA.rawPaid,
+          percentage: data.headToHead.userA.percentage,
+          count: data.headToHead.userA.count,
+          color: isDark ? '#93C5FD' : '#2563EB',
+          isLeader: data.headToHead.leaderName === data.headToHead.userA.name,
+        },
+        {
+          name: data.headToHead.userB.name,
+          rawPaid: data.headToHead.userB.rawPaid,
+          percentage: data.headToHead.userB.percentage,
+          count: data.headToHead.userB.count,
+          color: isDark ? '#6EE7B7' : '#059669',
+          isLeader: data.headToHead.leaderName === data.headToHead.userB.name,
+        },
+      ];
+    }
     return [
       {
         name: data.kpis.aporteUserA.name,
-        total: data.kpis.aporteUserA.total,
+        rawPaid: data.kpis.aporteUserA.total,
         percentage: data.kpis.aporteUserA.percentage,
+        count: 0,
         color: isDark ? '#93C5FD' : '#2563EB',
+        isLeader: false,
       },
       {
         name: data.kpis.aporteUserB.name,
-        total: data.kpis.aporteUserB.total,
+        rawPaid: data.kpis.aporteUserB.total,
         percentage: data.kpis.aporteUserB.percentage,
+        count: 0,
         color: isDark ? '#6EE7B7' : '#059669',
+        isLeader: false,
       },
     ];
   }, [data, isDark]);
@@ -386,7 +414,7 @@ export default function AnalyticsPage() {
                     <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
                       Evolución Acumulada Diaria
                     </h2>
-                    <p className="text-xs text-[var(--text-muted)]">Ritmo de consumo a lo largo de {data.monthLabel}</p>
+                    <p className="text-xs text-[var(--text-muted)]">Ritmo de consumo global de todos los gastos en {data.monthLabel}</p>
                   </div>
                 </div>
 
@@ -456,20 +484,48 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              {/* Gráfico 2: Paridad de Aportes Head-to-Head */}
+              {/* Gráfico 2: Cara a Cara - Quién Puso Más Plata (50/50 Crudo) */}
               <div className="hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
-                <div className="flex items-center justify-between mb-4">
+                <div className="space-y-3 mb-4">
                   <div>
                     <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
-                      Comparativa de Aporte
+                      Cara a Cara: Quién Puso Más Plata
                     </h2>
-                    <p className="text-xs text-[var(--text-muted)]">Volumen neto aportado en {data.monthLabel}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Desembolso en crudo sobre gastos compartidos (50/50) en {data.monthLabel}
+                    </p>
                   </div>
+
+                  {/* Veredicto Rápido */}
+                  {data.headToHead && (
+                    <div className="p-2.5 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-sunken)] flex items-center justify-between gap-2 text-xs font-mono">
+                      {data.headToHead.difference > 0 ? (
+                        <>
+                          <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                            <span>
+                              Líder del mes:{' '}
+                              <strong className="text-[var(--text-primary)] font-bold">
+                                {data.headToHead.leaderName}
+                              </strong>
+                            </span>
+                          </div>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                            +{formatARS(data.headToHead.difference)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-[var(--text-muted)] w-full text-center">
+                          Aportes 50/50 exactamente igualados en {formatARS(data.headToHead.userA.rawPaid)}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="h-56 sm:h-64 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={comparisonData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                    <BarChart data={headToHeadData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
                       <XAxis
                         dataKey="name"
                         stroke={isDark ? '#6B7280' : '#868C98'}
@@ -491,26 +547,157 @@ export default function AnalyticsPage() {
                           if (active && payload && payload.length) {
                             const p = payload[0].payload;
                             return (
-                              <div className="p-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-md font-mono">
+                              <div className="p-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-md font-mono space-y-1">
                                 <p className="font-semibold text-[var(--text-primary)]">{p.name}</p>
-                                <p className="font-bold tabular-nums text-sm mt-0.5 text-[var(--text-primary)]">
-                                  {formatARS(p.total)}
+                                <p className="font-bold tabular-nums text-sm text-[var(--text-primary)]">
+                                  {formatARS(p.rawPaid)}
                                 </p>
-                                <p className="text-[var(--text-muted)] text-[11px] mt-0.5">
-                                  Representa el {p.percentage}% del total
+                                <p className="text-[var(--text-secondary)] text-[11px]">
+                                  {p.percentage}% del total compartido 50/50
                                 </p>
+                                {p.count > 0 && (
+                                  <p className="text-[var(--text-muted)] text-[10px]">
+                                    {p.count} {p.count === 1 ? 'pago realizado' : 'pagos realizados'}
+                                  </p>
+                                )}
                               </div>
                             );
                           }
                           return null;
                         }}
                       />
-                      <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                        {comparisonData.map((entry, index) => (
+                      <Bar dataKey="rawPaid" radius={[6, 6, 0, 0]}>
+                        {headToHeadData.map((entry, index) => (
                           <Cell key={`bar-${index}`} fill={entry.color} />
                         ))}
                       </Bar>
                     </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Gráfico 3: Interacción con Agyke en el Tiempo (Doble Línea Temporal) */}
+              <div className="lg:col-span-2 hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-[var(--text-muted)]" />
+                      <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                        Interacción con Agyke en el Tiempo
+                      </h2>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Volumen acumulado de dinero cargado por usuario sin importar clasificación (días 1 al fin de mes)
+                    </p>
+                  </div>
+
+                  {/* Leyenda con Totales Finales Acumulados */}
+                  {data.interactionTimeline && data.interactionTimeline.length > 0 && (
+                    <div className="flex items-center gap-3 text-xs font-mono">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: isDark ? '#93C5FD' : '#2563EB' }} />
+                        <span className="text-[var(--text-secondary)]">{data.headToHead?.userA.name || 'Usuario A'}:</span>
+                        <span className="font-bold tabular-nums text-[var(--text-primary)]">
+                          {formatARS(data.interactionTimeline[data.interactionTimeline.length - 1].userAAccum)}
+                        </span>
+                      </div>
+                      <span className="text-[var(--border-hairline)]">|</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: isDark ? '#6EE7B7' : '#059669' }} />
+                        <span className="text-[var(--text-secondary)]">{data.headToHead?.userB.name || 'Usuario B'}:</span>
+                        <span className="font-bold tabular-nums text-[var(--text-primary)]">
+                          {formatARS(data.interactionTimeline[data.interactionTimeline.length - 1].userBAccum)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-64 sm:h-72 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={data.interactionTimeline || []} margin={{ top: 10, right: 15, left: -15, bottom: 0 }}>
+                      <XAxis
+                        dataKey="day"
+                        stroke={isDark ? '#6B7280' : '#868C98'}
+                        fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
+                        tickLine={false}
+                        interval="preserveStartEnd"
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
+                        tickFormatter={(d) => `d${d}`}
+                      />
+                      <YAxis
+                        stroke={isDark ? '#6B7280' : '#868C98'}
+                        fontSize={11}
+                        fontFamily="var(--font-geist-mono), monospace"
+                        tickLine={false}
+                        axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
+                        tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const p = payload[0].payload as AnalyticsInteractionTimelineItem;
+                            const nameA = data.headToHead?.userA.name || 'Usuario A';
+                            const nameB = data.headToHead?.userB.name || 'Usuario B';
+                            return (
+                              <div className="p-3.5 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-lg space-y-2 font-mono">
+                                <p className="font-semibold text-[var(--text-primary)] border-b border-[var(--border-hairline)] pb-1">
+                                  {p.date}
+                                </p>
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span className="flex items-center gap-1.5 font-medium" style={{ color: isDark ? '#93C5FD' : '#2563EB' }}>
+                                      <span className="w-2 h-2 rounded-full bg-current inline-block" />
+                                      {nameA}:
+                                    </span>
+                                    <span className="font-bold tabular-nums text-[var(--text-primary)]">
+                                      {formatARS(p.userAAccum)}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-[var(--text-muted)] pl-3.5">
+                                    Carga del día: +{formatARS(p.userADaily)} ({p.userACount} {p.userACount === 1 ? 'movimiento' : 'movimientos'})
+                                  </p>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span className="flex items-center gap-1.5 font-medium" style={{ color: isDark ? '#6EE7B7' : '#059669' }}>
+                                      <span className="w-2 h-2 rounded-full bg-current inline-block" />
+                                      {nameB}:
+                                    </span>
+                                    <span className="font-bold tabular-nums text-[var(--text-primary)]">
+                                      {formatARS(p.userBAccum)}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-[var(--text-muted)] pl-3.5">
+                                    Carga del día: +{formatARS(p.userBDaily)} ({p.userBCount} {p.userBCount === 1 ? 'movimiento' : 'movimientos'})
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="userAAccum"
+                        name={data.headToHead?.userA.name || 'Usuario A'}
+                        stroke={isDark ? '#93C5FD' : '#2563EB'}
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 5 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="userBAccum"
+                        name={data.headToHead?.userB.name || 'Usuario B'}
+                        stroke={isDark ? '#6EE7B7' : '#059669'}
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </div>
@@ -629,7 +816,7 @@ export default function AnalyticsPage() {
                     <h2 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
                       Intensidad Semanal
                     </h2>
-                    <p className="text-xs text-[var(--text-muted)]">Gasto agrupado por día de la semana</p>
+                    <p className="text-xs text-[var(--text-muted)]">Gasto total acumulado por día de la semana (Lunes a Domingo)</p>
                   </div>
                 </div>
 

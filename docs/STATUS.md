@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 21 de Octubre de 2026.
-* **Rama Activa:** `feat/analytics-monthly-and-muro` (creada a partir de `dev`).
+* **Fecha de corte:** 22 de Octubre de 2026.
+* **Rama Activa:** `dev`.
 * **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** Sincronizado con `2098a91` (PR #15 y #16) en `dev`.
+* **Último Commit:** `ddef06f` (PR #20 y fix de hook ThemeToggle).
 
 ---
 
@@ -57,6 +57,14 @@
 * **ADR-027 (Resolución de Reglas ESLint 9 / React 19 y Prevención de Cascading Renders en Hooks):** Para cumplir con el estándar de CI de cero advertencias y cero errores en Next.js 16 / React 19 (`react-hooks/set-state-in-effect`), se realizaron los siguientes ajustes arquitecturales:
   1. **Desacople de setState Síncrono en Efectos:** Se reemplazó la invocación directa de `fetchAnalytics()` y `fetchData()` dentro del cuerpo de `useEffect` en `/analytics` y `/muro`. Se implementaron runners asíncronos desacoplados (`initAnalytics` e `initMuro`) con bandera booleana `ignore` de descarte para evitar llamadas a `setLoading(true)` síncronas durante el ciclo de montaje y proteger contra condiciones de carrera al desmontar componentes.
   2. **Limpieza de Símbolos Huérfanos:** Se eliminó la constante `PIE_COLORS` no utilizada en `web/src/app/analytics/page.tsx` y los imports no utilizados `AlertCircle`, `RefreshCw` y `User` junto con el estado huérfano `users` en `web/src/app/muro/page.tsx`.
+* **ADR-028 (Transición hacia Editorial Financial Craft, Dual Theme Claro/Oscuro y Purga de Anti-Patterns IA Dev):** Se formalizó en [`docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md`](./ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md) la especificación arquitectural para una refundación visual profunda de Agyke:
+  1. **Purga de Anti-Patterns "AI Dev":** Erradicación total de orbes de gradiente borrosos (`blur-[120px]`), mallas artificiales (`bg-grid-mesh`), cajas de iconos genéricos de colores pastel y glassmorphism plástico brillante.
+  2. **Filosofía Editorial Financial Craft:** Inspirada en Linear, Stripe Press y Vercel Design System, basada en tipografía de alta jerarquía (`Geist Sans` y `Geist Mono` tabular), micro-bordes hairline de 1px y elevaciones limpias.
+  3. **Sistema Dual Theme Nativo (Claro / Oscuro):** Implementación de variables semánticas CSS en `globals.css` para `:root` y `.dark`, persistencia de tema en `localStorage`, script inline en `<head>` para blindaje estricto Anti-FOUC (sin destellos al recargar) y componente `ThemeToggle` integrado en `HeaderBar` y `MobileBottomDock`.
+  4. **Iconografía con Criterio de Autor:** Supresión de icon-spam en tarjetas métricas (`StatMetricCard`), reservando íconos exclusivamente para acciones funcionales e interactivas con trazo estilizado.
+* **ADR-029 (Sincronización Estricta de Lockfile CI, Hashes de Integridad SHA-512 y useSyncExternalStore):** Para asegurar la ejecución en verde del pipeline de CI (`.github/workflows/ci.yml`), se realizaron las siguientes correcciones arquitecturales:
+  1. **Prevención de Cascading Renders en ThemeToggle:** Se reemplazó el `useEffect` con `setMounted(true)` por `useSyncExternalStore` nativo de React 19, permitiendo suscripción segura a eventos de tema (`window.addEventListener('agyke-theme-change')`) y SSR sin descalibrar el render inicial. Se eliminó además el parámetro huérfano `index` en `AnalyticsSection.tsx`.
+  2. **Sincronización de Lockfile y Checksums de Integridad:** Se corrigió la discrepancia en `package-lock.json` y `package.json`, realineando estrictamente `tsx` (`^4.23.1`), `typescript` (`^5.7.2`), `@types/node` (`^22.10.0`) y `undici-types` (`~6.20.0`) con sus checksums SHA-512 canónicos del registro de npm, erradicando los errores `EINTEGRITY` y `EUSAGE` durante el paso `npm ci`.
 
 ---
 
@@ -77,8 +85,18 @@
 - [x] Especificación e Implementación Mobile-First y Card Feed Híbrido (Fase 9 - ADR-023 y ADR-024).
 - [x] Especificación de Analítica Mensual, Command Center y Desacople del Muro (Fase 10 - ADR-025).
 - [x] Implementación de Analítica Mensual, Command Center, Muro Dedicado y Navegación Global (Fase 10 - ADR-026).
+- [x] Corrección de Reglas ESLint y Hooks en /analytics y /muro (UI-38 - ADR-027).
+- [x] Especificación de Rediseño Editorial "Financial Craft", Dual Theme y Purga IA Dev (Fase 11 - ADR-028 en `docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md`).
+- [x] Implementación Completa de Rediseño Editorial y Dual Theme (UI-39 a UI-46):
+  1. Tokens CSS semánticos para Modo Claro y Modo Oscuro en `globals.css` (cero orbes, cero mallas, cero gradientes radiales fluorescentes).
+  2. Motor de temas con script Anti-FOUC bloqueante en `layout.tsx` y componente interactivo `ThemeToggle.tsx`.
+  3. Rediseño editorial de `HeaderBar.tsx` y `MobileBottomDock.tsx` con monograma arquitectural y micro-indicador de webhook sobrio.
+  4. Rediseño editorial de `MasterBalanceHero.tsx` y `StatMetricCard.tsx` (cero icon-spam en cajas de color, tipografía monumental tabular).
+  5. Gráficos Recharts reactivos al tema en `AnalyticsSection.tsx` y `/analytics`.
+  6. Tablas y cards en `TransactionsTable.tsx` y `/muro` con micro-bordes hairline y chips sobrios.
+  7. Pantalla de PIN en `/login` limpia y monolítica.
 
 ---
 
 ## 5. Próxima Acción Inmediata
-Realizar commit atómico de la implementación completa de la Fase 10 (`UI-32` a `UI-37`) en la rama `feat/analytics-monthly-and-muro`, y continuar con la verificación o integración hacia `dev`.
+Realizar commit atómico de la Fase 11 (`UI-39` a `UI-46`) en la rama `feat/editorial-design-and-dual-theme`, y presentar al usuario para su revisión visual.

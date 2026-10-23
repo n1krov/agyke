@@ -75,3 +75,15 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 - [x] **Tarea UI-36:** Página Dedicada `/muro` y Desacople del Dashboard Principal (`web/src/app/muro/page.tsx`, `web/src/app/page.tsx`).
 - [x] **Tarea UI-37:** Sincronización de Navegación Global (HeaderBar y MobileBottomDock con badges interactivos).
 
+---
+
+### Fase 11: Rediseño Editorial "Financial Craft", Dual Theme y Purga de Anti-Patterns IA Dev (`SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md`)
+- [x] **Tarea UI-39:** Sistema de Tokens Dual Theme y Limpieza de Anti-Patterns en `globals.css` (cero orbes, cero mallas, variables semánticas Claro/Oscuro).
+- [x] **Tarea UI-40:** Motor de Temas, Script Anti-FOUC y Componente `ThemeToggle` (persistencia en `localStorage` y toggle Sol/Luna).
+- [x] **Tarea UI-41:** Rediseño Editorial de `HeaderBar` y `MobileBottomDock` (integración de `ThemeToggle`, navegación de alto contraste y micro-indicador sobrio).
+- [x] **Tarea UI-42:** Rediseño Editorial de `MasterBalanceHero` y `StatMetricCard` (erradicación de cajas de iconos pastel, tipografía tabular monumental).
+- [x] **Tarea UI-43:** Adaptación de Recharts y Analítica a Paleta Dual Theme (`AnalyticsSection.tsx` y `/analytics`).
+- [x] **Tarea UI-44:** Rediseño Editorial de `TransactionsTable` y `/muro` (tablas nítidas y badges monocromáticos).
+- [x] **Tarea UI-45:** Rediseño Editorial de `/login` (tarjeta de PIN limpia y monolítica).
+- [x] **Tarea UI-46:** Verificación Visual Integral, Contrast Ratio (WCAG AA/AAA) y Cero Regresiones de CI.
+

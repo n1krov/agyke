@@ -12,17 +12,11 @@ import {
 } from 'recharts';
 import { TrendingUp, PieChart as PieIcon } from 'lucide-react';
 import type { Transaction, ClassificationType } from '../types/database';
+import { useTheme } from './ThemeToggle';
 
 interface AnalyticsSectionProps {
   transactions: Transaction[];
 }
-
-const PIE_COLORS: Record<ClassificationType, string> = {
-  '50': '#818CF8', // Indigo
-  '100': '#34D399', // Emerald
-  '-100': '#FB7185', // Rose
-  '0': '#94A3B8', // Slate
-};
 
 const PIE_LABELS: Record<ClassificationType, string> = {
   '50': '50/50 Mitad',
@@ -33,6 +27,15 @@ const PIE_LABELS: Record<ClassificationType, string> = {
 
 export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const PIE_COLORS: Record<ClassificationType, string> = useMemo(() => ({
+    '50': isDark ? '#60A5FA' : '#2563EB',
+    '100': isDark ? '#34D399' : '#059669',
+    '-100': isDark ? '#F87171' : '#DC2626',
+    '0': isDark ? '#9CA3AF' : '#64748B',
+  }), [isDark]);
 
   // Total acumulado general
   const totalSpent = useMemo(() => {
@@ -98,71 +101,73 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
           percentage,
         };
       });
-  }, [transactions, totalSpent]);
+  }, [transactions, totalSpent, PIE_COLORS]);
 
   const activeItem = activeIndex !== null && pieData[activeIndex] ? pieData[activeIndex] : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
       {/* Gráfico de Evolución Temporal (2 columnas) */}
-      <div className="lg:col-span-2 glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
+      <div className="lg:col-span-2 hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400">
-                <TrendingUp className="w-4 h-4" />
-              </div>
+              <TrendingUp className="w-4 h-4 text-[var(--text-secondary)]" strokeWidth={1.75} />
               <div>
-                <h3 className="text-base font-semibold text-white">Evolución Acumulada de Gastos</h3>
-                <p className="text-[11px] text-slate-400">Historial continuo del saldo consumido</p>
+                <h3 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                  Evolución Acumulada
+                </h3>
+                <p className="text-xs text-[var(--text-muted)]">Historial de volumen contable consumido</p>
               </div>
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)]">
               {transactions.length} registros
             </span>
           </div>
 
           <div className="h-52 sm:h-60 w-full">
             {timelineData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center text-xs font-mono text-[var(--text-muted)]">
                 Sin datos suficientes para graficar
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.45} />
-                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0.0} />
+                    <linearGradient id="editorialAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={isDark ? '#F3F4F6' : '#0F172A'} stopOpacity={isDark ? 0.15 : 0.08} />
+                      <stop offset="95%" stopColor={isDark ? '#F3F4F6' : '#0F172A'} stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
                   <XAxis
                     dataKey="date"
-                    stroke="#64748B"
+                    stroke={isDark ? '#6B7280' : '#868C98'}
                     fontSize={11}
+                    fontFamily="var(--font-geist-mono), monospace"
                     tickLine={false}
                     interval="preserveStartEnd"
-                    axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                    axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                   />
                   <YAxis
-                    stroke="#64748B"
+                    stroke={isDark ? '#6B7280' : '#868C98'}
                     fontSize={11}
+                    fontFamily="var(--font-geist-mono), monospace"
                     tickLine={false}
-                    axisLine={{ stroke: 'rgba(255, 255, 255, 0.08)' }}
+                    axisLine={{ stroke: isDark ? '#22242E' : '#E4E5EA' }}
                     tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
-                        const data = payload[0].payload;
+                        const d = payload[0].payload;
                         return (
-                          <div className="p-3 rounded-xl glass-panel border border-indigo-500/30 text-xs shadow-xl space-y-1 backdrop-blur-xl">
-                            <p className="font-semibold text-white">{data.date} · {data.concepto}</p>
-                            <p className="text-slate-300">
-                              Importe: <span className="text-indigo-300 font-bold tabular-nums">${data.monto.toLocaleString('es-AR')}</span>
+                          <div className="p-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] text-xs shadow-md space-y-1 font-mono">
+                            <p className="font-semibold text-[var(--text-primary)]">{d.date} · {d.concepto}</p>
+                            <p className="text-[var(--text-secondary)]">
+                              Importe: <span className="font-bold text-[var(--text-primary)] tabular-nums">${d.monto.toLocaleString('es-AR')}</span>
                             </p>
-                            <p className="text-slate-400">
-                              Acumulado: <span className="text-white font-bold tabular-nums">${data.acumulado.toLocaleString('es-AR')}</span>
+                            <p className="text-[var(--text-muted)]">
+                              Acumulado: <span className="font-bold text-[var(--text-primary)] tabular-nums">${d.acumulado.toLocaleString('es-AR')}</span>
                             </p>
                           </div>
                         );
@@ -173,10 +178,10 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
                   <Area
                     type="monotone"
                     dataKey="acumulado"
-                    stroke="#818CF8"
-                    strokeWidth={2.5}
+                    stroke={isDark ? '#F3F4F6' : '#0F172A'}
+                    strokeWidth={2}
                     fillOpacity={1}
-                    fill="url(#areaGradient)"
+                    fill="url(#editorialAreaGradient)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -184,24 +189,24 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
           </div>
         </div>
 
-        {/* Tira de 3 Métricas Rápidas para Balance Visual con el Donut */}
+        {/* Tira de 3 Métricas Rápidas */}
         {timelineData.length > 0 && (
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/[0.06]">
-            <div className="p-1.5 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Total</span>
-              <span className="text-xs sm:text-sm font-bold text-white tabular-nums mt-0.5 block truncate">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 pt-4 border-t border-[var(--border-hairline)]">
+            <div className="p-2 sm:p-2.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-subtle)]">
+              <span className="block text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] truncate">Total</span>
+              <span className="text-xs sm:text-sm font-semibold font-mono text-[var(--text-primary)] tabular-nums mt-0.5 block truncate">
                 ${totalSpent.toLocaleString('es-AR')}
               </span>
             </div>
-            <div className="p-1.5 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Promedio</span>
-              <span className="text-xs sm:text-sm font-bold text-indigo-300 tabular-nums mt-0.5 block truncate">
+            <div className="p-2 sm:p-2.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-subtle)]">
+              <span className="block text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] truncate">Promedio</span>
+              <span className="text-xs sm:text-sm font-semibold font-mono text-[var(--text-primary)] tabular-nums mt-0.5 block truncate">
                 ${areaStats.avg.toLocaleString('es-AR')}
               </span>
             </div>
-            <div className="p-1.5 sm:p-2.5 rounded-xl bg-slate-900/40 border border-white/5">
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium truncate">Mayor</span>
-              <span className="text-xs sm:text-sm font-bold text-emerald-300 tabular-nums mt-0.5 block truncate">
+            <div className="p-2 sm:p-2.5 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-subtle)]">
+              <span className="block text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] truncate">Mayor</span>
+              <span className="text-xs sm:text-sm font-semibold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5 block truncate">
                 ${areaStats.max.toLocaleString('es-AR')}
               </span>
             </div>
@@ -209,202 +214,120 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ transactions
         )}
       </div>
 
-      {/* Gráfico Donut de Clasificaciones Prolijo con Indicador Central y Desglose (1 columna) */}
-      <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-white/[0.08] flex flex-col justify-between">
+      {/* Gráfico Donut de Clasificaciones */}
+      <div className="hairline-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-colors">
         <div>
           {/* Card Header */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400">
-                <PieIcon className="w-4 h-4" />
-              </div>
+              <PieIcon className="w-4 h-4 text-[var(--text-secondary)]" strokeWidth={1.75} />
               <div>
-                <h3 className="text-base font-semibold text-white">Por Clasificación</h3>
-                <p className="text-[11px] text-slate-400">Distribución porcentual de gastos</p>
+                <h3 className="text-sm sm:text-base font-semibold font-mono uppercase tracking-wider text-[var(--text-primary)]">
+                  Por Clasificación
+                </h3>
+                <p className="text-xs text-[var(--text-muted)]">Distribución del gasto compartido</p>
               </div>
             </div>
-            <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-white/5">
+            <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)]">
               {pieData.length} {pieData.length === 1 ? 'tipo' : 'tipos'}
             </span>
           </div>
 
           {pieData.length === 0 ? (
-            <div className="h-64 w-full flex flex-col items-center justify-center text-xs text-slate-500 gap-2">
-              <PieIcon className="w-8 h-8 opacity-20" />
+            <div className="h-64 w-full flex flex-col items-center justify-center text-xs font-mono text-[var(--text-muted)] gap-2">
+              <PieIcon className="w-6 h-6 opacity-30" strokeWidth={1.5} />
               <span>Sin datos para distribuir</span>
             </div>
           ) : (
             <div className="flex flex-col">
               {/* Donut Container with Perfectly Centered Gauge */}
-              <div className="relative h-48 w-full flex items-center justify-center my-1">
+              <div className="relative h-44 w-full flex items-center justify-center my-1">
                 {/* Central Gauge Disk */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-900/85 border border-white/[0.08] shadow-2xl flex flex-col items-center justify-center p-1.5 sm:p-2 text-center backdrop-blur-md transition-all duration-300">
-                    {activeItem ? (
-                      <div className="animate-fade-in transition-all">
-                        <span
-                          className="block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider truncate max-w-[80px] sm:max-w-[95px] mx-auto"
-                          style={{ color: activeItem.color }}
-                        >
-                          {activeItem.name}
-                        </span>
-                        <span className="block text-base sm:text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
-                          ${activeItem.value >= 100000
-                            ? `${(activeItem.value / 1000).toFixed(0)}k`
-                            : activeItem.value.toLocaleString('es-AR')}
-                        </span>
-                        <span
-                          className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.2 rounded-full text-[8px] sm:text-[9px] font-bold tabular-nums border"
-                          style={{
-                            backgroundColor: `${activeItem.color}20`,
-                            borderColor: `${activeItem.color}40`,
-                            color: activeItem.color,
-                          }}
-                        >
-                          {activeItem.percentage}%
-                        </span>
-                      </div>
-                    ) : (
-                      <div>
-                        <span className="block text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                          TOTAL
-                        </span>
-                        <span className="block text-base sm:text-lg font-black text-white tabular-nums tracking-tight mt-0.5">
-                          ${totalSpent >= 1000000
-                            ? `${(totalSpent / 1000000).toFixed(2)}M`
-                            : totalSpent.toLocaleString('es-AR')}
-                        </span>
-                        <span className="block text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5">
-                          {transactions.length} txs
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-10">
+                  {activeItem ? (
+                    <div className="flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-150 px-2">
+                      <span className="text-[10px] font-mono font-bold tracking-tight text-[var(--text-primary)] uppercase truncate max-w-[120px]">
+                        {activeItem.name}
+                      </span>
+                      <span className="text-base sm:text-lg font-bold font-mono text-[var(--text-primary)] tabular-nums leading-tight">
+                        ${activeItem.value.toLocaleString('es-AR')}
+                      </span>
+                      <span className="text-[10px] font-mono font-medium text-[var(--text-muted)]">
+                        {activeItem.percentage}% ({activeItem.count} {activeItem.count === 1 ? 'tx' : 'txs'})
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center animate-in fade-in duration-200">
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
+                        Total
+                      </span>
+                      <span className="text-base sm:text-lg font-bold font-mono text-[var(--text-primary)] tabular-nums leading-tight">
+                        ${totalSpent.toLocaleString('es-AR')}
+                      </span>
+                      <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                        {transactions.length} movs
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Recharts Pie */}
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const item = payload[0].payload;
-                          return (
-                            <div className="px-3 py-2 rounded-xl glass-panel border border-white/15 text-xs shadow-2xl backdrop-blur-xl">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                                <span className="font-semibold text-white">{item.name}</span>
-                              </div>
-                              <div className="flex items-baseline gap-2">
-                                <span className="text-sm font-bold text-white tabular-nums">
-                                  ${Number(item.value).toLocaleString('es-AR')}
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-medium">
-                                  ({item.percentage}%)
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
                     <Pie
                       data={pieData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={58}
-                      outerRadius={78}
-                      cornerRadius={5}
+                      innerRadius={52}
+                      outerRadius={70}
                       paddingAngle={3}
                       dataKey="value"
-                      onClick={(_: unknown, index: number) => setActiveIndex((prev) => (prev === index ? null : index))}
-                      onMouseEnter={(_: unknown, index: number) => setActiveIndex(index)}
+                      onMouseEnter={(_, index) => setActiveIndex(index)}
                       onMouseLeave={() => setActiveIndex(null)}
+                      cursor="pointer"
                     >
-                      {pieData.map((entry, index) => {
-                        const isHovered = activeIndex === index;
-                        return (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={entry.color}
-                            stroke={isHovered ? '#FFFFFF' : '#080B11'}
-                            strokeWidth={isHovered ? 2.5 : 1.5}
-                            opacity={activeIndex !== null && !isHovered ? 0.35 : 1}
-                            style={{
-                              filter: isHovered ? `drop-shadow(0 0 10px ${entry.color})` : undefined,
-                              cursor: 'pointer',
-                              transition: 'all 0.25s ease',
-                            }}
-                          />
-                        );
-                      })}
+                      {pieData.map((entry) => (
+                        <Cell
+                          key={`cell-${entry.key}`}
+                          fill={entry.color}
+                          stroke="var(--surface)"
+                          strokeWidth={2}
+                          className="transition-opacity hover:opacity-80"
+                        />
+                      ))}
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Stack de Desglose Prolijo de Categorías */}
-              <div className="space-y-2 mt-2 pt-3 border-t border-white/[0.06]">
+              {/* Leyenda interactiva */}
+              <div className="space-y-1.5 mt-2">
                 {pieData.map((item, index) => {
                   const isHovered = activeIndex === index;
                   return (
-                    <div
+                    <button
                       key={item.key}
-                      onClick={() => setActiveIndex((prev) => (prev === index ? null : index))}
                       onMouseEnter={() => setActiveIndex(index)}
                       onMouseLeave={() => setActiveIndex(null)}
-                      className={`min-h-[44px] flex flex-col justify-center p-2.5 rounded-xl border transition-all duration-200 cursor-pointer active:scale-[0.99] ${
+                      onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+                      className={`w-full flex items-center justify-between p-1.5 rounded-lg border transition-all text-xs font-mono cursor-pointer ${
                         isHovered
-                          ? 'bg-slate-800/80 border-indigo-500/40 shadow-md shadow-indigo-500/10 -translate-y-0.5'
-                          : 'bg-slate-900/40 border-white/[0.04] hover:bg-slate-800/40 hover:border-white/[0.08]'
+                          ? 'border-[var(--border-hover)] bg-[var(--surface-subtle)]'
+                          : 'border-transparent hover:bg-[var(--surface-subtle)]/50'
                       }`}
                     >
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
-                            style={{
-                              backgroundColor: item.color,
-                              boxShadow: isHovered ? `0 0 8px ${item.color}` : 'none',
-                              transform: isHovered ? 'scale(1.2)' : 'scale(1)',
-                            }}
-                          />
-                          <span className={`font-semibold truncate ${isHovered ? 'text-white' : 'text-slate-200'}`}>
-                            {item.name}
-                          </span>
-                          <span className="text-[10px] text-slate-500 hidden sm:inline">
-                            ({item.count} {item.count === 1 ? 'tx' : 'txs'})
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-2 shrink-0">
-                          <span className="font-bold text-white tabular-nums text-xs sm:text-sm">
-                            ${item.value.toLocaleString('es-AR')}
-                          </span>
-                          <span
-                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md tabular-nums border"
-                            style={{
-                              backgroundColor: `${item.color}15`,
-                              borderColor: `${item.color}35`,
-                              color: item.color,
-                            }}
-                          >
-                            {item.percentage}%
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                        <span className="text-[var(--text-secondary)] font-medium">{item.name}</span>
                       </div>
-                      {/* Micro Barra de Progreso */}
-                      <div className="w-full h-1 bg-slate-800/90 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${Math.max(item.percentage, 3)}%`,
-                            backgroundColor: item.color,
-                            boxShadow: isHovered ? `0 0 8px ${item.color}` : 'none',
-                          }}
-                        />
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                          ${item.value.toLocaleString('es-AR')}
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-muted)]">
+                          {item.percentage}%
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>

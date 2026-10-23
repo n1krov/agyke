@@ -85,11 +85,40 @@ export interface AnalyticsTopExpense {
   classification: ClassificationType;
 }
 
+export interface AnalyticsHeadToHeadUser {
+  id: string;
+  name: string;
+  rawPaid: number;
+  percentage: number;
+  count: number;
+}
+
+export interface AnalyticsHeadToHead {
+  userA: AnalyticsHeadToHeadUser;
+  userB: AnalyticsHeadToHeadUser;
+  totalSharedPaid: number;
+  difference: number;
+  leaderName: string;
+}
+
+export interface AnalyticsInteractionTimelineItem {
+  day: number;
+  date: string;
+  userAAccum: number;
+  userBAccum: number;
+  userADaily: number;
+  userBDaily: number;
+  userACount: number;
+  userBCount: number;
+}
+
 export interface AnalyticsMonthPayload {
   selectedMonth: string;
   monthLabel: string;
   availableMonths: string[];
   kpis: AnalyticsKPIs;
+  headToHead: AnalyticsHeadToHead;
+  interactionTimeline: AnalyticsInteractionTimelineItem[];
   dailyTimeline: AnalyticsDailyTimeline[];
   classificationBreakdown: AnalyticsClassificationItem[];
   dayOfWeekIntensity: AnalyticsDayOfWeekItem[];

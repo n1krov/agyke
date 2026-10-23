@@ -4,6 +4,8 @@ import type {
   ClassificationType,
   AnalyticsMonthPayload,
   AnalyticsKPIs,
+  AnalyticsHeadToHead,
+  AnalyticsInteractionTimelineItem,
   AnalyticsDailyTimeline,
   AnalyticsClassificationItem,
   AnalyticsDayOfWeekItem,
@@ -134,6 +136,11 @@ export async function GET(request: Request) {
     let totalUserB = 0;
     let deudaGeneradaMes = 0;
 
+    let rawPaidUserA = 0;
+    let countSharedUserA = 0;
+    let rawPaidUserB = 0;
+    let countSharedUserB = 0;
+
     currentTxData.forEach((t) => {
       const amount = Number(t.amount);
       const impact = Number(t.debt_impact);
@@ -141,11 +148,50 @@ export async function GET(request: Request) {
       if (t.user_id === userA.id) {
         totalUserA += amount;
         deudaGeneradaMes += impact;
+        if (t.classification === '50') {
+          rawPaidUserA += amount;
+          countSharedUserA += 1;
+        }
       } else if (t.user_id === userB.id) {
         totalUserB += amount;
         deudaGeneradaMes -= impact;
+        if (t.classification === '50') {
+          rawPaidUserB += amount;
+          countSharedUserB += 1;
+        }
       }
     });
+
+    const totalSharedPaid = rawPaidUserA + rawPaidUserB;
+    const pctSharedUserA = totalSharedPaid > 0 ? Math.round((rawPaidUserA / totalSharedPaid) * 100) : 0;
+    const pctSharedUserB = totalSharedPaid > 0 ? Math.round((rawPaidUserB / totalSharedPaid) * 100) : 0;
+    const diffShared = Math.abs(rawPaidUserA - rawPaidUserB);
+    const leaderName =
+      rawPaidUserA > rawPaidUserB
+        ? userA.name
+        : rawPaidUserB > rawPaidUserA
+        ? userB.name
+        : 'Empate';
+
+    const headToHead: AnalyticsHeadToHead = {
+      userA: {
+        id: userA.id,
+        name: userA.name,
+        rawPaid: rawPaidUserA,
+        percentage: pctSharedUserA,
+        count: countSharedUserA,
+      },
+      userB: {
+        id: userB.id,
+        name: userB.name,
+        rawPaid: rawPaidUserB,
+        percentage: pctSharedUserB,
+        count: countSharedUserB,
+      },
+      totalSharedPaid,
+      difference: diffShared,
+      leaderName,
+    };
 
     const kpis: AnalyticsKPIs = {
       totalGastoMes,
@@ -167,23 +213,42 @@ export async function GET(request: Request) {
       },
     };
 
-    // Línea de tiempo diaria (días 1 al fin de mes)
+    // Línea de tiempo diaria y serie de interacción por usuario (días 1 al fin de mes)
     const dailyMap: Record<number, { monto: number; count: number }> = {};
+    const interactionDailyMap: Record<number, { userADaily: number; userBDaily: number; userACount: number; userBCount: number }> = {};
+
     for (let d = 1; d <= daysInMonth; d++) {
       dailyMap[d] = { monto: 0, count: 0 };
+      interactionDailyMap[d] = { userADaily: 0, userBDaily: 0, userACount: 0, userBCount: 0 };
     }
 
     currentTxData.forEach((t) => {
       const txDate = new Date(t.created_at);
       const day = txDate.getDate();
+      const amount = Number(t.amount);
+
       if (dailyMap[day]) {
-        dailyMap[day].monto += Number(t.amount);
+        dailyMap[day].monto += amount;
         dailyMap[day].count += 1;
+      }
+
+      if (interactionDailyMap[day]) {
+        if (t.user_id === userA.id) {
+          interactionDailyMap[day].userADaily += amount;
+          interactionDailyMap[day].userACount += 1;
+        } else if (t.user_id === userB.id) {
+          interactionDailyMap[day].userBDaily += amount;
+          interactionDailyMap[day].userBCount += 1;
+        }
       }
     });
 
     let runningAccum = 0;
+    let runningUserA = 0;
+    let runningUserB = 0;
     const dailyTimeline: AnalyticsDailyTimeline[] = [];
+    const interactionTimeline: AnalyticsInteractionTimelineItem[] = [];
+
     for (let d = 1; d <= daysInMonth; d++) {
       runningAccum += dailyMap[d].monto;
       dailyTimeline.push({
@@ -192,6 +257,19 @@ export async function GET(request: Request) {
         monto: dailyMap[d].monto,
         acumulado: runningAccum,
         count: dailyMap[d].count,
+      });
+
+      runningUserA += interactionDailyMap[d].userADaily;
+      runningUserB += interactionDailyMap[d].userBDaily;
+      interactionTimeline.push({
+        day: d,
+        date: `${d} ${MONTH_SHORT_ES[monthNum - 1]}`,
+        userAAccum: runningUserA,
+        userBAccum: runningUserB,
+        userADaily: interactionDailyMap[d].userADaily,
+        userBDaily: interactionDailyMap[d].userBDaily,
+        userACount: interactionDailyMap[d].userACount,
+        userBCount: interactionDailyMap[d].userBCount,
       });
     }
 
@@ -280,6 +358,8 @@ export async function GET(request: Request) {
       monthLabel,
       availableMonths,
       kpis,
+      headToHead,
+      interactionTimeline,
       dailyTimeline,
       classificationBreakdown,
       dayOfWeekIntensity,

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { Transaction, User, AgykeItem } from '../types/database';
+import type { Transaction, User, AgykeItem, Tag } from '../types/database';
 import { HeaderBar } from '../components/HeaderBar';
 import { MasterBalanceHero } from '../components/MasterBalanceHero';
 import { StatMetricCard } from '../components/StatMetricCard';
@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [queueItems, setQueueItems] = useState<AgykeItem[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [netBalance, setNetBalance] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -27,6 +28,7 @@ export default function Dashboard() {
       if (data.users) setUsers(data.users);
       if (data.transactions) setTransactions(data.transactions);
       if (data.queueItems) setQueueItems(data.queueItems);
+      if (data.tags) setTags(data.tags);
       if (typeof data.netBalance === 'number') setNetBalance(data.netBalance);
       setLastUpdated(new Date());
     } catch (err) {
@@ -47,6 +49,7 @@ export default function Dashboard() {
         if (data.users) setUsers(data.users);
         if (data.transactions) setTransactions(data.transactions);
         if (data.queueItems) setQueueItems(data.queueItems);
+        if (data.tags) setTags(data.tags);
         if (typeof data.netBalance === 'number') setNetBalance(data.netBalance);
         setLastUpdated(new Date());
       } catch (err) {
@@ -60,6 +63,23 @@ export default function Dashboard() {
       ignore = true;
     };
   }, []);
+
+  const handleUpdateTransactionTags = (
+    transactionId: string,
+    updatedTags: Tag[]
+  ) => {
+    setTransactions((prev) =>
+      prev.map((tx) =>
+        tx.id === transactionId ? { ...tx, tags: updatedTags } : tx
+      )
+    );
+  };
+
+  const handleTagCreated = (newTag: Tag) => {
+    setTags((prev) =>
+      [...prev, newTag].sort((a, b) => a.name.localeCompare(b.name))
+    );
+  };
 
   // Métricas agregadas
   const metrics = useMemo(() => {
@@ -147,7 +167,12 @@ export default function Dashboard() {
         <AnalyticsSection transactions={transactions} />
 
         {/* Tabla Interactiva de Transacciones */}
-        <TransactionsTable transactions={transactions} />
+        <TransactionsTable
+          transactions={transactions}
+          allTags={tags}
+          onUpdateTransactionTags={handleUpdateTransactionTags}
+          onTagCreated={handleTagCreated}
+        />
       </main>
 
       {/* Cápsula Flotante Inferior de Navegación Mobile */}

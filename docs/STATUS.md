@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 23 de Octubre de 2026.
-* **Rama Activa:** `feat/analytics-fidelity-and-interaction-chart` (creada a partir de `dev`).
-* **Rama Base:** `dev` | **Rama de Producción:** `master`.
-* **Último Commit:** `1a2d7a3` (fix(ci): fix package-lock integrity sha512 checksums and synchronize tsx version).
+* **Fecha de corte:** 27 de Octubre de 2026.
+* **Rama Activa:** `feat/settings-tags-and-transaction-detail` (creada a partir de `dev`).
+* **Rama Base:** `dev` (`e79a83c`) | **Rama de Producción:** `master` (`695211e`).
+* **Último Commit:** `e79a83c` (Merge pull request #22 from n1krov/feat/analytics-fidelity-and-interaction-chart).
 
 ---
 
@@ -69,6 +69,10 @@
   1. **Clarificación Conceptual del Cara a Cara:** Se redefine la métrica para responder estrictamente *"Quién puso más plata este mes en gastos compartidos (50/50)"*, comparando montos en crudo sin fórmulas de deuda ni distorsiones de gastos personales (`0`) o favores (`-100`).
   2. **Nuevo Gráfico de Interacción Temporal (LineChart de 2 Líneas):** Se modela una serie temporal continua a lo largo del mes (días 1 al último día) que mide la actividad de carga y volumen total de dinero registrado en Agyke por cada usuario, abarcando todas las categorías para analizar la dinámica de uso con el bot.
   3. **Auditoría Integral de Gráficos:** Revisión y rotulado inequívoco de la velocidad de gasto acumulada, donut de clasificaciones, intensidad por día de la semana y top 5 compras.
+* **ADR-031 (Especificación de Perfiles de Usuarios Vinculados con Alias Web, Detalle Expandido de Transacciones y Gestor ABM de Etiquetas en `/settings`):** Se formalizaron las 3 especificaciones que conforman la **Fase 13 (`UI-52` a `UI-58`)**:
+  1. **Perfiles Vinculados, Última Actividad y Alias Web (`docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md`):** Ampliación de la tabla `users` con `alias TEXT NULL`. Cálculo de última actividad de cada usuario a partir de su último gasto registrado en `transactions`. Regla estricta de alcance: el `alias` reemplaza al nombre en toda la interfaz Web (`getUserDisplayName`), manteniendo intacto el `name` original de Telegram dentro del bot.
+  2. **Detalle Extra de Gasto y Etiquetado Múltiple en Vivo (`docs/ui/SPEC_TRANSACTION_DETAIL_AND_TAGGING.md`):** Componente `<TransactionDetailDrawer />` (Modal/Drawer lateral editorial sin recarga de página) que permite inspeccionar todos los campos auditados de un gasto y asignar/quitar múltiples etiquetas en vivo mediante relación `N:M` (`transaction_tags`).
+  3. **Centro Unificado `/settings` y ABM de Etiquetas (`docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md`):** Ruta unificada `/settings` con navegación por pestañas (`Usuarios y Perfiles` y `Etiquetas`), accesible desde `HeaderBar` y `MobileBottomDock`, con CRUD completo de etiquetas (`tags`: listar con `usage_count`, crear, editar nombre/color semántico y eliminar).
 
 ---
 
@@ -93,11 +97,9 @@
 - [x] Especificación de Rediseño Editorial "Financial Craft", Dual Theme y Purga IA Dev (Fase 11 - ADR-028 en `docs/ui/SPEC_EDITORIAL_DESIGN_SYSTEM_AND_DUAL_THEME.md`).
 - [x] Implementación Completa de Rediseño Editorial y Dual Theme (UI-39 a UI-46).
 - [x] Sincronización Estricta de Lockfile CI y Hashes SHA-512 Oficiales (ADR-029).
-- [x] Especificación Técnica de Fidelidad Analítica, Desembolso Crudo y Gráfico Temporal de Interacción (UI-47 - ADR-030).
-- [x] Enriquecimiento del Endpoint Backend `/api/analytics` con `headToHead` y `interactionTimeline` (UI-48).
-- [x] Rediseño del Cuadro Cara a Cara (Head-to-Head en Crudo con Veredicto 50/50) (UI-49).
-- [x] Implementación del Gráfico de Líneas Temporal Comparativo de Interacción (2 Líneas Recharts) (UI-50).
-- [x] Auditoría de Etiquetas, Tooltips y Consistencia Numérica en todos los Gráficos de `/analytics` (UI-51).
+- [x] Especificación e Implementación Completa de Fase 12: Fidelidad Analítica, Desembolso Crudo Cara a Cara y Gráfico Temporal de Interacción (UI-47 a UI-51 - ADR-030).
+- [x] Especificación Técnica de Fase 13: Perfiles y Alias, Detalle de Gasto y Centro de Configuración / ABM de Etiquetas (UI-52 - ADR-031).
+- [x] Implementación Completa de Fase 13 (`UI-53` a `UI-58` - ADR-031): Esquema SQL (`users.alias`, `tags`, `transaction_tags`), endpoints `/api/users`, `/api/tags`, `/api/transactions/[id]/tags`, componente `<TransactionDetailDrawer />`, `<TagBadge />`, página `/settings` y suite de tests `settings-and-tags.test.ts`.
 
 ### Pendientes del Roadmap
 - [ ] Tareas Multimodales restantes (`MULTI-03` a `MULTI-06`: Timeouts, fixtures y script CLI).
@@ -106,4 +108,4 @@
 ---
 
 ## 5. Próxima Acción Inmediata
-Realizar commit atómico de la Fase 12 (`UI-47` a `UI-51`) en la rama activa `feat/analytics-fidelity-and-interaction-chart`, y dejar listo para que el usuario pueda pushear y validar en CI o fusionar a `dev`.
+Realizar commit de la Fase 13 (`UI-52` a `UI-58`) en `feat/settings-tags-and-transaction-detail`, ejecutar la migración SQL de `alias`, `tags` y `transaction_tags` en Supabase y fusionar a `dev`.

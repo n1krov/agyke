@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getUserDisplayName } from '@/lib/user-display';
 import type {
   ClassificationType,
   AnalyticsMonthPayload,
@@ -131,6 +132,8 @@ export async function GET(request: Request) {
 
     const userA = usersData[0] || { id: 'user_a_placeholder', name: 'Usuario A', telegram_id: 0, created_at: '' };
     const userB = usersData[1] || { id: 'user_b_placeholder', name: 'Usuario B', telegram_id: 0, created_at: '' };
+    const userAName = getUserDisplayName(userA, 'Usuario A');
+    const userBName = getUserDisplayName(userB, 'Usuario B');
 
     let totalUserA = 0;
     let totalUserB = 0;
@@ -168,22 +171,22 @@ export async function GET(request: Request) {
     const diffShared = Math.abs(rawPaidUserA - rawPaidUserB);
     const leaderName =
       rawPaidUserA > rawPaidUserB
-        ? userA.name
+        ? userAName
         : rawPaidUserB > rawPaidUserA
-        ? userB.name
+        ? userBName
         : 'Empate';
 
     const headToHead: AnalyticsHeadToHead = {
       userA: {
         id: userA.id,
-        name: userA.name,
+        name: userAName,
         rawPaid: rawPaidUserA,
         percentage: pctSharedUserA,
         count: countSharedUserA,
       },
       userB: {
         id: userB.id,
-        name: userB.name,
+        name: userBName,
         rawPaid: rawPaidUserB,
         percentage: pctSharedUserB,
         count: countSharedUserB,
@@ -201,13 +204,13 @@ export async function GET(request: Request) {
       deudaGeneradaMes,
       aporteUserA: {
         id: userA.id,
-        name: userA.name,
+        name: userAName,
         total: totalUserA,
         percentage: totalGastoMes > 0 ? Math.round((totalUserA / totalGastoMes) * 100) : 0,
       },
       aporteUserB: {
         id: userB.id,
-        name: userB.name,
+        name: userBName,
         total: totalUserB,
         percentage: totalGastoMes > 0 ? Math.round((totalUserB / totalGastoMes) * 100) : 0,
       },
@@ -348,7 +351,7 @@ export async function GET(request: Request) {
       id: t.id,
       concept: t.concept || 'Gasto sin descripción',
       amount: Number(t.amount),
-      userName: t.users?.name || 'Usuario',
+      userName: getUserDisplayName(t.users, 'Usuario'),
       date: new Date(t.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }),
       classification: t.classification,
     }));

@@ -96,4 +96,16 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 - [x] **Tarea UI-50:** Implementación del Gráfico de Líneas Temporal Comparativo de Interacción con Agyke (2 Líneas Recharts en el mes).
 - [x] **Tarea UI-51:** Auditoría de Etiquetas, Tooltips y Consistencia Numérica en todos los Gráficos de `/analytics`.
 
+---
+
+### Fase 13: Configuración de Perfiles y Alias, Detalle Extra de Gasto y Gestor ABM de Etiquetas (`SPEC_USER_PROFILES_AND_ALIASES.md`, `SPEC_TRANSACTION_DETAIL_AND_TAGGING.md`, `SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md`)
+- [x] **Tarea UI-52:** Especificación Técnica de Perfiles y Alias, Detalle de Gasto y Centro de Configuración / ABM de Etiquetas (`docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md`, `docs/ui/SPEC_TRANSACTION_DETAIL_AND_TAGGING.md`, `docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md`).
+- [x] **Tarea UI-53:** Evolución del Esquema SQL (`users.alias`, tablas `tags` y `transaction_tags`), Contratos TypeScript y Helper `getUserDisplayName`.
+- [x] **Tarea UI-54:** Endpoints Backend de Usuarios (`/api/users`, `/api/users/[id]`) con cálculo de Última Actividad y propagación de Alias en `/api/dashboard` y `/api/analytics`.
+- [x] **Tarea UI-55:** Endpoints Backend ABM de Etiquetas (`/api/tags`, `/api/tags/[id]`) y Asignación N:M por Gasto (`/api/transactions/[id]/tags`).
+- [x] **Tarea UI-56:** Componente `<TransactionDetailDrawer />` (Modal/Drawer lateral editorial de detalle extra de gasto y selector de etiquetas en vivo) e integración en `<TransactionsTable />` con filtro por etiqueta.
+- [x] **Tarea UI-57:** Página Unificada `/settings` con Pestañas (`Usuarios y Perfiles` + `Etiquetas`) e integración en `<HeaderBar />`, `<MobileBottomDock />` y `middleware.ts`.
+- [x] **Tarea UI-58:** Suite de Tests Unitarios de Perfiles, Alias y Etiquetas (`src/tests/settings-and-tags.test.ts`) y Verificación Integral CI.
+
+
 

@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-23T15:16:00-03:00",
-  "active_sprint": "Fase 12 - Fidelidad de Gráficos de Analítica, Cara a Cara Crudo y Línea Temporal de Interacción (UI-47 a UI-51)",
+  "last_updated": "2026-10-27T11:20:00-03:00",
+  "active_sprint": "Fase 13 - Configuración de Perfiles y Alias, Detalle Extra de Gasto y Gestor ABM de Etiquetas (UI-52 a UI-58)",
   "summary": {
-    "total": 81,
-    "done": 73,
+    "total": 88,
+    "done": 80,
     "in_progress": 0,
     "pending": 4,
     "backlog": 4
@@ -1163,6 +1163,151 @@
         "docs/STATUS.md"
       ],
       "completed_at": "2026-10-23T15:08:00Z"
+    },
+    {
+      "id": "UI-52",
+      "title": "Especificación Técnica de Perfiles y Alias, Detalle de Gasto y Centro de Configuración / ABM de Etiquetas",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md",
+      "dependencies": ["UI-51"],
+      "acceptance_criteria": [
+        "Documentar SPEC_USER_PROFILES_AND_ALIASES.md con resolución de alias Web exclusivo y última actividad",
+        "Documentar SPEC_TRANSACTION_DETAIL_AND_TAGGING.md con Drawer lateral editorial y relación N:M de etiquetas",
+        "Documentar SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md con ruta unificada /settings y ABM completo de etiquetas"
+      ],
+      "files_to_touch": [
+        "docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md",
+        "docs/ui/SPEC_TRANSACTION_DETAIL_AND_TAGGING.md",
+        "docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md",
+        "docs/ui/ROADMAP_UI.md",
+        "docs/ui/README.md"
+      ],
+      "completed_at": "2026-10-27T09:58:00Z"
+    },
+    {
+      "id": "UI-53",
+      "title": "Evolución de Esquema SQL (Alias y Etiquetas N:M), Contratos TypeScript y Helper getUserDisplayName",
+      "domain": "core",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md#2-evolución-del-esquema-de-base-de-datos-supabaseschemasql",
+      "dependencies": ["UI-52"],
+      "acceptance_criteria": [
+        "Añadir columna alias a tabla users y tablas tags y transaction_tags en supabase/schema.sql",
+        "Actualizar interfaces User, Tag, Transaction y UserProfileSummary en src/types/database.ts y web/src/types/database.ts",
+        "Crear helper canónico getUserDisplayName en web/src/lib/user-display.ts"
+      ],
+      "files_to_touch": [
+        "supabase/schema.sql",
+        "src/types/database.ts",
+        "web/src/types/database.ts",
+        "web/src/lib/user-display.ts"
+      ],
+      "completed_at": "2026-10-27T11:10:00Z"
+    },
+    {
+      "id": "UI-54",
+      "title": "Endpoints Backend de Usuarios (/api/users) con Última Actividad y Propagación de Alias en Web",
+      "domain": "web",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md#4-especificación-de-endpoints-backend-apiusers",
+      "dependencies": ["UI-53"],
+      "acceptance_criteria": [
+        "Implementar GET /api/users devolviendo usuarios vinculados, conteo de gastos y última actividad",
+        "Implementar PATCH /api/users/[id] para configurar o limpiar el alias (1-24 caracteres)",
+        "Propagar alias en /api/dashboard, /api/analytics y componentes Web sin alterar el nombre en el bot de Telegram"
+      ],
+      "files_to_touch": [
+        "web/src/app/api/users/route.ts",
+        "web/src/app/api/users/[id]/route.ts",
+        "web/src/app/api/dashboard/route.ts",
+        "web/src/app/api/analytics/route.ts"
+      ],
+      "completed_at": "2026-10-27T11:12:00Z"
+    },
+    {
+      "id": "UI-55",
+      "title": "Endpoints Backend ABM de Etiquetas (/api/tags) y Asignación N:M por Gasto (/api/transactions/[id]/tags)",
+      "domain": "web",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md#3-especificación-de-endpoints-backend-apitags",
+      "dependencies": ["UI-53"],
+      "acceptance_criteria": [
+        "Implementar GET y POST en /api/tags con conteo de uso usage_count y validación de unicidad",
+        "Implementar PATCH y DELETE en /api/tags/[id] para editar nombre/color o borrar etiqueta",
+        "Implementar PUT /api/transactions/[id]/tags para sincronizar múltiples etiquetas en un gasto"
+      ],
+      "files_to_touch": [
+        "web/src/app/api/tags/route.ts",
+        "web/src/app/api/tags/[id]/route.ts",
+        "web/src/app/api/transactions/[id]/tags/route.ts"
+      ],
+      "completed_at": "2026-10-27T11:14:00Z"
+    },
+    {
+      "id": "UI-56",
+      "title": "Drawer Lateral de Detalle Extra de Gasto (TransactionDetailDrawer) y Filtro por Etiquetas en Tabla",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_TRANSACTION_DETAIL_AND_TAGGING.md#4-anatomía-visual-del-componente-transactiondetaildrawer-",
+      "dependencies": ["UI-54", "UI-55"],
+      "acceptance_criteria": [
+        "Crear componente TransactionDetailDrawer con metadatos completos del gasto y asignación de etiquetas en vivo",
+        "Crear componente TagBadge con soporte para los 7 colores semánticos en Dual Theme",
+        "Mostrar etiquetas en filas/tarjetas de TransactionsTable y permitir filtrar gastos por etiqueta"
+      ],
+      "files_to_touch": [
+        "web/src/components/TagBadge.tsx",
+        "web/src/components/TransactionDetailDrawer.tsx",
+        "web/src/components/TransactionsTable.tsx",
+        "web/src/app/page.tsx"
+      ],
+      "completed_at": "2026-10-27T11:16:00Z"
+    },
+    {
+      "id": "UI-57",
+      "title": "Página Unificada /settings (Pestañas Usuarios y Etiquetas) e Integración en Navegación Global",
+      "domain": "web",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md#2-estructura-visual-de-la-página-settings",
+      "dependencies": ["UI-54", "UI-55"],
+      "acceptance_criteria": [
+        "Crear página web/src/app/settings/page.tsx con pestaña 'Usuarios y Perfiles' (estado, última actividad, alias) y pestaña 'Etiquetas' (ABM completo)",
+        "Añadir enlace Ajustes (/settings) en HeaderBar y MobileBottomDock",
+        "Proteger rutas /settings, /api/users, /api/tags y /api/transactions en web/src/middleware.ts"
+      ],
+      "files_to_touch": [
+        "web/src/app/settings/page.tsx",
+        "web/src/components/HeaderBar.tsx",
+        "web/src/components/MobileBottomDock.tsx",
+        "web/src/middleware.ts"
+      ],
+      "completed_at": "2026-10-27T11:18:00Z"
+    },
+    {
+      "id": "UI-58",
+      "title": "Suite de Tests Unitarios de Perfiles, Alias y Etiquetas y Verificación Integral CI",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md#4-plan-de-pruebas-y-criterios-de-calidad-ci-en-verde",
+      "dependencies": ["UI-56", "UI-57"],
+      "acceptance_criteria": [
+        "Crear suite src/tests/settings-and-tags.test.ts validando resolución de alias, última actividad y sanitización de etiquetas",
+        "Verificar 0 errores en npm run typecheck y 0 warnings en npm run lint",
+        "Compilación exitosa de producción con npm run build"
+      ],
+      "files_to_touch": [
+        "src/tests/settings-and-tags.test.ts",
+        "docs/STATUS.md"
+      ],
+      "completed_at": "2026-10-27T11:20:00Z"
     },
     {
       "id": "MULTI-01",

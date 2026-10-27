@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { UserAvatar } from './UserAvatar';
+import { getUserDisplayName } from '../lib/user-display';
 import type { User } from '../types/database';
 
 interface MasterBalanceHeroProps {
@@ -16,6 +17,8 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
 }) => {
   const userA = users[0] || { name: 'Usuario A', id: '1' };
   const userB = users[1] || { name: 'Usuario B', id: '2' };
+  const userAName = getUserDisplayName(userA, 'Usuario A');
+  const userBName = getUserDisplayName(userB, 'Usuario B');
 
   const isPositive = netBalance > 0;
   const isNegative = netBalance < 0;
@@ -33,11 +36,11 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
 
   if (isPositive) {
     badgeClasses = 'bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-400';
-    badgeText = `${userB.name} debe a ${userA.name}`;
+    badgeText = `${userBName} debe a ${userAName}`;
     accentBorder = 'border-l-emerald-600 dark:border-l-emerald-500';
   } else if (isNegative) {
     badgeClasses = 'bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-400';
-    badgeText = `${userA.name} debe a ${userB.name}`;
+    badgeText = `${userAName} debe a ${userBName}`;
     accentBorder = 'border-l-rose-600 dark:border-l-rose-500';
   }
 
@@ -69,15 +72,15 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
             {isZero && 'Ambos usuarios están al día. No existen deudas pendientes entre las cuentas.'}
             {isPositive && (
               <>
-                <strong className="text-[var(--text-primary)] font-semibold">{userB.name}</strong> debe transferirle a{' '}
-                <strong className="text-[var(--text-primary)] font-semibold">{userA.name}</strong> la suma exacta de{' '}
+                <strong className="text-[var(--text-primary)] font-semibold">{userBName}</strong> debe transferirle a{' '}
+                <strong className="text-[var(--text-primary)] font-semibold">{userAName}</strong> la suma exacta de{' '}
                 <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">${formattedAbs}</span> para saldar la diferencia acumulada.
               </>
             )}
             {isNegative && (
               <>
-                <strong className="text-[var(--text-primary)] font-semibold">{userA.name}</strong> debe transferirle a{' '}
-                <strong className="text-[var(--text-primary)] font-semibold">{userB.name}</strong> la suma exacta de{' '}
+                <strong className="text-[var(--text-primary)] font-semibold">{userAName}</strong> debe transferirle a{' '}
+                <strong className="text-[var(--text-primary)] font-semibold">{userBName}</strong> la suma exacta de{' '}
                 <span className="font-mono font-semibold text-rose-600 dark:text-rose-400">${formattedAbs}</span> para saldar la diferencia acumulada.
               </>
             )}
@@ -88,8 +91,8 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
         <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-5 p-3.5 sm:p-4 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] w-full sm:w-auto">
           {/* Usuario A */}
           <div className="flex flex-col items-center gap-1.5 text-center min-w-[70px]">
-            <UserAvatar name={userA.name} size="md" />
-            <span className="text-xs font-medium text-[var(--text-primary)] truncate max-w-[85px]">{userA.name}</span>
+            <UserAvatar name={userAName} size="md" />
+            <span className="text-xs font-medium text-[var(--text-primary)] truncate max-w-[85px]">{userAName}</span>
             <span className={`text-[11px] font-mono font-semibold tabular-nums ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-muted)]'}`}>
               {isPositive ? `+$${formattedAbs}` : isNegative ? `-$${formattedAbs}` : '$0'}
             </span>
@@ -116,8 +119,8 @@ export const MasterBalanceHero: React.FC<MasterBalanceHeroProps> = ({
 
           {/* Usuario B */}
           <div className="flex flex-col items-center gap-1.5 text-center min-w-[70px]">
-            <UserAvatar name={userB.name} size="md" />
-            <span className="text-xs font-medium text-[var(--text-primary)] truncate max-w-[85px]">{userB.name}</span>
+            <UserAvatar name={userBName} size="md" />
+            <span className="text-xs font-medium text-[var(--text-primary)] truncate max-w-[85px]">{userBName}</span>
             <span className={`text-[11px] font-mono font-semibold tabular-nums ${isPositive ? 'text-rose-600 dark:text-rose-400' : isNegative ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-muted)]'}`}>
               {isPositive ? `-$${formattedAbs}` : isNegative ? `+$${formattedAbs}` : '$0'}
             </span>

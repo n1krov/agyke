@@ -5,8 +5,13 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     telegram_id BIGINT UNIQUE NOT NULL,
     name TEXT NOT NULL,
+    alias TEXT DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Migración idempotente para bases existentes
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS alias TEXT DEFAULT NULL;
 
 -- Muro Agyke (Cola de Pendientes)
 CREATE TABLE IF NOT EXISTS agyke_queue (
@@ -41,3 +46,22 @@ CREATE TABLE IF NOT EXISTS balances (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CONSTRAINT unique_user_pair UNIQUE (user_a_id, user_b_id)
 );
+
+-- Catálogo Maestro de Etiquetas (Tags)
+CREATE TABLE IF NOT EXISTS tags (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT UNIQUE NOT NULL,
+    color TEXT NOT NULL DEFAULT 'slate' CHECK (color IN ('slate', 'indigo', 'emerald', 'amber', 'rose', 'cyan', 'violet')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Tabla Puente N:M entre Transacciones y Etiquetas
+CREATE TABLE IF NOT EXISTS transaction_tags (
+    transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+    tag_id UUID NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (transaction_id, tag_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_transaction_tags_tx_id ON transaction_tags(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_tags_tag_id ON transaction_tags(tag_id);

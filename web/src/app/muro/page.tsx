@@ -21,6 +21,7 @@ import type { AgykeItem } from '../../types/database';
 import { HeaderBar } from '../../components/HeaderBar';
 import { MobileBottomDock } from '../../components/MobileBottomDock';
 import { UserAvatar } from '../../components/UserAvatar';
+import { getUserDisplayName } from '../../lib/user-display';
 
 type StatusFilter = 'ALL' | 'PENDING' | 'PROCESSED' | 'DISCARDED';
 type SourceFilter = 'ALL' | 'audio' | 'image' | 'text';
@@ -109,7 +110,9 @@ export default function MuroPage() {
         const q = searchQuery.toLowerCase();
         const matchesConcept = (item.concept || '').toLowerCase().includes(q);
         const matchesAmount = (item.amount || '').toString().includes(q);
-        const matchesUser = (item.users?.name || '').toLowerCase().includes(q);
+        const matchesUser =
+          getUserDisplayName(item.users, '').toLowerCase().includes(q) ||
+          (item.users?.name || '').toLowerCase().includes(q);
         return matchesConcept || matchesAmount || matchesUser;
       }
 
@@ -424,8 +427,8 @@ export default function MuroPage() {
                   <div className="pt-3 border-t border-[var(--border-hairline)] space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <UserAvatar name={item.users?.name || 'Usuario'} size="sm" />
-                        <span className="font-medium text-[var(--text-primary)]">{item.users?.name || 'Desconocido'}</span>
+                        <UserAvatar name={getUserDisplayName(item.users, 'Usuario')} size="sm" />
+                        <span className="font-medium text-[var(--text-primary)]">{getUserDisplayName(item.users, 'Desconocido')}</span>
                       </div>
                       {item.telegram_message_id && (
                         <span className="text-[10px] text-[var(--text-muted)] font-mono">

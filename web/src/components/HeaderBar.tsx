@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   TrendingUp,
   Inbox,
+  SlidersHorizontal,
   Clock,
   ArrowRight,
 } from 'lucide-react';
@@ -58,6 +59,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       icon: Inbox,
       isActive: pathname.startsWith('/muro'),
       badge: pendingQueueCount > 0 ? pendingQueueCount : null,
+    },
+    {
+      href: '/settings',
+      label: 'Ajustes',
+      icon: SlidersHorizontal,
+      isActive: pathname.startsWith('/settings'),
     },
   ];
 

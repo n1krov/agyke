@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, TrendingUp, Inbox, Send, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Inbox, SlidersHorizontal, Send, RefreshCw } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 interface MobileBottomDockProps {
@@ -38,6 +38,12 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       icon: Inbox,
       isActive: pathname.startsWith('/muro'),
       badge: pendingQueueCount > 0 ? pendingQueueCount : null,
+    },
+    {
+      href: '/settings',
+      label: 'Ajustes',
+      icon: SlidersHorizontal,
+      isActive: pathname.startsWith('/settings'),
     },
   ];
 

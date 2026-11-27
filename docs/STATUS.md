@@ -5,10 +5,10 @@
 ---
 
 ## 1. Identificación y Estado de Git
-* **Fecha de corte:** 27 de Octubre de 2026.
-* **Rama Activa:** `feat/settings-tags-and-transaction-detail` (creada a partir de `dev`).
-* **Rama Base:** `dev` (`e79a83c`) | **Rama de Producción:** `master` (`695211e`).
-* **Último Commit:** `e79a83c` (Merge pull request #22 from n1krov/feat/analytics-fidelity-and-interaction-chart).
+* **Fecha de corte:** 27 de Noviembre de 2026.
+* **Rama Activa:** `feat/salary-calculator` (creada a partir de `dev`).
+* **Rama Base:** `dev` (`dea5417`) | **Rama de Producción:** `master` (`695211e`).
+* **Último Commit:** `dea5417` (Merge pull request #24 from n1krov/feat/settings-tags-and-transaction-detail).
 
 ---
 
@@ -73,6 +73,10 @@
   1. **Perfiles Vinculados, Última Actividad y Alias Web (`docs/ui/SPEC_USER_PROFILES_AND_ALIASES.md`):** Ampliación de la tabla `users` con `alias TEXT NULL`. Cálculo de última actividad de cada usuario a partir de su último gasto registrado en `transactions`. Regla estricta de alcance: el `alias` reemplaza al nombre en toda la interfaz Web (`getUserDisplayName`), manteniendo intacto el `name` original de Telegram dentro del bot.
   2. **Detalle Extra de Gasto y Etiquetado Múltiple en Vivo (`docs/ui/SPEC_TRANSACTION_DETAIL_AND_TAGGING.md`):** Componente `<TransactionDetailDrawer />` (Modal/Drawer lateral editorial sin recarga de página) que permite inspeccionar todos los campos auditados de un gasto y asignar/quitar múltiples etiquetas en vivo mediante relación `N:M` (`transaction_tags`).
   3. **Centro Unificado `/settings` y ABM de Etiquetas (`docs/ui/SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md`):** Ruta unificada `/settings` con navegación por pestañas (`Usuarios y Perfiles` y `Etiquetas`), accesible desde `HeaderBar` y `MobileBottomDock`, con CRUD completo de etiquetas (`tags`: listar con `usage_count`, crear, editar nombre/color semántico y eliminar).
+* **ADR-032 (Especificación de Calculadora de Plan Financiero Standalone `/plan` con Persistencia Híbrida y Micro-Animaciones):** Se formalizó en [`docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md`](./ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md) la **Fase 14 (`UI-59` a `UI-65`)**:
+  1. **Motor Puro Compartido (`src/services/financial-plan.ts`):** Extracción del motor determinista en pesos reales de hoy (`calculatePlan`, simulación mes a mes hasta 80 años con cascada Fondo de Emergencia -> Inversión y bisección de aporte necesario) completamente tipado y testeado con `node:test`.
+  2. **Persistencia Híbrida (`Supabase` + `localStorage`):** Tabla `financial_plans` en `supabase/schema.sql` y endpoints `GET`/`PUT /api/plan` con fallback resiliente ante tabla no migrada, combinados con caché local instantánea y sincronización debounced entre dispositivos.
+  3. **Experiencia Editorial Animada en `/plan`:** Vista standalone integrada en `HeaderBar` y `MobileBottomDock`, con Hero de sueldo editable preservando caret, barra de reparto con cross-highlight, timeline animado de 3 hitos y gráfico SVG interactivo a 60 FPS (mouse + touch) adaptado a Dual Theme (Claro/Oscuro).
 
 ---
 
@@ -100,6 +104,8 @@
 - [x] Especificación e Implementación Completa de Fase 12: Fidelidad Analítica, Desembolso Crudo Cara a Cara y Gráfico Temporal de Interacción (UI-47 a UI-51 - ADR-030).
 - [x] Especificación Técnica de Fase 13: Perfiles y Alias, Detalle de Gasto y Centro de Configuración / ABM de Etiquetas (UI-52 - ADR-031).
 - [x] Implementación Completa de Fase 13 (`UI-53` a `UI-58` - ADR-031): Esquema SQL (`users.alias`, `tags`, `transaction_tags`), endpoints `/api/users`, `/api/tags`, `/api/transactions/[id]/tags`, componente `<TransactionDetailDrawer />`, `<TagBadge />`, página `/settings` y suite de tests `settings-and-tags.test.ts`.
+- [x] Especificación Técnica de Fase 14: Calculadora de Plan Financiero Standalone en `/plan` (`UI-59` - ADR-032 en `docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md`).
+- [x] Implementación Completa de Fase 14 (`UI-60` a `UI-65` - ADR-032): Motor matemático puro y 10 tests unitarios (`src/services/financial-plan.ts`, `src/services/financial-plan.test.ts`), tabla `financial_plans` en `supabase/schema.sql`, endpoints `GET`/`PUT /api/plan`, tokens Dual Theme + micro-animaciones en `globals.css`, hooks `useAnimatedNumber` y `useFinancialPlan` (Supabase + caché local), componentes en `web/src/components/plan/`, página `/plan` y navegación en `HeaderBar` / `MobileBottomDock`.
 
 ### Pendientes del Roadmap
 - [ ] Tareas Multimodales restantes (`MULTI-03` a `MULTI-06`: Timeouts, fixtures y script CLI).
@@ -108,4 +114,4 @@
 ---
 
 ## 5. Próxima Acción Inmediata
-Realizar commit de la Fase 13 (`UI-52` a `UI-58`) en `feat/settings-tags-and-transaction-detail`, ejecutar la migración SQL de `alias`, `tags` y `transaction_tags` en Supabase y fusionar a `dev`.
+Ejecutar la migración SQL de `financial_plans` (en `supabase/schema.sql`) en Supabase, realizar commit y PR de la rama `feat/salary-calculator` hacia `dev` para validación en GitHub Actions CI y despliegue en Vercel.

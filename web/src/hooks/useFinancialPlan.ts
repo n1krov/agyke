@@ -143,78 +143,181 @@ export function useFinancialPlan(): UseFinancialPlanReturn {
     [pushToCloud]
   );
 
-  const syncFromServer = useCallback(async (ignoreRef?: { current: boolean }) => {
-    await Promise.resolve();
-    if (ignoreRef?.current) return;
-
+  const refreshFromCloud = useCallback(async () => {
+    setSyncStatus('hydrating');
     const local = readLocalCache();
-    if (local) {
-      latestConfigRef.current = local.config;
-      setInputs(local.config);
-      setLastSyncedAt(local.updatedAt);
-    }
-
     try {
       const res = await fetch('/api/plan', { cache: 'no-store' });
-      if (ignoreRef?.current) return;
-
       if (!res.ok) {
+        if (local) {
+          latestConfigRef.current = local.config;
+          setInputs(local.config);
+          setLastSyncedAt(local.updatedAt);
+        }
         setSyncStatus('local-only');
-        setIsHydrated(true);
         return;
       }
 
       const server = (await res.json()) as PlanApiGetResponse;
-      if (ignoreRef?.current) return;
-
       if (server.migration_pending) {
+        if (local) {
+          latestConfigRef.current = local.config;
+          setInputs(local.config);
+          setLastSyncedAt(local.updatedAt);
+        }
         setSyncStatus('local-only');
-        setIsHydrated(true);
         return;
       }
 
       if (server.source === 'supabase') {
-        const localTime = local?.updatedAt ? Date.parse(local.updatedAt) : 0;
-        const serverTime = server.updated_at ? Date.parse(server.updated_at) : 0;
-
-        if (!local || serverTime >= localTime) {
-          const normalized = normalizePlanInputs(server.config);
-          latestConfigRef.current = normalized;
-          setInputs(normalized);
-          writeLocalCache(normalized, server.updated_at);
-          setLastSyncedAt(server.updated_at);
-          setSyncStatus('synced');
-        } else {
-          // Local tiene cambios más recientes sin subir aún
-          void pushToCloud(local.config);
-        }
+        const normalized = normalizePlanInputs(server.config);
+        latestConfigRef.current = normalized;
+        setInputs(normalized);
+        writeLocalCache(normalized, server.updated_at);
+        setLastSyncedAt(server.updated_at);
+        setSyncStatus('synced');
       } else if (local) {
-        // Supabase todavía no tiene registro, pero hay caché local: subimos
-        void pushToCloud(local.config);
+        await pushToCloud(local.config);
       } else {
         setSyncStatus('synced');
       }
     } catch {
-      if (!ignoreRef?.current) {
-        setSyncStatus('local-only');
-      }
+      setSyncStatus('local-only');
     } finally {
-      if (!ignoreRef?.current) {
-        setIsHydrated(true);
-      }
+      setIsHydrated(true);
     }
   }, [pushToCloud]);
 
   useEffect(() => {
-    const ignoreRef = { current: false };
-    void syncFromServer(ignoreRef);
+    let ignore = false;
+
+    async function initPlan() {
+      const local = readLocalCache();
+
+      try {
+        const res = await fetch('/api/plan', { cache: 'no-store' });
+        if (ignore) return;
+
+        if (!res.ok) {
+          if (local) {
+            latestConfigRef.current = local.config;
+            setInputs(local.config);
+            setLastSyncedAt(local.updatedAt);
+          }
+          setSyncStatus('local-only');
+          return;
+        }
+
+        const server = (await res.json()) as PlanApiGetResponse;
+        if (ignore) return;
+
+        if (server.migration_pending) {
+          if (local) {
+            latestConfigRef.current = local.config;
+            setInputs(local.config);
+            setLastSyncedAt(local.updatedAt);
+          }
+          setSyncStatus('local-only');
+          return;
+        }
+
+        if (server.source === 'supabase') {
+          const localTime = local?.updatedAt ? Date.parse(local.updatedAt) : 0;
+          const serverTime = server.updated_at ? Date.parse(server.updated_at) : 0;
+
+          if (!local || serverTime >= localTime) {
+            const normalized = normalizePlanInputs(server.config);
+            latestConfigRef.current = normalized;
+            setInputs(normalized);
+            writeLocalCache(normalized, server.updated_at);
+            setLastSyncedAt(server.updated_at);
+            setSyncStatus('synced');
+            return;
+          }
+
+          // Local tiene cambios más recientes: aplicamos local y subimos
+          latestConfigRef.current = local.config;
+          setInputs(local.config);
+          setLastSyncedAt(local.updatedAt);
+          setSyncStatus('saving');
+
+          const putRes = await fetch('/api/plan', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ config: local.config }),
+          });
+          if (ignore) return;
+
+          if (putRes.ok) {
+            const putData = (await putRes.json()) as PlanApiPutResponse;
+            if (ignore) return;
+            if (putData.persisted) {
+              writeLocalCache(putData.config, putData.updated_at);
+              setLastSyncedAt(putData.updated_at);
+              setSyncStatus('synced');
+            } else {
+              setSyncStatus('local-only');
+            }
+          } else {
+            setSyncStatus('local-only');
+          }
+          return;
+        }
+
+        if (local) {
+          latestConfigRef.current = local.config;
+          setInputs(local.config);
+          setLastSyncedAt(local.updatedAt);
+          setSyncStatus('saving');
+
+          const putRes = await fetch('/api/plan', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ config: local.config }),
+          });
+          if (ignore) return;
+
+          if (putRes.ok) {
+            const putData = (await putRes.json()) as PlanApiPutResponse;
+            if (ignore) return;
+            if (putData.persisted) {
+              writeLocalCache(putData.config, putData.updated_at);
+              setLastSyncedAt(putData.updated_at);
+              setSyncStatus('synced');
+            } else {
+              setSyncStatus('local-only');
+            }
+          } else {
+            setSyncStatus('local-only');
+          }
+          return;
+        }
+
+        setSyncStatus('synced');
+      } catch {
+        if (!ignore) {
+          if (local) {
+            latestConfigRef.current = local.config;
+            setInputs(local.config);
+            setLastSyncedAt(local.updatedAt);
+          }
+          setSyncStatus('local-only');
+        }
+      } finally {
+        if (!ignore) {
+          setIsHydrated(true);
+        }
+      }
+    }
+
+    initPlan();
 
     return () => {
-      ignoreRef.current = true;
+      ignore = true;
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [syncFromServer]);
+  }, []);
 
   const plan = useMemo<FinancialPlanResult>(() => calculatePlan(inputs), [inputs]);
 
@@ -244,11 +347,6 @@ export function useFinancialPlan(): UseFinancialPlanReturn {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     void pushToCloud(defaults);
   }, [pushToCloud]);
-
-  const refreshFromCloud = useCallback(async () => {
-    setSyncStatus('hydrating');
-    await syncFromServer();
-  }, [syncFromServer]);
 
   return {
     inputs,

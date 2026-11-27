@@ -30,5 +30,7 @@ Esta carpeta contiene la documentación oficial, modelado y especificaciones té
    * Drawer/Modal lateral editorial de detalle extra de gasto y asignación en vivo de múltiples etiquetas (`N:M`).
 12. [`SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md`](./SPEC_SETTINGS_HUB_AND_TAGS_CRUD.md):
    * Centro unificado de configuración (`/settings`) con pestañas y gestor ABM completo de etiquetas (`Tags`).
-13. [`ROADMAP_UI.md`](./ROADMAP_UI.md):
+13. [`SPEC_FINANCIAL_PLAN_CALCULATOR.md`](./SPEC_FINANCIAL_PLAN_CALCULATOR.md):
+   * Integración standalone de la Calculadora de Plan Financiero en `/plan` con motor matemático puro, persistencia híbrida (`Supabase` + `localStorage`), estética Editorial Dual Theme y micro-animaciones.
+14. [`ROADMAP_UI.md`](./ROADMAP_UI.md):
    * Plan de ejecución estructurado en fases atómicas bajo la metodología Spec-Driven Development (SDD).

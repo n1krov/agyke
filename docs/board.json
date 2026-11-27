@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
   "project": "Agyke",
-  "last_updated": "2026-10-27T11:20:00-03:00",
-  "active_sprint": "Fase 13 - Configuración de Perfiles y Alias, Detalle Extra de Gasto y Gestor ABM de Etiquetas (UI-52 a UI-58)",
+  "last_updated": "2026-11-27T14:40:00-03:00",
+  "active_sprint": "Fase 14 - Calculadora de Plan Financiero Standalone (/plan) con Persistencia Híbrida y Animaciones (UI-59 a UI-65)",
   "summary": {
-    "total": 88,
-    "done": 80,
+    "total": 95,
+    "done": 87,
     "in_progress": 0,
     "pending": 4,
     "backlog": 4
@@ -1308,6 +1308,149 @@
         "docs/STATUS.md"
       ],
       "completed_at": "2026-10-27T11:20:00Z"
+    },
+    {
+      "id": "UI-59",
+      "title": "Especificación Técnica de la Calculadora de Plan Financiero (/plan)",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md",
+      "dependencies": ["UI-58"],
+      "acceptance_criteria": [
+        "Documentar motor matemático puro, contratos TypeScript y validaciones en SPEC_FINANCIAL_PLAN_CALCULATOR.md",
+        "Modelar tabla financial_plans y endpoints GET/PUT /api/plan con persistencia híbrida Supabase + localStorage",
+        "Especificar anatomía visual Editorial Dual Theme, animaciones y navegación en HeaderBar y MobileBottomDock"
+      ],
+      "files_to_touch": [
+        "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md",
+        "docs/ui/README.md",
+        "docs/ui/ROADMAP_UI.md",
+        "docs/board.json",
+        "docs/STATUS.md"
+      ],
+      "completed_at": "2026-11-27T14:20:00-03:00"
+    },
+    {
+      "id": "UI-60",
+      "title": "Motor Matemático Puro de Plan Financiero y Suite de Tests Unitarios",
+      "domain": "core",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md#3-contratos-typescript-y-motor-matemático-srctypesfinancial-plants-y-srcservicesfinancial-plants",
+      "dependencies": ["UI-59"],
+      "acceptance_criteria": [
+        "Crear interfaces estrictas en src/types/financial-plan.ts sin uso de any",
+        "Implementar calculatePlan, simulatePlan, validateAndSanitizePlanInputs y helpers de formato en src/services/financial-plan.ts",
+        "Crear suite de tests src/services/financial-plan.test.ts cubriendo reparto, cascada fondo->inversión, hitos, bisección y edge cases"
+      ],
+      "files_to_touch": [
+        "src/types/financial-plan.ts",
+        "src/services/financial-plan.ts",
+        "src/services/financial-plan.test.ts"
+      ],
+      "completed_at": "2026-11-27T14:30:00-03:00"
+    },
+    {
+      "id": "UI-61",
+      "title": "Esquema SQL financial_plans y Endpoints GET/PUT /api/plan",
+      "domain": "web",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md#4-especificación-de-endpoints-backend-apiplan",
+      "dependencies": ["UI-60"],
+      "acceptance_criteria": [
+        "Agregar tabla idempotente financial_plans en supabase/schema.sql",
+        "Implementar GET y PUT en web/src/app/api/plan/route.ts con validación estricta y resiliencia ante tabla no migrada (42P01/PGRST205)",
+        "Verificar protección automática por middleware.ts mediante agyke_session"
+      ],
+      "files_to_touch": [
+        "supabase/schema.sql",
+        "web/src/app/api/plan/route.ts"
+      ],
+      "completed_at": "2026-11-27T14:30:00-03:00"
+    },
+    {
+      "id": "UI-62",
+      "title": "Tokens Visuales, Animaciones CSS, Sliders Custom y Hook de Persistencia Híbrida",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md#53-micro-animaciones-y-accesibilidad",
+      "dependencies": ["UI-60"],
+      "acceptance_criteria": [
+        "Añadir variables Dual Theme (--plan-fijos, --plan-gustos, --plan-inv), estilos de sliders y keyframes de entrada/pulso en web/src/app/globals.css respetando prefers-reduced-motion",
+        "Crear hook useAnimatedNumber para interpolación suave de KPIs",
+        "Crear hook useFinancialPlan con hidratación localStorage instantánea y sincronización debounced contra /api/plan"
+      ],
+      "files_to_touch": [
+        "web/src/app/globals.css",
+        "web/src/hooks/useAnimatedNumber.ts",
+        "web/src/hooks/useFinancialPlan.ts"
+      ],
+      "completed_at": "2026-11-27T14:32:00-03:00"
+    },
+    {
+      "id": "UI-63",
+      "title": "Componentes Modulares de Plan Financiero (Hero, Controles, Hitos y Proyección)",
+      "domain": "ui_ux",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md#52-anatomía-de-componentes-websrccomponentsplan",
+      "dependencies": ["UI-61", "UI-62"],
+      "acceptance_criteria": [
+        "Implementar PlanHero.tsx con input monumental con separador de miles preservando caret, barra segmentada con cross-highlight y banner de destino",
+        "Implementar PlanControls.tsx con sliders, segmented control Sueldo/Gastos, saldos actuales y acordeón animado de ajustes avanzados",
+        "Implementar PlanMilestones.tsx con timeline vertical animado, estados done/active/locked, ticks 25/50/75% y ETAs",
+        "Implementar PlanProjectionChart.tsx con gráfico SVG interactivo (mouse y touch), línea de meta, marcador de fondo completo, 3 KPIs animados y veredicto"
+      ],
+      "files_to_touch": [
+        "web/src/components/plan/MoneyInput.tsx",
+        "web/src/components/plan/PlanHero.tsx",
+        "web/src/components/plan/PlanControls.tsx",
+        "web/src/components/plan/PlanMilestones.tsx",
+        "web/src/components/plan/PlanProjectionChart.tsx"
+      ],
+      "completed_at": "2026-11-27T14:34:00-03:00"
+    },
+    {
+      "id": "UI-64",
+      "title": "Página Dedicada /plan e Integración en HeaderBar y MobileBottomDock",
+      "domain": "web",
+      "status": "done",
+      "priority": "p0",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md#51-navegación-global",
+      "dependencies": ["UI-63"],
+      "acceptance_criteria": [
+        "Crear ruta web/src/app/plan/page.tsx ensamblando HeaderBar, componentes de plan y MobileBottomDock",
+        "Añadir pestaña Plan (icono Calculator) en HeaderBar.tsx y MobileBottomDock.tsx",
+        "Garantizar ergonomía táctil y cero scroll horizontal en mobile (360px-430px) y desktop"
+      ],
+      "files_to_touch": [
+        "web/src/app/plan/page.tsx",
+        "web/src/components/HeaderBar.tsx",
+        "web/src/components/MobileBottomDock.tsx"
+      ],
+      "completed_at": "2026-11-27T14:34:00-03:00"
+    },
+    {
+      "id": "UI-65",
+      "title": "Limpieza de HTML Temporal y Verificación Integral CI de Fase 14",
+      "domain": "devops",
+      "status": "done",
+      "priority": "p1",
+      "spec_reference": "docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md#6-plan-de-pruebas-y-criterios-de-aceptación-ci-en-verde",
+      "dependencies": ["UI-64"],
+      "acceptance_criteria": [
+        "Eliminar archivo fuente temporal plan-financiero.html tras verificar paridad funcional",
+        "Validar 100% en verde npm test, npm run typecheck, npm run lint, npm run build y npm run board",
+        "Actualizar docs/STATUS.md y cerrar Fase 14 en docs/board.json"
+      ],
+      "files_to_touch": [
+        "docs/STATUS.md",
+        "docs/board.json"
+      ],
+      "completed_at": "2026-11-27T14:40:00-03:00"
     },
     {
       "id": "MULTI-01",

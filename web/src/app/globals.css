@@ -29,6 +29,13 @@
   --scrollbar-track: #F1F2F5;
   --scrollbar-thumb: #D0D2DC;
   --scrollbar-thumb-hover: #B0B4C0;
+
+  /* Plan Financiero Semantics - Light */
+  --plan-fijos: #273842;
+  --plan-gustos: #D99514;
+  --plan-inv: #2563EB;
+  --plan-inv-soft: #EFF6FF;
+  --plan-inv-border: #BFDBFE;
 }
 
 .dark {
@@ -60,6 +67,13 @@
   --scrollbar-track: #0A0B0E;
   --scrollbar-thumb: #22242E;
   --scrollbar-thumb-hover: #333745;
+
+  /* Plan Financiero Semantics - Dark */
+  --plan-fijos: #94A3B8;
+  --plan-gustos: #FBBF24;
+  --plan-inv: #60A5FA;
+  --plan-inv-soft: rgba(59, 130, 246, 0.12);
+  --plan-inv-border: rgba(96, 165, 250, 0.28);
 }
 
 @layer base {
@@ -146,4 +160,133 @@
 
 .animate-shake {
   animation: shake-x 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* =========================================================================
+   Plan Financiero (/plan) - Sliders, Acordeón y Micro-Animaciones GPU
+   ========================================================================= */
+
+@keyframes plan-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes plan-node-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.28);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(59, 130, 246, 0);
+  }
+}
+
+.plan-enter {
+  animation: plan-fade-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.plan-enter-delay-1 {
+  animation-delay: 60ms;
+}
+
+.plan-enter-delay-2 {
+  animation-delay: 110ms;
+}
+
+.plan-enter-delay-3 {
+  animation-delay: 160ms;
+}
+
+.plan-node-active-pulse {
+  animation: plan-node-pulse 2.6s ease-in-out infinite;
+}
+
+/* Slider Editorial Dual Theme */
+.plan-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--plan-inv) var(--p, 50%),
+    var(--border-hairline) var(--p, 50%)
+  );
+  outline: none;
+  cursor: pointer;
+  transition: background-size 0.15s ease;
+}
+
+.plan-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 2px solid var(--plan-inv);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease;
+}
+
+.plan-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 4px var(--plan-inv-soft);
+}
+
+.plan-slider:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 6px var(--plan-inv-soft);
+}
+
+.plan-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 2px solid var(--plan-inv);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease;
+}
+
+.plan-slider:focus-visible {
+  outline: 2px solid var(--plan-inv);
+  outline-offset: 6px;
+}
+
+/* Acordeón CSS fluido para Ajustes Avanzados */
+.plan-accordion {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.plan-accordion[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.plan-accordion-inner {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-enter,
+  .plan-enter-delay-1,
+  .plan-enter-delay-2,
+  .plan-enter-delay-3,
+  .plan-node-active-pulse {
+    animation: none !important;
+  }
+
+  .plan-accordion,
+  .plan-slider::-webkit-slider-thumb,
+  .plan-slider::-moz-range-thumb {
+    transition: none !important;
+  }
 }

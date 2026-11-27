@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, TrendingUp, Inbox, SlidersHorizontal, Send, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Calculator, Inbox, SlidersHorizontal, Send, RefreshCw } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 interface MobileBottomDockProps {
@@ -31,6 +31,12 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       label: 'Analítica',
       icon: TrendingUp,
       isActive: pathname.startsWith('/analytics'),
+    },
+    {
+      href: '/plan',
+      label: 'Plan',
+      icon: Calculator,
+      isActive: pathname.startsWith('/plan'),
     },
     {
       href: '/muro',
@@ -61,7 +67,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center justify-center min-h-[44px] min-w-[52px] px-2 py-1 rounded-xl transition-all active:scale-95 ${
+                className={`relative flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 py-1 rounded-xl transition-all active:scale-95 ${
                   item.isActive
                     ? 'text-[var(--text-primary)] font-semibold'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

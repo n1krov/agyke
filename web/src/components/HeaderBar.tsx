@@ -9,6 +9,7 @@ import {
   Lock,
   LayoutDashboard,
   TrendingUp,
+  Calculator,
   Inbox,
   SlidersHorizontal,
   Clock,
@@ -52,6 +53,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       label: 'Analítica',
       icon: TrendingUp,
       isActive: pathname.startsWith('/analytics'),
+    },
+    {
+      href: '/plan',
+      label: 'Plan',
+      icon: Calculator,
+      isActive: pathname.startsWith('/plan'),
     },
     {
       href: '/muro',

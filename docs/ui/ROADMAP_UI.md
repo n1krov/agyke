@@ -107,5 +107,16 @@ Este documento desglosa el plan de ejecución atómico para implementar el siste
 - [x] **Tarea UI-57:** Página Unificada `/settings` con Pestañas (`Usuarios y Perfiles` + `Etiquetas`) e integración en `<HeaderBar />`, `<MobileBottomDock />` y `middleware.ts`.
 - [x] **Tarea UI-58:** Suite de Tests Unitarios de Perfiles, Alias y Etiquetas (`src/tests/settings-and-tags.test.ts`) y Verificación Integral CI.
 
+---
+
+### Fase 14: Calculadora de Plan Financiero Standalone (`/plan`) (`SPEC_FINANCIAL_PLAN_CALCULATOR.md`)
+- [x] **Tarea UI-59:** Especificación Técnica de la Calculadora de Plan Financiero (`/plan`) con persistencia híbrida y animaciones (`docs/ui/SPEC_FINANCIAL_PLAN_CALCULATOR.md`).
+- [x] **Tarea UI-60:** Motor Matemático Puro, Contratos TypeScript y Suite de Tests Unitarios (`src/types/financial-plan.ts`, `src/services/financial-plan.ts`, `src/services/financial-plan.test.ts`).
+- [x] **Tarea UI-61:** Esquema SQL (`financial_plans` en `supabase/schema.sql`) y Endpoints Backend de Persistencia (`GET`/`PUT /api/plan`).
+- [x] **Tarea UI-62:** Tokens de Paleta, Sliders Custom y Micro-Animaciones CSS en `globals.css` + Hook `useAnimatedNumber` y Persistencia Híbrida (`localStorage` + Supabase).
+- [x] **Tarea UI-63:** Componentes Modulares de la Calculadora (`MoneyInput`, `PlanHero`, `PlanControls`, `PlanMilestones`, `PlanProjectionChart`) en `web/src/components/plan/`.
+- [x] **Tarea UI-64:** Página Dedicada `/plan` e Integración en Navegación Global (`HeaderBar` y `MobileBottomDock`).
+- [x] **Tarea UI-65:** Limpieza del HTML temporal, Verificación Local (`bun test` + bundle transpile) y Validación Integral de CI.
+
 
 

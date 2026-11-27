@@ -65,3 +65,10 @@ CREATE TABLE IF NOT EXISTS transaction_tags (
 
 CREATE INDEX IF NOT EXISTS idx_transaction_tags_tx_id ON transaction_tags(transaction_id);
 CREATE INDEX IF NOT EXISTS idx_transaction_tags_tag_id ON transaction_tags(tag_id);
+
+-- Configuración Persistente del Plan Financiero (/plan)
+CREATE TABLE IF NOT EXISTS financial_plans (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    config JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
